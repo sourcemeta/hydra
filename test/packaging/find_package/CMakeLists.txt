@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.18)
+project(hydra_hello VERSION 0.0.1 LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+find_package(hydra REQUIRED)
+add_executable(hydra_hello hello.cc)
+target_link_libraries(hydra_hello PRIVATE sourcemeta::hydra::http)

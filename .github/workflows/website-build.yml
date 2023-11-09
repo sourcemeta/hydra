@@ -1,0 +1,26 @@
+name: website
+on:
+  push:
+    branches-ignore:
+      - main
+
+concurrency:
+  group: website-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - run: sudo apt update
+      - run: sudo apt install -y doxygen
+      - run: >
+          cmake -S . -B ./build
+          -DCMAKE_BUILD_TYPE:STRING=Release
+          -DHYDRA_HTTP:BOOL=OFF
+          -DHYDRA_CONTRIB:BOOL=OFF
+          -DHYDRA_TESTS:BOOL=OFF
+          -DHYDRA_DOCS:BOOL=ON
+      - run: cmake --build ./build --config Release --target doxygen
