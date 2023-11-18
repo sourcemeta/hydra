@@ -223,7 +223,17 @@ auto Stream::send() -> std::future<Status> {
       handle_curl(curl_easy_setopt(this->internal->handle,
                                    CURLOPT_CUSTOMREQUEST, "PUT"));
       break;
+
+      // Can't find it in the docs, but seems like MSVC defines
+      // a DELETE macro that confuses this clause.
+#ifdef WIN32
+#pragma push_macro("DELETE")
+#undef DELETE
+#endif
     case Method::DELETE:
+#ifdef WIN32
+#pragma pop_macro("DELETE")
+#endif
       handle_curl(curl_easy_setopt(this->internal->handle,
                                    CURLOPT_CUSTOMREQUEST, "DELETE"));
       break;
@@ -253,11 +263,6 @@ auto Stream::send() -> std::future<Status> {
                                this->internal->url.c_str()));
   handle_curl(curl_easy_setopt(this->internal->handle, CURLOPT_HTTPHEADER,
                                this->internal->headers));
-
-  // This tells libcurl the maximum time any cached certificate store it has in
-  // memory may be kept and reused for new connections.
-  handle_curl(curl_easy_setopt(this->internal->handle, CURLOPT_CA_CACHE_TIMEOUT,
-                               604800L));
 
   handle_curl(curl_easy_setopt(this->internal->handle, CURLOPT_WRITEFUNCTION,
                                callback_on_body));

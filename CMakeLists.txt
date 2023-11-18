@@ -1,4 +1,10 @@
 cmake_minimum_required(VERSION 3.24)
+
+# Needs to happen before the first call to "project()".
+if(WIN32)
+  include(cmake/VCPKG.cmake)
+endif()
+
 project(hydra VERSION 0.0.1 LANGUAGES CXX
   DESCRIPTION "A convenience networking library for modern C++")
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
