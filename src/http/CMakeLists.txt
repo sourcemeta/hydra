@@ -25,7 +25,7 @@ set_target_properties(sourcemeta_hydra_http PROPERTIES
   EXPORT_NAME hydra::http
   FOLDER "Hydra/HTTP")
 
-target_link_libraries(sourcemeta_hydra_http PRIVATE curl)
+target_link_libraries(sourcemeta_hydra_http PRIVATE CURL::libcurl)
 
 include(GenerateExportHeader)
 generate_export_header(sourcemeta_hydra_http

@@ -1,3 +1,4 @@
+# TODO: Move this to Noa and also pull from JSON Toolkit
 find_package(Doxygen)
 if(DOXYGEN_FOUND)
   set(DOXYGEN_IN "${PROJECT_SOURCE_DIR}/doxygen/Doxyfile.in")

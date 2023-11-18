@@ -8,5 +8,6 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   find_package(Threads REQUIRED)
 endif()
 
+find_package(CURL REQUIRED)
 include("${CMAKE_CURRENT_LIST_DIR}/sourcemeta_hydra_http.cmake")
 check_required_components("@PROJECT_NAME@")

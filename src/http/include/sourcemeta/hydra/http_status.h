@@ -1,6 +1,12 @@
 #ifndef SOURCEMETA_HYDRA_HTTP_STATUS_H
 #define SOURCEMETA_HYDRA_HTTP_STATUS_H
 
+#if defined(__EMSCRIPTEN__) || defined(__Unikraft__)
+#define SOURCEMETA_HYDRA_HTTP_EXPORT
+#else
+#include "http_export.h"
+#endif
+
 #include <cstdint> // std::uint16_t
 #include <ostream> // std::ostream
 
@@ -81,7 +87,9 @@ enum class Status : std::uint16_t {
   NETWORK_AUTHENTICATION_REQUIRED = 511
 };
 
-auto operator<<(std::ostream &stream, const Status value) -> std::ostream &;
+auto SOURCEMETA_HYDRA_HTTP_EXPORT operator<<(std::ostream &stream,
+                                             const Status value)
+    -> std::ostream &;
 
 } // namespace sourcemeta::hydra::http
 

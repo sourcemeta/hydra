@@ -8,8 +8,8 @@ abstracts the gory details of making HTTP requests using
 [`libcurl`](https://curl.se/libcurl/), including streaming.
 
 It targets C++20 and supports the Clang, GCC, and MSVC compilers on macOS,
-GNU/Linux, FreeBSD, Windows, and Unikraft, and it is designed to integrate well
-with other Sourcemeta libraries like [JSON
+GNU/Linux, Windows, and Unikraft, and it is designed to integrate well with
+other Sourcemeta libraries like [JSON
 Toolkit](https://jsontoolkit.sourcemeta.com).
 
 Installation

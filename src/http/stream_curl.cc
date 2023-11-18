@@ -254,11 +254,6 @@ auto Stream::send() -> std::future<Status> {
   handle_curl(curl_easy_setopt(this->internal->handle, CURLOPT_HTTPHEADER,
                                this->internal->headers));
 
-  // This tells libcurl the maximum time any cached certificate store it has in
-  // memory may be kept and reused for new connections.
-  handle_curl(curl_easy_setopt(this->internal->handle, CURLOPT_CA_CACHE_TIMEOUT,
-                               604800L));
-
   handle_curl(curl_easy_setopt(this->internal->handle, CURLOPT_WRITEFUNCTION,
                                callback_on_body));
   handle_curl(
