@@ -223,7 +223,17 @@ auto Stream::send() -> std::future<Status> {
       handle_curl(curl_easy_setopt(this->internal->handle,
                                    CURLOPT_CUSTOMREQUEST, "PUT"));
       break;
+
+      // Can't find it in the docs, but seems like MSVC defines
+      // a DELETE macro that confuses this clause.
+#ifdef WIN32
+#pragma push_macro("DELETE")
+#undef DELETE
+#endif
     case Method::DELETE:
+#ifdef WIN32
+#pragma pop_macro("DELETE")
+#endif
       handle_curl(curl_easy_setopt(this->internal->handle,
                                    CURLOPT_CUSTOMREQUEST, "DELETE"));
       break;
