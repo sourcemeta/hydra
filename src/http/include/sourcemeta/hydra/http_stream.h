@@ -50,7 +50,16 @@ private:
   // No need to make this private, as the contents of `Internal`
   // are already hidden with the PIMPL idiom.
 public:
+// Exporting symbols that depends on the standard C++ library is considered
+// safe.
+// https://learn.microsoft.com/en-us/cpp/error-messages/compiler-warnings/compiler-warning-level-2-c4275?view=msvc-170&redirectedfrom=MSDN
+#if defined(_MSC_VER)
+#pragma warning(disable : 4251)
+#endif
   std::unique_ptr<Internal> internal;
+#if defined(_MSC_VER)
+#pragma warning(default : 4251)
+#endif
 };
 
 } // namespace sourcemeta::hydra::http
