@@ -1,4 +1,5 @@
-# Tests
+# TODO: Add HTTP/2 tests
+
 add_executable(sourcemeta_hydra_http_unit
   request_1_1_test.cc)
 sourcemeta_hydra_add_compile_options(sourcemeta_hydra_http_unit)
