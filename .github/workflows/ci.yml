@@ -107,7 +107,7 @@ jobs:
 
       # Run stubs
       - name: Run HTTP stub (Windows)
-        run: Start-Process -NoNewWindow node test\http\stub.js &&	Start-Sleep -Seconds 2
+        run: cmd /c "start /b node test\http\stub.js" && Start-Sleep -Seconds 2
         if: runner.os == 'windows'
       - name: Run HTTP stub (*nix)
         run: (node test/http/stub.js &) && sleep 2
