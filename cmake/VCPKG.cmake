@@ -1,4 +1,3 @@
-# TODO: Move this to Noa
 if(DEFINED ENV{VCPKG_ROOT})
   set(VCPKG_CMAKE_TOOLCHAIN $ENV{VCPKG_ROOT})
   cmake_path(APPEND VCPKG_CMAKE_TOOLCHAIN scripts buildsystems vcpkg.cmake)
