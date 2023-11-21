@@ -57,7 +57,7 @@ jobs:
     steps:
       - name: Install dependencies (GNU/Linux)
         if: runner.os == 'linux'
-        run: sudo apt-get install --yes clang-format libcurl4-openssl-dev
+        run: sudo apt-get install --yes clang-format libcurl4-openssl-dev nodejs
 
       # See https://github.com/actions/runner-images/issues/8659
       - name: Workaround Clang issue (GNU/Linux)
@@ -104,6 +104,14 @@ jobs:
       - run: >
           cmake --install ./build --prefix ./build/dist --config Release --verbose
           --component sourcemeta_hydra_dev
+
+      # Run stubs
+      - name: Run HTTP stub (Windows)
+        run: cmd /c "start /b node test\http\stub.js" && Start-Sleep -Seconds 2
+        if: runner.os == 'windows'
+      - name: Run HTTP stub (*nix)
+        run: (node test/http/stub.js &) && sleep 2
+        if: runner.os != 'windows'
 
       # Not every CTest version supports the --test-dir option. If such option
       # is not recognized, `ctest` will successfully exit finding no tests.

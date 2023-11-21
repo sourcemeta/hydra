@@ -120,6 +120,7 @@ cmake --build ./build --config <Debug|Release> --target clang_format
 # Build the project
 cmake --build ./build --config <Debug|Release>
 # Run the test suite
+node test/http/stub.js
 ctest --test-dir ./build --build-config <Debug|Release> --output-on-failure --progress
 ```
 

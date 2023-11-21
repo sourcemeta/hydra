@@ -1,6 +1,10 @@
 # Programs
 CMAKE = cmake
 CTEST = ctest
+# For test server
+NODE = node
+KILLALL = killall
+SLEEP = sleep
 
 # Options
 PRESET = Debug
@@ -30,10 +34,14 @@ compile: .always
 lint: .always
 	$(CMAKE) --build ./build --config $(PRESET) --target clang_tidy
 
-test: .always
+test: test/http/stub.js .always
+	$(KILLALL) $(NODE) || true
+	$(NODE) $< &
+	$(SLEEP) 1
 	$(CMAKE) -E env UBSAN_OPTIONS=print_stacktrace=1 \
 		$(CTEST) --test-dir ./build --build-config $(PRESET) \
 			--output-on-failure --progress --parallel
+	$(KILLALL) $(NODE)
 
 doxygen: .always
 	$(CMAKE) --build ./build --config $(PRESET) --target doxygen
