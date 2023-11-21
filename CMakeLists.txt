@@ -72,6 +72,11 @@ endif()
 if(HYDRA_TESTS)
   find_package(GoogleTest REQUIRED)
   enable_testing()
+
+  if(HYDRA_HTTP)
+    add_subdirectory(test/http)
+  endif()
+
   # TODO: Add tests
   if(PROJECT_IS_TOP_LEVEL)
     # Otherwise we need the child project to link
