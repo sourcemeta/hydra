@@ -18,7 +18,6 @@ namespace sourcemeta::hydra::http {
 
 class SOURCEMETA_HYDRA_HTTP_EXPORT Response {
 public:
-  // TODO: Make this constructor private
   Response(const Status status, std::map<std::string, std::string> &&headers,
            std::ostringstream &&stream);
 
