@@ -78,7 +78,6 @@ if(HYDRA_TESTS)
     add_subdirectory(test/http)
   endif()
 
-  # TODO: Add tests
   if(PROJECT_IS_TOP_LEVEL)
     # Otherwise we need the child project to link
     # against the sanitizers too.
