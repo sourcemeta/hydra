@@ -1,0 +1,9 @@
+menuconfig LIBHYDRA
+	bool "libhydra - A convenience networking library for modern C++"
+	select LIBCXX
+	select CXX_THREADS
+	select LIBCURL
+	select LIBCURL_SSL
+	select LIBCURL_ZLIB
+	select LIBCURL_HTTP
+	default n
