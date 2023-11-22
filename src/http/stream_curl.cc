@@ -5,11 +5,14 @@
 
 #include <curl/curl.h>
 
+#include <algorithm>    // std::transform
 #include <cassert>      // assert
+#include <cctype>       // std::tolower
 #include <charconv>     // std::from_chars
 #include <cstddef>      // std::size_t
 #include <cstdint>      // std::uint64_t
 #include <future>       // std::future
+#include <iterator>     // std::back_inserter
 #include <memory>       // std::make_unique
 #include <optional>     // std::optional
 #include <sstream>      // std::stringstream
@@ -104,12 +107,20 @@ auto callback_on_header(const void *const data, const std::size_t size,
   const auto key_end{line.find_last_not_of(spacing, colon)};
   const auto value_start{line.find_first_not_of(spacing, colon + 1)};
   const auto value_end{line.find_last_not_of(spacing) + 1};
+  const auto key{line.substr(key_start, key_end - key_start)};
+
   if (request->internal->on_header) {
     try {
       assert(request->internal->status.has_value());
+
+      // Convert headers to lowercase
+      std::string key_lowercase;
+      std::transform(
+          key.cbegin(), key.cend(), std::back_inserter(key_lowercase),
+          [](unsigned char character) { return std::tolower(character); });
+
       request->internal->on_header(
-          request->internal->status.value(),
-          line.substr(key_start, key_end - key_start),
+          request->internal->status.value(), key_lowercase,
           line.substr(value_start, value_end - value_start));
     } catch (...) {
       return 0;
