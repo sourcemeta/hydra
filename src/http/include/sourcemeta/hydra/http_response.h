@@ -23,6 +23,7 @@ public:
 
   auto status() const noexcept -> Status;
   auto header(const std::string &key) const -> std::optional<std::string>;
+  auto empty() noexcept -> bool;
   auto body() -> std::istringstream &;
 
 private:
