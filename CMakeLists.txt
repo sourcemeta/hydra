@@ -14,7 +14,6 @@ include(CompilerOptions)
 # Options
 option(HYDRA_HTTP "Build the Hydra HTTP library" ON)
 option(HYDRA_TESTS "Build the Hydra tests" OFF)
-option(HYDRA_CONTRIB "Build the Hydra extra programs" OFF)
 option(HYDRA_DOCS "Build the Hydra docs" OFF)
 option(HYDRA_ADDRESS_SANITIZER "Build Hydra with an address sanitizer" OFF)
 option(HYDRA_UNDEFINED_SANITIZER "Build Hydra with an undefined behavior sanitizer" OFF)
@@ -49,14 +48,6 @@ elseif(HYDRA_UNDEFINED_SANITIZER)
   noa_sanitizer(TYPE undefined)
 endif()
 
-if(HYDRA_CONTRIB)
-  if(HYDRA_HTTP)
-    # TODO: Improve these utilities to be more general purpose
-    add_subdirectory(contrib/http_stream)
-    add_subdirectory(contrib/http_request)
-  endif()
-endif()
-
 if(HYDRA_DOCS)
   noa_target_doxygen(CONFIG "${PROJECT_SOURCE_DIR}/doxygen/Doxyfile.in"
     OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/website")
@@ -64,7 +55,7 @@ endif()
 
 if(PROJECT_IS_TOP_LEVEL)
   noa_target_clang_format(SOURCES
-    contrib/*.cc src/*.cc src/*.h test/*.cc)
+    src/*.cc src/*.h test/*.cc)
   noa_target_clang_tidy(SOURCES
     src/*.h src/*.cc)
 endif()
