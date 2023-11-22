@@ -20,9 +20,16 @@ namespace sourcemeta::hydra::http {
 #pragma warning(disable : 4251 4275)
 #endif
 
+/// @ingroup http
+/// This class represents a general HTTP error.
 class SOURCEMETA_HYDRA_HTTP_EXPORT Error : public std::exception {
 public:
+  // We don't want to document this internal constructor
+#if !defined(DOXYGEN)
   Error(std::string message) : message_{std::move(message)} {}
+#endif
+
+  /// Get the error message
   [[nodiscard]] auto what() const noexcept -> const char * override {
     return this->message_.c_str();
   }
