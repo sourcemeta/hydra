@@ -12,7 +12,8 @@
 
 namespace sourcemeta::hydra::http {
 
-// See https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
+/// @ingroup http
+/// The list of possible HTTP response statuses.
 enum class Status : std::uint16_t {
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/Status#information_responses
   CONTINUE = 100,
@@ -87,6 +88,7 @@ enum class Status : std::uint16_t {
   NETWORK_AUTHENTICATION_REQUIRED = 511
 };
 
+/// @ingroup http
 auto SOURCEMETA_HYDRA_HTTP_EXPORT operator<<(std::ostream &stream,
                                              const Status value)
     -> std::ostream &;

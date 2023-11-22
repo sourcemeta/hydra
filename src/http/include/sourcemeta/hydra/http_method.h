@@ -3,6 +3,8 @@
 
 namespace sourcemeta::hydra::http {
 
+/// @ingroup http
+/// The list of possible HTTP methods.
 enum class Method {
   GET,
   HEAD,
