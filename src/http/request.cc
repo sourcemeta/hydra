@@ -35,6 +35,10 @@ auto Request::header(std::string_view key, std::string_view value) -> void {
   this->stream.header(key, value);
 }
 
+auto Request::header(std::string_view key, int value) -> void {
+  this->stream.header(key, value);
+}
+
 auto Request::send() -> std::future<Response> {
   std::ostringstream output;
   this->stream.on_data(

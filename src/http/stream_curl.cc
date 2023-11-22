@@ -205,6 +205,10 @@ auto Stream::header(std::string_view key, std::string_view value) -> void {
       curl_slist_append(this->internal->headers, result.c_str());
 }
 
+auto Stream::header(std::string_view key, int value) -> void {
+  this->header(key, std::to_string(value));
+}
+
 auto Stream::send() -> std::future<Status> {
   switch (this->internal->method) {
     case Method::GET:
