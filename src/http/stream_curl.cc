@@ -279,10 +279,17 @@ auto Stream::send() -> std::future<Status> {
   handle_curl(curl_easy_setopt(this->internal->handle, CURLOPT_HTTPHEADER,
                                this->internal->headers));
 
-  handle_curl(curl_easy_setopt(this->internal->handle, CURLOPT_WRITEFUNCTION,
-                               callback_on_body));
-  handle_curl(
-      curl_easy_setopt(this->internal->handle, CURLOPT_WRITEDATA, this));
+  // Otherwise cURL will hang for some seconds waiting for a response when
+  // performing a HEAD request
+  if (this->internal->method == Method::HEAD) {
+    handle_curl(curl_easy_setopt(this->internal->handle, CURLOPT_NOBODY, 1L));
+  } else {
+    handle_curl(curl_easy_setopt(this->internal->handle, CURLOPT_WRITEFUNCTION,
+                                 callback_on_body));
+    handle_curl(
+        curl_easy_setopt(this->internal->handle, CURLOPT_WRITEDATA, this));
+  }
+
   handle_curl(curl_easy_setopt(this->internal->handle, CURLOPT_HEADERFUNCTION,
                                callback_on_header));
   handle_curl(
