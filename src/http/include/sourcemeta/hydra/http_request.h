@@ -19,6 +19,7 @@
 
 namespace sourcemeta::hydra::http {
 
+// TODO: Support passing a request body
 class SOURCEMETA_HYDRA_HTTP_EXPORT Request {
 public:
   Request(std::string url);
