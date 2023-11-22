@@ -1,6 +1,7 @@
 #include <sourcemeta/hydra/http_response.h>
 #include <sourcemeta/hydra/http_status.h>
 
+#include <cassert>  // assert
 #include <map>      // std::map
 #include <optional> // std::optional, std::nullopt
 #include <sstream>  // std::ostringstream, std::istringstream
@@ -26,6 +27,11 @@ auto Response::header(const std::string &key) const
   return this->headers_.at(key);
 }
 
-auto Response::body() -> std::istringstream & { return this->stream_; }
+auto Response::empty() noexcept -> bool { return this->stream_.peek() == -1; }
+
+auto Response::body() -> std::istringstream & {
+  assert(!this->empty());
+  return this->stream_;
+}
 
 } // namespace sourcemeta::hydra::http
