@@ -40,7 +40,7 @@ test: test/http/stub.js .always
 	$(SLEEP) 1
 	$(CMAKE) -E env UBSAN_OPTIONS=print_stacktrace=1 \
 		$(CTEST) --test-dir ./build --build-config $(PRESET) \
-			--output-on-failure --progress --parallel
+			--output-on-failure --parallel
 	$(KILLALL) $(NODE)
 
 doxygen: .always

@@ -20,7 +20,6 @@
 
 namespace sourcemeta::hydra::http {
 
-// TODO: Unit test the streaming interface
 class SOURCEMETA_HYDRA_HTTP_EXPORT Stream {
 public:
   Stream(std::string url);
