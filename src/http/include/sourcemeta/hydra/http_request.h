@@ -1,7 +1,7 @@
 #ifndef SOURCEMETA_HYDRA_HTTP_REQUEST_H
 #define SOURCEMETA_HYDRA_HTTP_REQUEST_H
 
-#if defined(__EMSCRIPTEN__) || defined(__Unikraft__)
+#if defined(__Unikraft__)
 #define SOURCEMETA_HYDRA_HTTP_EXPORT
 #else
 #include "http_export.h"
