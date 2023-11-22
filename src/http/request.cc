@@ -24,12 +24,16 @@ auto Request::method(const Method method) noexcept -> void {
 }
 
 auto Request::capture(std::string header) -> void {
+  this->capture_all_ = false;
   this->capture_.insert(std::move(header));
 }
 
 auto Request::capture(std::initializer_list<std::string> headers) -> void {
+  this->capture_all_ = false;
   this->capture_.insert(headers);
 }
+
+auto Request::capture() -> void { this->capture_all_ = true; }
 
 auto Request::header(std::string_view key, std::string_view value) -> void {
   this->stream.header(key, value);
@@ -51,7 +55,7 @@ auto Request::send() -> std::future<Response> {
   this->stream.on_header([&headers, this](const Status, std::string_view key,
                                           std::string_view value) noexcept {
     std::string header{key};
-    if (this->capture_.contains(header)) {
+    if (this->capture_.contains(header) || this->capture_all_) {
       headers.insert_or_assign(std::move(header), std::string{value});
     }
   });
