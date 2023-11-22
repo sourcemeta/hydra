@@ -235,3 +235,28 @@ TEST(HTTP_Request_1_1, GET_root_request_header_mixed_case_echo) {
   EXPECT_TRUE(response.header("x-x-foo-bar").has_value());
   EXPECT_EQ(response.header("x-x-foo-bar").value(), "foo");
 }
+
+TEST(HTTP_Request_1_1, GET_root_multiple_times) {
+  sourcemeta::hydra::http::Request request{BASE_URL};
+  request.method(sourcemeta::hydra::http::Method::GET);
+
+  sourcemeta::hydra::http::Response response_1{request.send().get()};
+  EXPECT_EQ(response_1.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_FALSE(response_1.empty());
+  EXPECT_EQ(body(response_1), "RECEIVED GET /");
+
+  sourcemeta::hydra::http::Response response_2{request.send().get()};
+  EXPECT_EQ(response_2.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_FALSE(response_2.empty());
+  EXPECT_EQ(body(response_2), "RECEIVED GET /");
+}
+
+TEST(HTTP_Request_1_1, GET_root_move) {
+  sourcemeta::hydra::http::Request request{BASE_URL};
+  request.method(sourcemeta::hydra::http::Method::GET);
+  sourcemeta::hydra::http::Request new_request{std::move(request)};
+  sourcemeta::hydra::http::Response response{new_request.send().get()};
+  EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_FALSE(response.empty());
+  EXPECT_EQ(body(response), "RECEIVED GET /");
+}
