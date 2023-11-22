@@ -34,6 +34,7 @@ public:
 
   auto method(const Method method) noexcept -> void;
   auto header(std::string_view key, std::string_view value) -> void;
+  auto header(std::string_view key, int value) -> void;
   auto send() -> std::future<Status>;
 
   using DataCallback =

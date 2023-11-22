@@ -26,6 +26,8 @@ public:
   auto capture(std::string header) -> void;
   auto capture(std::initializer_list<std::string> headers) -> void;
   auto header(std::string_view key, std::string_view value) -> void;
+  auto header(std::string_view key, int value) -> void;
+
   auto send() -> std::future<Response>;
 
 private:
