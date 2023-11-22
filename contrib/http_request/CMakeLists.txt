@@ -1,9 +1,0 @@
-add_executable(sourcemeta_hydra_contrib_http_request main.cc)
-sourcemeta_hydra_add_compile_options(sourcemeta_hydra_contrib_http_request)
-target_link_libraries(sourcemeta_hydra_contrib_http_request
-  PRIVATE sourcemeta_hydra_http)
-set_target_properties(sourcemeta_hydra_contrib_http_request PROPERTIES
-  OUTPUT_NAME hydra-http-request)
-install(TARGETS sourcemeta_hydra_contrib_http_request
-  RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
-  COMPONENT sourcemeta_hydra_contrib)

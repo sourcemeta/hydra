@@ -86,7 +86,6 @@ CMake
 |-----------------------------|---------|---------|-----------------------------------------|
 | `HYDRA_HTTP`                | Boolean | `ON`    | Build the Hydra HTTP library            |
 | `HYDRA_TESTS`               | Boolean | `OFF`   | Build the Hydra tests                   |
-| `HYDRA_CONTRIB`             | Boolean | `OFF`   | Build the Hydra `contrib` programs      |
 | `HYDRA_DOCS`                | Boolean | `OFF`   | Build the Hydra docs                    |
 | `HYDRA_ADDRESS_SANITIZER`   | Boolean | `OFF`   | Enable the address sanitizer            |
 | `HYDRA_UNDEFINED_SANITIZER` | Boolean | `OFF`   | Enable the undefined behavior sanitizer |
@@ -100,7 +99,6 @@ into a set of CMake components:
 |----------------------------------|------------------------------------------------|
 | `sourcemeta_hydra`         | The core Hydra libraries                |
 | `sourcemeta_hydra_dev`     | The Hydra headers and development files |
-| `sourcemeta_hydra_contrib` | The optional executables located in `contrib/` |
 
 Contributing
 ------------
@@ -112,7 +110,6 @@ configure, build and test the project as follows:
 cmake -S . -B ./build \
   -DCMAKE_BUILD_TYPE:STRING=<Debug|Release> \
   -DCMAKE_COMPILE_WARNING_AS_ERROR:BOOL=ON \
-  -DHYDRA_CONTRIB:BOOL=ON \
   -DHYDRA_DOCS:BOOL=ON \
   -DHYDRA_TESTS:BOOL=ON
 # Format the code

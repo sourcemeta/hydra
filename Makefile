@@ -17,7 +17,6 @@ configure: .always
 		-DCMAKE_BUILD_TYPE:STRING=$(PRESET) \
 		-DCMAKE_COMPILE_WARNING_AS_ERROR:BOOL=ON \
 		-DHYDRA_TESTS:BOOL=ON \
-		-DHYDRA_CONTRIB:BOOL=ON \
 		-DHYDRA_DOCS:BOOL=ON \
 		-DBUILD_SHARED_LIBS:BOOL=$(SHARED)
 
@@ -28,8 +27,6 @@ compile: .always
 		--component sourcemeta_hydra
 	$(CMAKE) --install ./build --prefix ./build/dist --config $(PRESET) --verbose \
 		--component sourcemeta_hydra_dev
-	$(CMAKE) --install ./build --prefix ./build/dist --config $(PRESET) --verbose \
-		--component sourcemeta_hydra_contrib
 
 lint: .always
 	$(CMAKE) --build ./build --config $(PRESET) --target clang_tidy
