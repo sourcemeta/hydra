@@ -12,3 +12,4 @@ DEPENDENCIES
 Makefile
 README.markdown
 vcpkg.json
+unikraft
