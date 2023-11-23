@@ -27,6 +27,10 @@ auto Response::header(const std::string &key) const
   return this->headers_.at(key);
 }
 
+auto Response::headers() const -> const std::map<std::string, std::string> & {
+  return this->headers_;
+}
+
 auto Response::empty() noexcept -> bool { return this->stream_.peek() == -1; }
 
 auto Response::body() -> std::istringstream & {
