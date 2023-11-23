@@ -2,6 +2,7 @@
 #include <iterator>
 #include <sstream>
 #include <string>
+#include <vector>
 
 #include <gtest/gtest.h>
 #include <sourcemeta/hydra/http.h>
@@ -270,4 +271,47 @@ TEST(HTTP_Request_1_1, GET_root_move) {
   EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
   EXPECT_FALSE(response.empty());
   EXPECT_EQ(body(response), "RECEIVED GET /");
+}
+
+TEST(HTTP_Request_1_1, GET_root_response_headers_capture_none) {
+  sourcemeta::hydra::http::Request request{BASE_URL};
+  request.method(sourcemeta::hydra::http::Method::GET);
+  sourcemeta::hydra::http::Response response{request.send().get()};
+  EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
+  std::vector<std::string> headers;
+  for (const auto &[key, value] : response.headers()) {
+    headers.push_back(key + " " + value);
+  }
+
+  EXPECT_TRUE(headers.empty());
+}
+
+TEST(HTTP_Request_1_1, GET_root_response_headers_capture_one) {
+  sourcemeta::hydra::http::Request request{BASE_URL};
+  request.method(sourcemeta::hydra::http::Method::GET);
+  request.capture("content-type");
+  sourcemeta::hydra::http::Response response{request.send().get()};
+  EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
+  std::vector<std::string> headers;
+  for (const auto &[key, value] : response.headers()) {
+    headers.push_back(key + " " + value);
+  }
+
+  EXPECT_EQ(headers.size(), 1);
+  EXPECT_EQ(headers.at(0), "content-type text/plain");
+}
+
+TEST(HTTP_Request_1_1, GET_root_response_headers_capture_all) {
+  sourcemeta::hydra::http::Request request{BASE_URL};
+  request.method(sourcemeta::hydra::http::Method::GET);
+  request.capture();
+  sourcemeta::hydra::http::Response response{request.send().get()};
+  EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
+  std::map<std::string, std::string> headers;
+  for (const auto &[key, value] : response.headers()) {
+    headers.emplace(key, value);
+  }
+
+  EXPECT_TRUE(headers.contains("content-type"));
+  EXPECT_TRUE(headers.contains("content-length"));
 }

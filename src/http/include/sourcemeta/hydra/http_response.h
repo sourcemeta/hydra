@@ -61,6 +61,25 @@ public:
   /// ```
   auto header(const std::string &key) const -> std::optional<std::string>;
 
+  /// Get a container for all the captured response headers. For example:
+  ///
+  /// ```cpp
+  /// #include <sourcemeta/hydra/http.h>
+  /// #include <iostream>
+  ///
+  /// sourcemeta::hydra::http::Request request{"https://www.example.com"};
+  /// request.method(sourcemeta::hydra::http::Method::GET);
+  ///
+  /// // Capture all headers
+  /// request.capture();
+  ///
+  /// sourcemeta::hydra::http::Response response{request.send().get()};
+  /// for (const auto &[ key, value ]) {
+  ///   std::cout << key << " -> " << value << "\n";
+  /// }
+  /// ```
+  auto headers() const -> const std::map<std::string, std::string> &;
+
   /// Check whether a response has a body to consume or not. A request made
   /// with the `HEAD` HTTP method is almost always empty. Remember to always
   /// check if a response is empty before calling
