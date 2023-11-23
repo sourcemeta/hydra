@@ -18,6 +18,17 @@ targets:
       - CONFIG_LIBSSL=y
       - CONFIG_LIBZLIB=y
       - CONFIG_LIBHYDRA=y
+      # Networking
+      - CONFIG_LIBLWIP=y
+      - CONFIG_LWIP_UKNETDEV=y
+      - CONFIG_LWIP_DHCP=y
+      - CONFIG_LIBVFSCORE=y
+      # File-system
+      - CONFIG_LIBRAMFS=y
+      - CONFIG_LIBCPIO=y
+      - CONFIG_LIBVFSCORE_ROOTFS_EINITRD=y
+      - CONFIG_LIBVFSCORE_AUTOMOUNT_ROOTFS=y
+      - CONFIG_LIBVFSCORE_ROOTFS_EINITRD_PATH=.unikraft/fs.cpio
 
 libraries:
   libcxxabi:

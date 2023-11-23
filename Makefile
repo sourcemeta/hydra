@@ -2,6 +2,9 @@
 CMAKE = cmake
 CTEST = ctest
 KRAFT = kraft
+CPIO = cpio
+FIND = find
+MKDIRP = mkdir -p
 # For test server
 NODE = node
 KILLALL = killall
@@ -45,6 +48,8 @@ doxygen: .always
 	$(CMAKE) --build ./build --config $(PRESET) --target doxygen
 
 unikraft: .always
+	$(MKDIRP) unikraft/.unikraft
+	$(FIND) unikraft/etc -depth -print0 | $(CPIO) -ocv0 > unikraft/.unikraft/fs.cpio
 	$(KRAFT) build --target development --jobs 4 --log-type=basic unikraft
 	$(KRAFT) run --target development unikraft
 
