@@ -6,4 +6,5 @@ menuconfig LIBHYDRA
 	select LIBCURL_SSL
 	select LIBCURL_ZLIB
 	select LIBCURL_HTTP
+	select LIBCURL_VERBOSE_STRINGS
 	default n
