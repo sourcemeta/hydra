@@ -22,8 +22,8 @@ targets:
       - CONFIG_LIBLWIP=y
       - CONFIG_LWIP_UKNETDEV=y
       - CONFIG_LWIP_DHCP=y
-      - CONFIG_LIBVFSCORE=y
       # File-system
+      - CONFIG_LIBVFSCORE=y
       - CONFIG_LIBRAMFS=y
       - CONFIG_LIBCPIO=y
       - CONFIG_LIBVFSCORE_ROOTFS_EINITRD=y

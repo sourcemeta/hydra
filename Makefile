@@ -49,7 +49,7 @@ doxygen: .always
 
 unikraft: .always
 	$(MKDIRP) unikraft/.unikraft
-	$(FIND) unikraft/etc -depth -print0 | $(CPIO) -ocv0 > unikraft/.unikraft/fs.cpio
+	cd unikraft && $(FIND) etc -print0 | $(CPIO) -ocv0 > .unikraft/fs.cpio
 	$(KRAFT) build --target development --jobs 4 --log-type=basic unikraft
 	$(KRAFT) run --target development unikraft
 
