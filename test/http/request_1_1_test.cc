@@ -142,6 +142,17 @@ TEST(HTTP_Request_1_1, GET_root_response_content_type_capture) {
   EXPECT_EQ(response.header("content-type").value(), "text/plain");
 }
 
+TEST(HTTP_Request_1_1, GET_root_response_content_type_capture_all) {
+  sourcemeta::hydra::http::Request request{BASE_URL};
+  request.method(sourcemeta::hydra::http::Method::GET);
+  request.capture();
+  sourcemeta::hydra::http::Response response{request.send().get()};
+  EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_FALSE(response.empty());
+  EXPECT_EQ(body(response), "RECEIVED GET /");
+  EXPECT_TRUE(response.header("content-type").has_value());
+}
+
 TEST(HTTP_Request_1_1, GET_root_missing_header_with_capture) {
   sourcemeta::hydra::http::Request request{BASE_URL};
   request.method(sourcemeta::hydra::http::Method::GET);

@@ -57,11 +57,6 @@ public:
   /// Express a desire of capturing a specific response header, if sent by the
   /// server.
   ///
-  /// This class does not store every response header as a memory
-  /// optimization, forcing the developer to choose the ones that are of
-  /// potential interest. This, if you do not capture a header sent by the
-  /// server, sourcemeta::hydra::http::Response::header will always be unset.
-  ///
   /// ```cpp
   /// #include <sourcemeta/hydra/http.h>
   /// #include <cassert>
@@ -79,11 +74,6 @@ public:
   /// Express a desire of capturing a set of response headers, if sent by the
   /// server.
   ///
-  /// This class does not store every response header as a memory
-  /// optimization, forcing the developer to choose the ones that are of
-  /// potential interest. This, if you do not capture a header sent by the
-  /// server, sourcemeta::hydra::http::Response::header will always be unset.
-  ///
   /// ```cpp
   /// #include <sourcemeta/hydra/http.h>
   /// #include <cassert>
@@ -97,6 +87,21 @@ public:
   /// assert(!response.header("x-foo").has_value());
   /// ```
   auto capture(std::initializer_list<std::string> headers) -> void;
+
+  /// Express a desire of capturing every response headers. For example:
+  ///
+  /// ```cpp
+  /// #include <sourcemeta/hydra/http.h>
+  /// #include <cassert>
+  ///
+  /// sourcemeta::hydra::http::Request request{"https://www.example.com"};
+  /// request.method(sourcemeta::hydra::http::Method::GET);
+  /// request.capture();
+  /// sourcemeta::hydra::http::Response response{request.send().get()};
+  /// assert(response.header("content-type").has_value());
+  /// assert(response.header("content-encoding").has_value());
+  /// ```
+  auto capture() -> void;
 
   /// Set an HTTP request header. For example:
   ///
@@ -149,6 +154,7 @@ private:
 #if defined(_MSC_VER)
 #pragma warning(default : 4251)
 #endif
+  bool capture_all_{false};
 };
 
 } // namespace sourcemeta::hydra::http
