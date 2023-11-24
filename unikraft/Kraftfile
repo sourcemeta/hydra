@@ -24,13 +24,14 @@ targets:
       - CONFIG_LIBLWIP=y
       - CONFIG_LWIP_UKNETDEV=y
       - CONFIG_LWIP_DHCP=y
+      - CONFIG_LWIP_DNS=y
       # File-system
       - CONFIG_LIBVFSCORE=y
       - CONFIG_LIBRAMFS=y
       - CONFIG_LIBCPIO=y
       - CONFIG_LIBVFSCORE_ROOTFS_EINITRD=y
       - CONFIG_LIBVFSCORE_AUTOMOUNT_ROOTFS=y
-      - CONFIG_LIBVFSCORE_ROOTFS_EINITRD_PATH=.unikraft/fs.cpio
+      - CONFIG_LIBVFSCORE_ROOTFS_EINITRD_PATH=.unikraft/build/initramfs.cpio
 
 libraries:
   libcxxabi:

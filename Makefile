@@ -2,9 +2,6 @@
 CMAKE = cmake
 CTEST = ctest
 KRAFT = kraft
-CPIO = cpio
-FIND = find
-MKDIRP = mkdir -p
 # For test server
 NODE = node
 KILLALL = killall
