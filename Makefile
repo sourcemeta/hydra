@@ -48,8 +48,6 @@ doxygen: .always
 	$(CMAKE) --build ./build --config $(PRESET) --target doxygen
 
 unikraft: .always
-	$(MKDIRP) unikraft/.unikraft
-	cd unikraft && $(FIND) etc -print0 | $(CPIO) -ocv0 > .unikraft/fs.cpio
 	$(KRAFT) build --target development --jobs 4 --log-type=basic unikraft
 	$(KRAFT) run --target development unikraft
 

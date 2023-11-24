@@ -1,7 +1,9 @@
-specification: v0.5
+specification: v0.6
 name: sourcemeta_hydra_test
 unikraft:
   version: stable
+
+rootfs: ./etc
 
 targets:
   - name: development
@@ -42,6 +44,8 @@ libraries:
   musl:
     version: stable
   openssl:
+    version: stable
+  lwip:
     version: stable
   zlib:
     version: stable
