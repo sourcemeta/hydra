@@ -1,7 +1,7 @@
 specification: v0.6
 name: sourcemeta_hydra_test
 unikraft:
-  version: stable
+  version: staging
 
 rootfs: ./etc
 
@@ -31,7 +31,6 @@ targets:
       - CONFIG_LIBCPIO=y
       - CONFIG_LIBVFSCORE_ROOTFS_EINITRD=y
       - CONFIG_LIBVFSCORE_AUTOMOUNT_ROOTFS=y
-      - CONFIG_LIBVFSCORE_ROOTFS_EINITRD_PATH=.unikraft/build/initramfs.cpio
 
 libraries:
   libcxxabi:
