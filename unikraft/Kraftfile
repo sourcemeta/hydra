@@ -1,0 +1,56 @@
+specification: v0.6
+name: sourcemeta_hydra_test
+unikraft:
+  version: staging
+
+rootfs: ./unikraft/etc
+
+targets:
+  - name: development
+    platform: qemu
+    architecture: x86_64
+    kconfig:
+      - CONFIG_LIBCXXABI=y
+      - CONFIG_LIBCXX=y
+      - CONFIG_LIBUNWIND=y
+      - CONFIG_LIBCOMPILER_RT=y
+      - CONFIG_LIBMUSL=y
+      - CONFIG_LIBCURL=y
+      - CONFIG_LIBOPENSSL=y
+      - CONFIG_LIBSSL=y
+      - CONFIG_LIBZLIB=y
+      - CONFIG_LIBHYDRA=y
+      # Networking
+      - CONFIG_LIBLWIP=y
+      - CONFIG_LWIP_UKNETDEV=y
+      - CONFIG_LWIP_DHCP=y
+      - CONFIG_LWIP_DNS=y
+      # File-system
+      - CONFIG_LIBVFSCORE=y
+      - CONFIG_LIBRAMFS=y
+      - CONFIG_LIBCPIO=y
+      - CONFIG_LIBVFSCORE_ROOTFS_EINITRD=y
+      - CONFIG_LIBVFSCORE_AUTOMOUNT_ROOTFS=y
+
+libraries:
+  libcxxabi:
+    version: stable
+  libcxx:
+    version: stable
+  libunwind:
+    source: staging
+  compiler-rt:
+    version: stable
+  musl:
+    version: stable
+  openssl:
+    version: stable
+  lwip:
+    version: stable
+  zlib:
+    version: stable
+  curl:
+    source: https://github.com/mschlumpp/lib-curl.git
+    version: mschlumpp/initial-version
+  hydra:
+    source: ..
