@@ -15,6 +15,7 @@ include(CompilerOptions)
 option(HYDRA_HTTP "Build the Hydra HTTP library" ON)
 option(HYDRA_TESTS "Build the Hydra tests" OFF)
 option(HYDRA_DOCS "Build the Hydra docs" OFF)
+option(HYDRA_INSTALL "Install the Hydra library" ON)
 option(HYDRA_ADDRESS_SANITIZER "Build Hydra with an address sanitizer" OFF)
 option(HYDRA_UNDEFINED_SANITIZER "Build Hydra with an undefined behavior sanitizer" OFF)
 

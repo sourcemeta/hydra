@@ -87,6 +87,7 @@ CMake
 | `HYDRA_HTTP`                | Boolean | `ON`    | Build the Hydra HTTP library            |
 | `HYDRA_TESTS`               | Boolean | `OFF`   | Build the Hydra tests                   |
 | `HYDRA_DOCS`                | Boolean | `OFF`   | Build the Hydra docs                    |
+| `HYDRA_INSTALL`             | Boolean | `ON`    | Install the Hydra library               |
 | `HYDRA_ADDRESS_SANITIZER`   | Boolean | `OFF`   | Enable the address sanitizer            |
 | `HYDRA_UNDEFINED_SANITIZER` | Boolean | `OFF`   | Enable the undefined behavior sanitizer |
 
