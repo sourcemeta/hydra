@@ -9,7 +9,7 @@ project(hydra VERSION 0.0.1 LANGUAGES CXX
   DESCRIPTION "A convenience networking library for modern C++")
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 include(vendor/noa/cmake/noa.cmake)
-include(CompilerOptions)
+include(cmake/CompilerOptions.cmake)
 
 # Options
 option(HYDRA_HTTP "Build the Hydra HTTP library" ON)
