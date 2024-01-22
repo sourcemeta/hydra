@@ -1,0 +1,14 @@
+assets
+doxygen
+test
+vendor/googletest
+vendor/googletest.mask
+vendor/vendorpull
+.ackrc
+.editorconfig
+Brewfile
+CHANGELOG.markdown
+DEPENDENCIES
+Makefile
+README.markdown
+vcpkg.json
