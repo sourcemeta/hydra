@@ -43,9 +43,7 @@ endif()
 
 if(HYDRA_ADDRESS_SANITIZER)
   noa_sanitizer(TYPE address)
-  noa_sanitizer(TYPE address)
 elseif(HYDRA_UNDEFINED_SANITIZER)
-  noa_sanitizer(TYPE undefined)
   noa_sanitizer(TYPE undefined)
 endif()
 
