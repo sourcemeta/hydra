@@ -1,7 +1,7 @@
 specification: v0.6
 name: sourcemeta_hydra_test
 unikraft:
-  version: stable
+  version: staging
 
 targets:
   - name: development
