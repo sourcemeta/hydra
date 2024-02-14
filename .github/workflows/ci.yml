@@ -145,4 +145,4 @@ jobs:
       - run: cd unikraft && kraft build --target development --jobs 4 --log-type=basic
         env:
           KRAFTKIT_LOG_LEVEL: debug
-      - run: cd unikraft && kraft run --target development --disable-acceleration
+      - run: cd unikraft && kraft run --target development --disable-acceleration --network bridge:kraft0
