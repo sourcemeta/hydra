@@ -40,6 +40,7 @@ libraries:
     source: https://github.com/unikraft-io/lib-ukp-bin.git
     version: stable
     kconfig:
+      - CONFIG_LIBUKP=y
       - CONFIG_LIBUKP_DEPS=y
   libcxxabi:
     version: stable
