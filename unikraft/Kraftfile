@@ -41,6 +41,11 @@ targets:
       - CONFIG_LIBVFSCORE_AUTOMOUNT=y
 
 libraries:
+  ukp-bin:
+    source: https://github.com/unikraft-io/lib-ukp-bin.git
+    version: stable
+    kconfig:
+      - CONFIG_LIBUKP_DEPS=y
   libcxxabi:
     version: stable
   libcxx:
@@ -55,6 +60,9 @@ libraries:
     version: stable
   lwip:
     version: staging
+    kconfig:
+      # Fail if no network interface was provided
+      - CONFIG_LWIP_FAILNOIFACE=y
   zlib:
     version: stable
   curl:
