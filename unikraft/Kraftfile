@@ -48,7 +48,7 @@ libraries:
   compiler-rt:
     version: stable
   musl:
-    version: stable
+    version: staging
   openssl:
     version: stable
   lwip:
