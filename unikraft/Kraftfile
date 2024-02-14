@@ -3,6 +3,8 @@ name: sourcemeta_hydra_test
 unikraft:
   version: staging
 
+rootfs: ./rootfs
+
 targets:
   - name: development
     platform: qemu
@@ -23,6 +25,13 @@ targets:
       - CONFIG_LWIP_UKNETDEV=y
       - CONFIG_LWIP_DHCP=y
       - CONFIG_LWIP_DNS=y
+      # File-system
+      - CONFIG_LIBVFSCORE=y
+      - CONFIG_LIBVFSCORE_AUTOMOUNT_CI1_DEV_ARG="initrd0"
+      - CONFIG_LIBVFSCORE_AUTOMOUNT_CI_INITRD=y
+      - CONFIG_LIBVFSCORE_AUTOMOUNT_CI=y
+      - CONFIG_LIBVFSCORE_AUTOMOUNT_UP=y
+      - CONFIG_LIBVFSCORE_AUTOMOUNT=y
 
 libraries:
   ukp-bin:
@@ -39,7 +48,7 @@ libraries:
   compiler-rt:
     version: stable
   musl:
-    version: staging
+    version: stable
   openssl:
     version: stable
   lwip:
