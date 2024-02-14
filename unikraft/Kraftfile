@@ -1,9 +1,8 @@
 specification: v0.6
 name: sourcemeta_hydra_test
 
-# TODO: Use stable instead
 unikraft:
-  version: 0.16.2
+  version: staging
   kconfig:
     # TODO: Debugging
     - CONFIG_LIBUKDEBUG_PRINTD=y
