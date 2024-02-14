@@ -1,7 +1,10 @@
 specification: v0.6
 name: sourcemeta_hydra_test
+
+# TODO: Use stable instead
 unikraft:
-  version: staging
+  source: https://github.com/unikraft/unikraft.git
+  version: 6b137204f6944d35399557eeecdfd45a7fbfaac2
 
 rootfs: ./rootfs
 
