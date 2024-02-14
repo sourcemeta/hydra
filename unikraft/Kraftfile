@@ -4,6 +4,11 @@ name: sourcemeta_hydra_test
 # TODO: Use stable instead
 unikraft:
   version: 0.16.2
+  kconfig:
+    # TODO: Debugging
+    - CONFIG_LIBUKDEBUG_PRINTD=y
+    - CONFIG_LIBUKDEBUG_PRINTK_INFO=y
+    - CONFIG_LIBSYSCALL_SHIM_STRACE=y
 
 rootfs: ./rootfs
 
@@ -34,10 +39,6 @@ targets:
       - CONFIG_LIBVFSCORE_AUTOMOUNT_CI=y
       - CONFIG_LIBVFSCORE_AUTOMOUNT_UP=y
       - CONFIG_LIBVFSCORE_AUTOMOUNT=y
-      # Debugging
-      - CONFIG_LIBUKDEBUG_PRINTD=y
-      - CONFIG_LIBUKDEBUG_PRINTK_INFO=y
-      - CONFIG_LIBSYSCALL_SHIM_STRACE=y
 
 libraries:
   libcxxabi:
