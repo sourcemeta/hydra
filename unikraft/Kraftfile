@@ -25,6 +25,11 @@ targets:
       - CONFIG_LWIP_DNS=y
 
 libraries:
+  ukp-bin:
+    source: https://github.com/unikraft-io/lib-ukp-bin.git
+    version: stable
+    kconfig:
+      - CONFIG_LIBUKP_DEPS=y
   libcxxabi:
     version: stable
   libcxx:
