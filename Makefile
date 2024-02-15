@@ -23,7 +23,7 @@ configure: .always
 
 compile: .always
 	$(CMAKE) --build ./build --config $(PRESET) --target clang_format
-	$(CMAKE) --build ./build --config $(PRESET) --parallel 4
+	$(CMAKE) --build ./build --config $(PRESET) --parallel 4 --verbose
 	$(CMAKE) --install ./build --prefix ./build/dist --config $(PRESET) --verbose \
 		--component sourcemeta_hydra
 	$(CMAKE) --install ./build --prefix ./build/dist --config $(PRESET) --verbose \
