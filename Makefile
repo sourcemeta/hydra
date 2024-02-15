@@ -1,6 +1,7 @@
 # Programs
 CMAKE = cmake
 CTEST = ctest
+KRAFT = kraft
 # For test server
 NODE = node
 KILLALL = killall
@@ -42,6 +43,13 @@ test: test/http/stub.js .always
 
 doxygen: .always
 	$(CMAKE) --build ./build --config $(PRESET) --target doxygen
+
+unikraft: .always
+	cd unikraft && $(KRAFT) build --target development --jobs 4 --log-type=basic
+	$(KILLALL) $(NODE) || true
+	$(NODE) $< &
+	$(SLEEP) 1
+	$(KILLALL) $(NODE)
 
 clean: .always
 	$(CMAKE) -E rm -R -f build unikraft/.unikraft unikraft/.config*
