@@ -4,7 +4,7 @@ name: sourcemeta_hydra_test
 unikraft:
   version: staging
 
-rootfs: ./rootfs
+rootfs: ../build/unikraft/rootfs
 
 targets:
   - name: development
