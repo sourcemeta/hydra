@@ -131,6 +131,8 @@ jobs:
         run: |
           sudo apt-get update --yes
           sudo apt-get install --yes qemu-system-x86
+      # TODO: Just for testing
+      - run: qemu-system-x86_64 -machine help
       - uses: actions/checkout@v3
       - name: Install KraftKit
         run: |
