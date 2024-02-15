@@ -148,4 +148,4 @@ jobs:
 
       # Setup networking
       - run: sudo kraft net create -n 172.88.0.1/24 kraft0
-      - run: cd unikraft && kraft run --target development --disable-acceleration --network bridge:kraft0
+      - run: cd unikraft && sudo kraft run --target development --disable-acceleration --network bridge:kraft0
