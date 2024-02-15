@@ -1,0 +1,12 @@
+$(eval $(call addlib_s,libhydra,$(CONFIG_LIBHYDRA)))
+
+# Flags
+LIBHYDRA_SRC = $(LIBHYDRA_BASE)/src
+LIBHYDRA_CXXFLAGS-y += --std=c++20
+
+# HTTP
+CXXINCLUDES-$(CONFIG_LIBHYDRA) += -I$(LIBHYDRA_SRC)/http/include
+LIBHYDRA_SRCS-y += $(LIBHYDRA_SRC)/http/request.cc
+LIBHYDRA_SRCS-y += $(LIBHYDRA_SRC)/http/response.cc
+LIBHYDRA_SRCS-y += $(LIBHYDRA_SRC)/http/status.cc
+LIBHYDRA_SRCS-y += $(LIBHYDRA_SRC)/http/stream_curl.cc

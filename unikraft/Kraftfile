@@ -1,0 +1,65 @@
+specification: v0.6
+name: sourcemeta_hydra_test
+
+unikraft:
+  version: staging
+
+rootfs: ./rootfs
+
+targets:
+  - name: development
+    platform: qemu
+    architecture: x86_64
+    kconfig:
+      - CONFIG_LIBCXXABI=y
+      - CONFIG_LIBCXX=y
+      - CONFIG_LIBUNWIND=y
+      - CONFIG_LIBCOMPILER_RT=y
+      - CONFIG_LIBMUSL=y
+      - CONFIG_LIBCURL=y
+      - CONFIG_LIBOPENSSL=y
+      - CONFIG_LIBSSL=y
+      - CONFIG_LIBZLIB=y
+      - CONFIG_LIBHYDRA=y
+      # Networking
+      - CONFIG_LIBLWIP=y
+      - CONFIG_LWIP_UKNETDEV=y
+      - CONFIG_LWIP_DHCP=y
+      - CONFIG_LWIP_DNS=y
+      # File-system
+      - CONFIG_LIBVFSCORE=y
+      - CONFIG_LIBVFSCORE_AUTOMOUNT_CI1_DEV_ARG="initrd0"
+      - CONFIG_LIBVFSCORE_AUTOMOUNT_CI_INITRD=y
+      - CONFIG_LIBVFSCORE_AUTOMOUNT_CI=y
+      - CONFIG_LIBVFSCORE_AUTOMOUNT_UP=y
+      - CONFIG_LIBVFSCORE_AUTOMOUNT=y
+
+libraries:
+  ukp-bin:
+    source: https://github.com/unikraft-io/lib-ukp-bin.git
+    version: stable
+    kconfig:
+      - CONFIG_LIBUKP_DEPS=y
+  libcxxabi:
+    version: stable
+  libcxx:
+    version: stable
+  libunwind:
+    version: stable
+  compiler-rt:
+    version: stable
+  musl:
+    version: staging
+  openssl:
+    version: stable
+  lwip:
+    version: staging
+    kconfig:
+      # Fail if no network interface was provided
+      - CONFIG_LWIP_FAILNOIFACE=y
+  zlib:
+    version: stable
+  curl:
+    version: staging
+  hydra:
+    source: ..
