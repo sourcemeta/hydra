@@ -44,7 +44,7 @@ doxygen: .always
 	$(CMAKE) --build ./build --config $(PRESET) --target doxygen
 
 clean: .always
-	$(CMAKE) -E rm -R -f build
+	$(CMAKE) -E rm -R -f build unikraft/.unikraft unikraft/.config*
 
 # For NMake, which doesn't support .PHONY
 .always:

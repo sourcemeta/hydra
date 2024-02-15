@@ -123,3 +123,40 @@ jobs:
         env:
           # See https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html
           UBSAN_OPTIONS: print_stacktrace=1
+
+  unikraft:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install dependencies (GNU/Linux)
+        run: |
+          sudo apt-get update --yes
+          sudo apt-get install --yes qemu-system-x86
+      - uses: actions/checkout@v3
+      - name: Install KraftKit
+        run: |
+          wget https://github.com/unikraft/kraftkit/releases/download/v0.7.5/kraftkit_0.7.5_linux_amd64.deb
+          sudo dpkg -i kraftkit_0.7.5_linux_amd64.deb
+          rm kraftkit_0.7.5_linux_amd64.deb
+
+      # TODO: Automate this?
+      - run: mkdir -p unikraft/rootfs/etc/ssl/certs
+      - run: cp -v /etc/ssl/certs/ca-certificates.crt unikraft/rootfs/etc/ssl/certs
+      # TODO: Get rid of these "cd" commands
+      - run: cd unikraft && kraft build --target development --jobs 4 --log-type=basic
+
+      # TODO: Run using `kraft` once it supports outbound networking configuration
+      - run: >
+          qemu-system-x86_64
+          -machine pc-i440fx-6.2,accel=tcg
+          -cpu qemu64,-vmx,-svm,+x2apic,+pdpe1gb
+          -nographic
+          -vga none
+          -rtc base=utc
+          -parallel none
+          -serial stdio
+          -monitor null
+          -netdev user,id=hostnet0
+          -device virtio-net-pci,netdev=hostnet0,id=net0
+          -kernel unikraft/.unikraft/build/development_qemu-x86_64
+          -initrd unikraft/.unikraft/build/initramfs-x86_64.cpio
+          -m 128
