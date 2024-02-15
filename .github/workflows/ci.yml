@@ -147,5 +147,20 @@ jobs:
           KRAFTKIT_LOG_LEVEL: debug
 
       # Setup networking
-      - run: sudo kraft net create -n 172.88.0.1/24 kraft0
-      - run: cd unikraft && sudo kraft run --target development --disable-acceleration --network bridge:kraft0
+      # - run: sudo kraft net create -n 172.88.0.1/24 kraft0
+      # - run: cd unikraft && sudo kraft run --target development --disable-acceleration --network bridge:kraft0
+      - run: >
+          qemu-system-x86_64
+          -machine pc-i440fx-7.0,accel=tcg
+          -cpu qemu64,-vmx,-svm,+x2apic,+pdpe1gb
+          -nographic
+          -vga none
+          -rtc base=utc
+          -parallel none
+          -serial stdio
+          -monitor null
+          -netdev user,id=hostnet0
+          -device virtio-net-pci,netdev=hostnet0,id=net0
+          -kernel unikraft/.unikraft/build/development_qemu-x86_64
+          -initrd unikraft/.unikraft/build/initramfs-x86_64.cpio
+          -m 128
