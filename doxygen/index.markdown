@@ -77,6 +77,11 @@ Then, on your target `kconfig` configuration, specify:
 - CONFIG_LIBHYDRA=y
 ```
 
+Keep in mind that setting up outbound networking in Unikraft can be tricky. For
+the nitty-gritty details, take a look at our test
+[`Kraftfile`](./unikraft/Kraftfile) and [GitHub
+Actions](./.github/workflows/ci.yml) setup.
+
 CMake
 -----
 
