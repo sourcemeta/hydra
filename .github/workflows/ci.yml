@@ -141,13 +141,11 @@ jobs:
       # TODO: Automate this?
       - run: mkdir -p build/unikraft/rootfs/etc/ssl/certs
       - run: cp -v /etc/ssl/certs/ca-certificates.crt build/unikraft/rootfs/etc/ssl/certs
-
       - run: cd unikraft && kraft build --target development --jobs 4 --log-type=basic
-
       # TODO: Run using `kraft` once it supports outbound networking configuration
       - run: >
           qemu-system-x86_64
-          -machine pc-i440fx-6.2,accel=tcg
+          -machine pc,accel=tcg
           -cpu qemu64,-vmx,-svm,+x2apic,+pdpe1gb
           -nographic
           -vga none
