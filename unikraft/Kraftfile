@@ -3,11 +3,6 @@ name: sourcemeta_hydra_test
 
 unikraft:
   version: staging
-  kconfig:
-    # TODO: Debugging
-    - CONFIG_LIBUKDEBUG_PRINTD=y
-    - CONFIG_LIBUKDEBUG_PRINTK_INFO=y
-    - CONFIG_LIBSYSCALL_SHIM_STRACE=y
 
 rootfs: ./rootfs
 

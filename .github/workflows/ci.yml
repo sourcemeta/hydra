@@ -145,8 +145,6 @@ jobs:
       - run: cp -v /etc/ssl/certs/ca-certificates.crt unikraft/rootfs/etc/ssl/certs
       # TODO: Get rid of these "cd" commands
       - run: cd unikraft && kraft build --target development --jobs 4 --log-type=basic
-        env:
-          KRAFTKIT_LOG_LEVEL: debug
 
       # Setup networking
       # - run: sudo kraft net create -n 172.88.0.1/24 kraft0
