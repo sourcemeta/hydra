@@ -129,6 +129,25 @@ public:
   /// ```
   auto header(std::string_view key, int value) -> void;
 
+  /// Sign the request using Amazon's Signature v4. For example, to send a
+  /// request to an S3-compatible API:
+  ///
+  /// ```cpp
+  /// #include <sourcemeta/hydra/http.h>
+  /// #include <cassert>
+  ///
+  /// sourcemeta::hydra::http::Request request{"https://www.example.com"};
+  /// request.aws_sigv4("s3", "us-east-1", "1234567", "my-secret");
+  /// sourcemeta::hydra::http::Response response{request.send().get()};
+  /// assert(response.status() == sourcemeta::hydra::http::Status::OK);
+  /// ```
+  ///
+  /// See
+  /// https://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-authenticating-requests.html
+  auto aws_sigv4(std::string_view service, std::string_view region,
+                 std::string_view access_key, std::string_view secret_key)
+      -> void;
+
   /// Perform the HTTP request. For example:
   ///
   /// ```cpp
