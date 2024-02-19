@@ -6,6 +6,10 @@
 #include <sstream>   // std::ostringstream, std::istringstream
 #include <stdexcept> // std::invalid_argument
 
+#if defined(_MSC_VER)
+#include <errno.h>
+#endif
+
 namespace {
 constexpr auto FORMAT_GMT{"%a, %d %b %Y %H:%M:%S GMT"};
 }
@@ -16,11 +20,13 @@ auto to_gmt(const std::chrono::system_clock::time_point time) -> std::string {
   const std::time_t ctime = std::chrono::system_clock::to_time_t(time);
 #if defined(_MSC_VER)
   std::tm buffer;
-  assert(gmtime_s(&buffer, &ctime));
+  const errno_t result = gmtime_s(&buffer, &ctime);
+  assert(result == 0);
   std::tm *parts = &buffer;
 #else
   std::tm *parts = std::gmtime(&ctime);
 #endif
+  assert(parts);
   std::ostringstream stream;
   stream << std::put_time(parts, FORMAT_GMT);
   return stream.str();
@@ -28,7 +34,7 @@ auto to_gmt(const std::chrono::system_clock::time_point time) -> std::string {
 
 auto from_gmt(const std::string &time)
     -> std::chrono::system_clock::time_point {
-  std::istringstream stream(time);
+  std::istringstream stream{time};
   std::tm parts = {};
   stream >> std::get_time(&parts, FORMAT_GMT);
   if (stream.fail()) {
