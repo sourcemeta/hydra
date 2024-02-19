@@ -1,5 +1,6 @@
 #include <sourcemeta/hydra/http_time.h>
 
+#include <cassert>   // assert
 #include <ctime>     // std::time_t, std::tm, std::gmtime, std::mktime, timegm
 #include <iomanip>   // std::put_time, std::get_time
 #include <sstream>   // std::ostringstream, std::istringstream
@@ -12,10 +13,11 @@ constexpr auto FORMAT_GMT{"%a, %d %b %Y %H:%M:%S GMT"};
 namespace sourcemeta::hydra::http {
 
 auto to_gmt(const std::chrono::system_clock::time_point time) -> std::string {
-  std::time_t ctime = std::chrono::system_clock::to_time_t(time);
+  const std::time_t ctime = std::chrono::system_clock::to_time_t(time);
 #if defined(_MSC_VER)
-  std::tm parts;
-  assert(gmtime_s(&parts, &ctime));
+  std::tm buffer;
+  assert(gmtime_s(&buffer, &ctime));
+  std::tm *parts = &buffer;
 #else
   std::tm *parts = std::gmtime(&ctime);
 #endif
