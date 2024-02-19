@@ -1,7 +1,7 @@
 noa_library(NAMESPACE sourcemeta PROJECT hydra NAME http
   FOLDER "Hydra/HTTP"
   PRIVATE_HEADERS method.h status.h error.h stream.h request.h response.h time.h
-  SOURCES status.cc stream_curl.cc request.cc response.cc time.cc)
+  SOURCES method.cc status.cc stream_curl.cc request.cc response.cc time.cc)
 
 if(HYDRA_INSTALL)
   noa_library_install(NAMESPACE sourcemeta PROJECT hydra NAME http)
