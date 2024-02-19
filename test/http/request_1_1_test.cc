@@ -315,3 +315,23 @@ TEST(HTTP_Request_1_1, GET_root_response_headers_capture_all) {
   EXPECT_TRUE(headers.contains("content-type"));
   EXPECT_TRUE(headers.contains("content-length"));
 }
+
+TEST(HTTP_Request_1_1, GET_root_response_headers_capture_all_aws_sigv4_s3) {
+  sourcemeta::hydra::http::Request request{BASE_URL};
+  request.method(sourcemeta::hydra::http::Method::GET);
+  request.aws_sigv4("s3", "us-east-1", "1234", "secret");
+  request.capture();
+  sourcemeta::hydra::http::Response response{request.send().get()};
+  EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
+  std::map<std::string, std::string> headers;
+  for (const auto &[key, value] : response.headers()) {
+    headers.emplace(key, value);
+  }
+
+  EXPECT_TRUE(headers.contains("x-authorization"));
+  EXPECT_TRUE(headers.contains("x-x-amz-date"));
+  EXPECT_TRUE(headers.contains("x-host"));
+
+  // The empty SHA
+  EXPECT_EQ(headers.at("x-host"), BASE_URL);
+}

@@ -66,3 +66,26 @@ TEST(HTTP_Stream_1_1, get_root_foo_bar) {
   // Body
   EXPECT_EQ(body.str(), "RECEIVED GET /foo/bar");
 }
+
+TEST(HTTP_Stream_1_1, get_root_foo_bar_aws_sigv4_s3) {
+  sourcemeta::hydra::http::Stream request{std::string{BASE_URL} + "/foo/bar"};
+  request.method(sourcemeta::hydra::http::Method::GET);
+  request.aws_sigv4("s3", "us-east-1", "1234", "secret");
+  std::map<std::string, std::string> headers;
+
+  request.on_header([&headers](const sourcemeta::hydra::http::Status,
+                               std::string_view key,
+                               std::string_view value) noexcept {
+    headers.emplace(key, value);
+  });
+
+  request.send().wait();
+
+  // Headers
+  EXPECT_TRUE(headers.contains("x-authorization"));
+  EXPECT_TRUE(headers.contains("x-x-amz-date"));
+  EXPECT_TRUE(headers.contains("x-host"));
+
+  // The empty SHA
+  EXPECT_EQ(headers.at("x-host"), BASE_URL);
+}

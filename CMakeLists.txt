@@ -35,7 +35,8 @@ install(FILES
   COMPONENT sourcemeta_hydra_dev)
 
 if(HYDRA_HTTP)
-  find_package(CURL REQUIRED)
+  # Mainly due to CURLOPT_AWS_SIGV4
+  find_package(CURL 7.75.0 REQUIRED)
   add_subdirectory(src/http)
 endif()
 
