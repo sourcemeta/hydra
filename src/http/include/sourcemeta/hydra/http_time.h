@@ -36,6 +36,8 @@ namespace sourcemeta::hydra::http {
 /// assert(sourcemeta::hydra::http::to_gmt(point) ==
 ///   "Wed, 21 Oct 2015 11:28:00 GMT");
 /// ```
+///
+/// On Windows, you might need to use `_mkgmtime` instead of `timegm`.
 SOURCEMETA_HYDRA_HTTP_EXPORT
 auto to_gmt(const std::chrono::system_clock::time_point time) -> std::string;
 
@@ -64,6 +66,8 @@ auto to_gmt(const std::chrono::system_clock::time_point time) -> std::string;
 ///
 /// assert(point = expected);
 /// ```
+///
+/// On Windows, you might need to use `_mkgmtime` instead of `timegm`.
 SOURCEMETA_HYDRA_HTTP_EXPORT
 auto from_gmt(const std::string &time) -> std::chrono::system_clock::time_point;
 

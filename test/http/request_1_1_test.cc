@@ -358,7 +358,13 @@ TEST(HTTP_Request_1_1, GET_root_response_header_last_modified_gmt) {
   parts.tm_min = 28;
   parts.tm_sec = 0;
   parts.tm_isdst = 0;
+
+#if defined(_MSC_VER)
+  const auto expected{
+      std::chrono::system_clock::from_time_t(_mkgmtime(&parts))};
+#else
   const auto expected{std::chrono::system_clock::from_time_t(timegm(&parts))};
+#endif
 
   EXPECT_EQ(last_modified.value(), expected);
 }

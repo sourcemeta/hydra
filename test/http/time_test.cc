@@ -16,7 +16,12 @@ TEST(HTTP_Time, time_to_gmt) {
   parts.tm_sec = 0;
   parts.tm_isdst = 0;
 
+#if defined(_MSC_VER)
+  const auto point{std::chrono::system_clock::from_time_t(_mkgmtime(&parts))};
+#else
   const auto point{std::chrono::system_clock::from_time_t(timegm(&parts))};
+#endif
+
   EXPECT_EQ(sourcemeta::hydra::http::to_gmt(point),
             "Wed, 21 Oct 2015 11:28:00 GMT");
 }
@@ -33,7 +38,13 @@ TEST(HTTP_Time, gmt_to_time) {
   parts.tm_min = 28;
   parts.tm_sec = 0;
   parts.tm_isdst = 0;
+
+#if defined(_MSC_VER)
+  const auto expected{
+      std::chrono::system_clock::from_time_t(_mkgmtime(&parts))};
+#else
   const auto expected{std::chrono::system_clock::from_time_t(timegm(&parts))};
+#endif
 
   EXPECT_EQ(point, expected);
 }

@@ -33,7 +33,11 @@ auto from_gmt(const std::string &time)
     throw std::invalid_argument("Invalid GMT timestamp");
   }
 
+#if defined(_MSC_VER)
+  return std::chrono::system_clock::from_time_t(_mkgmtime(&parts));
+#else
   return std::chrono::system_clock::from_time_t(timegm(&parts));
+#endif
 }
 
 } // namespace sourcemeta::hydra::http
