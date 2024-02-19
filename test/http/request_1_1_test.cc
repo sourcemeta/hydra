@@ -1,10 +1,14 @@
+#include <gtest/gtest.h>
+
 #include <algorithm>
+#include <chrono>
+#include <ctime>
 #include <iterator>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
-#include <gtest/gtest.h>
 #include <sourcemeta/hydra/http.h>
 
 static auto body(sourcemeta::hydra::http::Response &response) -> std::string {
@@ -334,4 +338,45 @@ TEST(HTTP_Request_1_1, GET_root_response_headers_capture_all_aws_sigv4_s3) {
 
   // The empty SHA
   EXPECT_EQ(headers.at("x-host"), BASE_URL);
+}
+
+TEST(HTTP_Request_1_1, GET_root_response_header_last_modified_gmt) {
+  sourcemeta::hydra::http::Request request{BASE_URL};
+  request.method(sourcemeta::hydra::http::Method::GET);
+  request.capture("last-modified");
+  sourcemeta::hydra::http::Response response{request.send().get()};
+  EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
+
+  const auto last_modified{response.header_gmt("last-modified")};
+  EXPECT_TRUE(last_modified.has_value());
+
+  std::tm parts = {};
+  parts.tm_year = 115;
+  parts.tm_mon = 9;
+  parts.tm_mday = 21;
+  parts.tm_hour = 11;
+  parts.tm_min = 28;
+  parts.tm_sec = 0;
+  parts.tm_isdst = 0;
+  const auto expected{std::chrono::system_clock::from_time_t(timegm(&parts))};
+
+  EXPECT_EQ(last_modified.value(), expected);
+}
+
+TEST(HTTP_Request_1_1, GET_root_response_header_gmt_invalid) {
+  sourcemeta::hydra::http::Request request{BASE_URL};
+  request.method(sourcemeta::hydra::http::Method::GET);
+  request.capture("content-type");
+  sourcemeta::hydra::http::Response response{request.send().get()};
+  EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_THROW(response.header_gmt("content-type"), std::invalid_argument);
+}
+
+TEST(HTTP_Request_1_1, GET_root_response_header_gmt_missing) {
+  sourcemeta::hydra::http::Request request{BASE_URL};
+  request.method(sourcemeta::hydra::http::Method::GET);
+  sourcemeta::hydra::http::Response response{request.send().get()};
+  EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
+  const auto last_modified{response.header_gmt("last-modified")};
+  EXPECT_FALSE(last_modified.has_value());
 }

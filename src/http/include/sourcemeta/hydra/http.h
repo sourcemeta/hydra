@@ -16,5 +16,6 @@
 #include <sourcemeta/hydra/http_response.h>
 #include <sourcemeta/hydra/http_status.h>
 #include <sourcemeta/hydra/http_stream.h>
+#include <sourcemeta/hydra/http_time.h>
 
 #endif

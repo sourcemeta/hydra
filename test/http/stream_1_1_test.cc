@@ -1,9 +1,10 @@
+#include <gtest/gtest.h>
+
 #include <algorithm>
 #include <map>
 #include <sstream>
 #include <vector>
 
-#include <gtest/gtest.h>
 #include <sourcemeta/hydra/http.h>
 
 TEST(HTTP_Stream_1_1, invalid_url) {
