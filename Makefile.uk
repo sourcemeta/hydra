@@ -9,4 +9,5 @@ CXXINCLUDES-$(CONFIG_LIBHYDRA) += -I$(LIBHYDRA_SRC)/http/include
 LIBHYDRA_SRCS-y += $(LIBHYDRA_SRC)/http/request.cc
 LIBHYDRA_SRCS-y += $(LIBHYDRA_SRC)/http/response.cc
 LIBHYDRA_SRCS-y += $(LIBHYDRA_SRC)/http/status.cc
+LIBHYDRA_SRCS-y += $(LIBHYDRA_SRC)/http/time.cc
 LIBHYDRA_SRCS-y += $(LIBHYDRA_SRC)/http/stream_curl.cc

@@ -9,6 +9,7 @@
 
 #include <sourcemeta/hydra/http_status.h>
 
+#include <chrono>   // std::chrono::system_clock::time_point
 #include <map>      // std::map
 #include <optional> // std::optional
 #include <sstream>  // std::ostringstream, std::istringstream
@@ -60,6 +61,25 @@ public:
   ///   == "text/html; charset=UTF-8");
   /// ```
   auto header(const std::string &key) const -> std::optional<std::string>;
+
+  /// Get the value of a given response header, if any, assuming it is a GMT
+  /// timestamp. Remember that you must express your desire of capturing the
+  /// response headers you are interest in when performing the request, using
+  /// sourcemeta::hydra::http::Request::capture.
+  ///
+  /// ```cpp
+  /// #include <sourcemeta/hydra/http.h>
+  /// #include <cassert>
+  ///
+  /// sourcemeta::hydra::http::Request request{"https://www.example.com"};
+  /// request.method(sourcemeta::hydra::http::Method::GET);
+  /// request.capture("last-modified");
+  /// sourcemeta::hydra::http::Response response{request.send().get()};
+  /// const auto time_poimt{response.header_gmt("content-type")};
+  /// assert(time_point.has_value());
+  /// ```
+  auto header_gmt(const std::string &key) const
+      -> std::optional<std::chrono::system_clock::time_point>;
 
   /// Get a container for all the captured response headers. For example:
   ///

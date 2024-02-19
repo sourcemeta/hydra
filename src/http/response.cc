@@ -1,5 +1,6 @@
 #include <sourcemeta/hydra/http_response.h>
 #include <sourcemeta/hydra/http_status.h>
+#include <sourcemeta/hydra/http_time.h>
 
 #include <cassert>  // assert
 #include <map>      // std::map
@@ -25,6 +26,16 @@ auto Response::header(const std::string &key) const
   }
 
   return this->headers_.at(key);
+}
+
+auto Response::header_gmt(const std::string &key) const
+    -> std::optional<std::chrono::system_clock::time_point> {
+  const auto header_string{this->header(key)};
+  if (!header_string.has_value()) {
+    return std::nullopt;
+  }
+
+  return from_gmt(header_string.value());
 }
 
 auto Response::headers() const -> const std::map<std::string, std::string> & {
