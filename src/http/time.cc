@@ -4,7 +4,7 @@
 #include <ctime>     // std::time_t, std::tm, std::gmtime, std::mktime, timegm
 #include <iomanip>   // std::put_time, std::get_time
 #include <sstream>   // std::ostringstream, std::istringstream
-#include <stdexcept> // std::invalid_argument
+#include <stdexcept> // std::invalid_argument, std::runtime_error
 
 #if defined(_MSC_VER)
 #include <errno.h>
@@ -20,8 +20,10 @@ auto to_gmt(const std::chrono::system_clock::time_point time) -> std::string {
   const std::time_t ctime = std::chrono::system_clock::to_time_t(time);
 #if defined(_MSC_VER)
   std::tm buffer;
-  const errno_t result = gmtime_s(&buffer, &ctime);
-  assert(result == 0);
+  if (gmtime_s(&buffer, &ctime) != 0) {
+    throw std::runtime_error("Could not convert time point to GMT");
+  }
+
   std::tm *parts = &buffer;
 #else
   std::tm *parts = std::gmtime(&ctime);
