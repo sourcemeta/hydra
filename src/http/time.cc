@@ -13,9 +13,9 @@ namespace sourcemeta::hydra::http {
 
 auto to_gmt(const std::chrono::system_clock::time_point time) -> std::string {
   std::time_t ctime = std::chrono::system_clock::to_time_t(time);
-#ifdef __STDC_LIB_EXT1__
-  struct tm buffer;
-  std::tm *parts = std::gmtime_s(&ctime, &buffer);
+#if defined(_MSC_VER)
+  std::tm parts;
+  assert(gmtime_s(&parts, &ctime));
 #else
   std::tm *parts = std::gmtime(&ctime);
 #endif
