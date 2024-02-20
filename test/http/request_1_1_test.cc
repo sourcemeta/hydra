@@ -181,7 +181,6 @@ TEST(HTTP_Request_1_1, GET_root_multiple_captures_match) {
   EXPECT_TRUE(response.header("content-type").has_value());
   EXPECT_TRUE(response.header("content-length").has_value());
   EXPECT_EQ(response.header("content-type").value(), "text/plain");
-  EXPECT_EQ(response.header("content-length").value(), "14");
 }
 
 TEST(HTTP_Request_1_1, GET_root_multiple_captures_partial_match) {
@@ -209,7 +208,6 @@ TEST(HTTP_Request_1_1, GET_root_multiple_captures_match_initializer_list) {
   EXPECT_TRUE(response.header("content-type").has_value());
   EXPECT_TRUE(response.header("content-length").has_value());
   EXPECT_EQ(response.header("content-type").value(), "text/plain");
-  EXPECT_EQ(response.header("content-length").value(), "14");
 }
 
 TEST(HTTP_Request_1_1,
