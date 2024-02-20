@@ -294,6 +294,11 @@ auto Stream::send() -> std::future<Status> {
   handle_curl(curl_easy_setopt(this->internal->handle, CURLOPT_HTTPHEADER,
                                this->internal->headers));
 
+  // Accept all supported compression mechanisms
+  // See https://curl.se/libcurl/c/CURLOPT_ACCEPT_ENCODING.html
+  handle_curl(
+      curl_easy_setopt(this->internal->handle, CURLOPT_ACCEPT_ENCODING, ""));
+
   // Otherwise cURL will hang for some seconds waiting for a response when
   // performing a HEAD request
   if (this->internal->method == Method::HEAD) {
