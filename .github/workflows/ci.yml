@@ -142,14 +142,21 @@ jobs:
           sudo dpkg -i kraftkit_0.7.5_linux_amd64.deb
           rm kraftkit_0.7.5_linux_amd64.deb
 
-      # TODO: Automate this?
-      - run: |
+      # TODO: Automate ca-certificates step?
+      - name: Kraft Build
+        run: |
           mkdir -p build/unikraft/rootfs/etc/ssl/certs
           cp -v /etc/ssl/certs/ca-certificates.crt build/unikraft/rootfs/etc/ssl/certs
           cd unikraft && kraft build --target development --jobs 4 --log-type=basic
 
       - name: Run HTTP stub
         run: (node test/http/stub.js ${{ env.TEST_PORT }} &) && sleep 10
+
+      - name: Store IP address
+        id: ip-address
+        run: |
+          ip addr
+          echo "IP_ADDRESS=$(ip addr show eth0 | awk '/inet/ {print $2}' | head -n 1 | cut -f1 -d '/')" >> "$GITHUB_OUTPUT"
 
       # TODO: Run using `kraft` once it supports outbound networking configuration
       - run: >
@@ -166,4 +173,5 @@ jobs:
           -device virtio-net-pci,netdev=hostnet0,id=net0
           -kernel unikraft/.unikraft/build/development_qemu-x86_64
           -initrd unikraft/.unikraft/build/initramfs-x86_64.cpio
+          -append "env.vars=[ 'SOURCEMETA_HYDRA_TEST_BASE_URL=${{ steps.ip-address.outputs.IP_ADDRESS }}:${{ env.TEST_PORT }}' ] --"
           -m 128
