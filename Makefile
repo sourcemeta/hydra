@@ -10,6 +10,7 @@ SLEEP = sleep
 # Options
 PRESET = Debug
 SHARED = OFF
+TEST_PORT = 9999
 
 all: configure compile test
 
@@ -34,9 +35,11 @@ lint: .always
 
 test: test/http/stub.js .always
 	$(KILLALL) $(NODE) || true
-	$(NODE) $< &
+	$(NODE) $< $(TEST_PORT) &
 	$(SLEEP) 1
-	$(CMAKE) -E env UBSAN_OPTIONS=print_stacktrace=1 \
+	$(CMAKE) -E env \
+		UBSAN_OPTIONS=print_stacktrace=1 \
+		SOURCEMETA_HYDRA_TEST_BASE_URL=localhost:$(TEST_PORT) \
 		$(CTEST) --test-dir ./build --build-config $(PRESET) \
 			--output-on-failure --parallel
 	$(KILLALL) $(NODE)

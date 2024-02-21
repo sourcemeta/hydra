@@ -1,6 +1,11 @@
 const zlib = require('zlib');
 const http = require('http');
-const PORT = 9999;
+const PORT = parseInt(process.argv[2], 10);
+
+if (!PORT || isNaN(PORT)) {
+  console.error(`Invalid port: ${PORT}`);
+  process.exit(1);
+}
 
 http.createServer((request, response) => {
   for (const [key, value] of Object.entries(request.headers)) {

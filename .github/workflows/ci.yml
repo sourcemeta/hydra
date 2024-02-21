@@ -57,6 +57,7 @@ jobs:
     env:
       CC: ${{ matrix.platform.cc }}
       CXX: ${{ matrix.platform.cxx }}
+      TEST_PORT: 9999
     steps:
       - name: Install dependencies (GNU/Linux)
         if: runner.os == 'linux'
@@ -110,10 +111,10 @@ jobs:
 
       # Run stubs
       - name: Run HTTP stub (Windows)
-        run: cmd /c "start /b node test\http\stub.js" && Start-Sleep -Seconds 10
+        run: cmd /c "start /b node test\http\stub.js ${{ env.TEST_PORT }}" && Start-Sleep -Seconds 10
         if: runner.os == 'windows'
       - name: Run HTTP stub (*nix)
-        run: (node test/http/stub.js &) && sleep 10
+        run: (node test/http/stub.js ${{ env.TEST_PORT }} &) && sleep 10
         if: runner.os != 'windows'
 
       # Not every CTest version supports the --test-dir option. If such option
@@ -121,6 +122,7 @@ jobs:
       # Better to be sure and `cd` all the time here.
       - run: cd ./build && ctest --build-config Release --output-on-failure --parallel
         env:
+          SOURCEMETA_HYDRA_TEST_BASE_URL: localhost:${{ env.TEST_PORT }}
           # See https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html
           UBSAN_OPTIONS: print_stacktrace=1
 
