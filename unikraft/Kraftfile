@@ -25,6 +25,8 @@ targets:
       - CONFIG_LIBSSL=y
       - CONFIG_LIBZLIB=y
       - CONFIG_LIBHYDRA=y
+      - CONFIG_LIBGOOGLETEST=y
+      - CONFIG_LIBGOOGLETEST_BUILD_MAIN=y
       # Networking
       - CONFIG_LIBLWIP=y
       - CONFIG_LWIP_UKNETDEV=y
@@ -65,5 +67,7 @@ libraries:
     version: stable
   curl:
     version: staging
+  googletest:
+    version: stable
   hydra:
     source: ..
