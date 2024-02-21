@@ -1,8 +1,11 @@
 $(eval $(call addlib,sourcemeta_hydra_test))
 
 SOURCEMETA_HYDRA_TEST_CXXFLAGS-y += --std=c++20
+TEST_BASE := $(SOURCEMETA_HYDRA_TEST_BASE)/../test
 
-# TODO: Run real unit tests
+# TODO: Add remaining e2e tests
 
 # HTTP
-SOURCEMETA_HYDRA_TEST_SRCS-y += $(SOURCEMETA_HYDRA_TEST_BASE)/main.cc
+SOURCEMETA_HYDRA_TEST_SRCS-y += $(TEST_BASE)/http/method_test.cc
+SOURCEMETA_HYDRA_TEST_SRCS-y += $(TEST_BASE)/http/time_test.cc
+
