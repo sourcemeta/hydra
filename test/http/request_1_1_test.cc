@@ -26,7 +26,7 @@ TEST(HTTP_Request_1_1, invalid_url) {
 }
 
 TEST(HTTP_Request_1_1, GET_root) {
-  sourcemeta::hydra::http::Request request{BASE_URL};
+  sourcemeta::hydra::http::Request request{SOURCEMETA_HYDRA_TEST_BASE_URL};
   request.method(sourcemeta::hydra::http::Method::GET);
   sourcemeta::hydra::http::Response response{request.send().get()};
   EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
@@ -35,7 +35,7 @@ TEST(HTTP_Request_1_1, GET_root) {
 }
 
 TEST(HTTP_Request_1_1, HEAD_root) {
-  sourcemeta::hydra::http::Request request{BASE_URL};
+  sourcemeta::hydra::http::Request request{SOURCEMETA_HYDRA_TEST_BASE_URL};
   request.method(sourcemeta::hydra::http::Method::HEAD);
   sourcemeta::hydra::http::Response response{request.send().get()};
   EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
@@ -43,7 +43,7 @@ TEST(HTTP_Request_1_1, HEAD_root) {
 }
 
 TEST(HTTP_Request_1_1, POST_root) {
-  sourcemeta::hydra::http::Request request{BASE_URL};
+  sourcemeta::hydra::http::Request request{SOURCEMETA_HYDRA_TEST_BASE_URL};
   request.method(sourcemeta::hydra::http::Method::POST);
   sourcemeta::hydra::http::Response response{request.send().get()};
   EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
@@ -52,7 +52,7 @@ TEST(HTTP_Request_1_1, POST_root) {
 }
 
 TEST(HTTP_Request_1_1, PUT_root) {
-  sourcemeta::hydra::http::Request request{BASE_URL};
+  sourcemeta::hydra::http::Request request{SOURCEMETA_HYDRA_TEST_BASE_URL};
   request.method(sourcemeta::hydra::http::Method::PUT);
   sourcemeta::hydra::http::Response response{request.send().get()};
   EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
@@ -61,7 +61,7 @@ TEST(HTTP_Request_1_1, PUT_root) {
 }
 
 TEST(HTTP_Request_1_1, DELETE_root) {
-  sourcemeta::hydra::http::Request request{BASE_URL};
+  sourcemeta::hydra::http::Request request{SOURCEMETA_HYDRA_TEST_BASE_URL};
   request.method(sourcemeta::hydra::http::Method::DELETE);
   sourcemeta::hydra::http::Response response{request.send().get()};
   EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
@@ -70,7 +70,7 @@ TEST(HTTP_Request_1_1, DELETE_root) {
 }
 
 TEST(HTTP_Request_1_1, OPTIONS_root) {
-  sourcemeta::hydra::http::Request request{BASE_URL};
+  sourcemeta::hydra::http::Request request{SOURCEMETA_HYDRA_TEST_BASE_URL};
   request.method(sourcemeta::hydra::http::Method::OPTIONS);
   sourcemeta::hydra::http::Response response{request.send().get()};
   EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
@@ -79,7 +79,7 @@ TEST(HTTP_Request_1_1, OPTIONS_root) {
 }
 
 TEST(HTTP_Request_1_1, TRACE_root) {
-  sourcemeta::hydra::http::Request request{BASE_URL};
+  sourcemeta::hydra::http::Request request{SOURCEMETA_HYDRA_TEST_BASE_URL};
   request.method(sourcemeta::hydra::http::Method::TRACE);
   sourcemeta::hydra::http::Response response{request.send().get()};
   EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
@@ -88,7 +88,7 @@ TEST(HTTP_Request_1_1, TRACE_root) {
 }
 
 TEST(HTTP_Request_1_1, PATCH_root) {
-  sourcemeta::hydra::http::Request request{BASE_URL};
+  sourcemeta::hydra::http::Request request{SOURCEMETA_HYDRA_TEST_BASE_URL};
   request.method(sourcemeta::hydra::http::Method::PATCH);
   sourcemeta::hydra::http::Response response{request.send().get()};
   EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
@@ -97,7 +97,8 @@ TEST(HTTP_Request_1_1, PATCH_root) {
 }
 
 TEST(HTTP_Request_1_1, GET_root_foo_bar) {
-  sourcemeta::hydra::http::Request request{std::string{BASE_URL} + "/foo/bar"};
+  sourcemeta::hydra::http::Request request{
+      std::string{SOURCEMETA_HYDRA_TEST_BASE_URL} + "/foo/bar"};
   request.method(sourcemeta::hydra::http::Method::GET);
   sourcemeta::hydra::http::Response response{request.send().get()};
   EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
@@ -106,7 +107,7 @@ TEST(HTTP_Request_1_1, GET_root_foo_bar) {
 }
 
 TEST(HTTP_Request_1_1, GET_root_custom_code_string) {
-  sourcemeta::hydra::http::Request request{BASE_URL};
+  sourcemeta::hydra::http::Request request{SOURCEMETA_HYDRA_TEST_BASE_URL};
   request.method(sourcemeta::hydra::http::Method::GET);
   request.header("X-Code", "400");
   sourcemeta::hydra::http::Response response{request.send().get()};
@@ -116,7 +117,7 @@ TEST(HTTP_Request_1_1, GET_root_custom_code_string) {
 }
 
 TEST(HTTP_Request_1_1, GET_root_custom_code_integer) {
-  sourcemeta::hydra::http::Request request{BASE_URL};
+  sourcemeta::hydra::http::Request request{SOURCEMETA_HYDRA_TEST_BASE_URL};
   request.method(sourcemeta::hydra::http::Method::GET);
   request.header("X-Code", 400);
   sourcemeta::hydra::http::Response response{request.send().get()};
@@ -126,7 +127,7 @@ TEST(HTTP_Request_1_1, GET_root_custom_code_integer) {
 }
 
 TEST(HTTP_Request_1_1, GET_root_response_content_type_no_capture) {
-  sourcemeta::hydra::http::Request request{BASE_URL};
+  sourcemeta::hydra::http::Request request{SOURCEMETA_HYDRA_TEST_BASE_URL};
   request.method(sourcemeta::hydra::http::Method::GET);
   sourcemeta::hydra::http::Response response{request.send().get()};
   EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
@@ -136,7 +137,7 @@ TEST(HTTP_Request_1_1, GET_root_response_content_type_no_capture) {
 }
 
 TEST(HTTP_Request_1_1, GET_root_response_content_type_capture) {
-  sourcemeta::hydra::http::Request request{BASE_URL};
+  sourcemeta::hydra::http::Request request{SOURCEMETA_HYDRA_TEST_BASE_URL};
   request.method(sourcemeta::hydra::http::Method::GET);
   request.capture("content-type");
   sourcemeta::hydra::http::Response response{request.send().get()};
@@ -148,7 +149,7 @@ TEST(HTTP_Request_1_1, GET_root_response_content_type_capture) {
 }
 
 TEST(HTTP_Request_1_1, GET_root_response_content_type_capture_all) {
-  sourcemeta::hydra::http::Request request{BASE_URL};
+  sourcemeta::hydra::http::Request request{SOURCEMETA_HYDRA_TEST_BASE_URL};
   request.method(sourcemeta::hydra::http::Method::GET);
   request.capture();
   sourcemeta::hydra::http::Response response{request.send().get()};
@@ -159,7 +160,7 @@ TEST(HTTP_Request_1_1, GET_root_response_content_type_capture_all) {
 }
 
 TEST(HTTP_Request_1_1, GET_root_missing_header_with_capture) {
-  sourcemeta::hydra::http::Request request{BASE_URL};
+  sourcemeta::hydra::http::Request request{SOURCEMETA_HYDRA_TEST_BASE_URL};
   request.method(sourcemeta::hydra::http::Method::GET);
   request.capture("x-foo-bar");
   sourcemeta::hydra::http::Response response{request.send().get()};
@@ -170,7 +171,7 @@ TEST(HTTP_Request_1_1, GET_root_missing_header_with_capture) {
 }
 
 TEST(HTTP_Request_1_1, GET_root_multiple_captures_match) {
-  sourcemeta::hydra::http::Request request{BASE_URL};
+  sourcemeta::hydra::http::Request request{SOURCEMETA_HYDRA_TEST_BASE_URL};
   request.method(sourcemeta::hydra::http::Method::GET);
   request.capture("content-type");
   request.capture("content-length");
@@ -184,7 +185,7 @@ TEST(HTTP_Request_1_1, GET_root_multiple_captures_match) {
 }
 
 TEST(HTTP_Request_1_1, GET_root_multiple_captures_partial_match) {
-  sourcemeta::hydra::http::Request request{BASE_URL};
+  sourcemeta::hydra::http::Request request{SOURCEMETA_HYDRA_TEST_BASE_URL};
   request.method(sourcemeta::hydra::http::Method::GET);
   request.capture("content-type");
   request.capture("x-foo-bar");
@@ -198,7 +199,7 @@ TEST(HTTP_Request_1_1, GET_root_multiple_captures_partial_match) {
 }
 
 TEST(HTTP_Request_1_1, GET_root_multiple_captures_match_initializer_list) {
-  sourcemeta::hydra::http::Request request{BASE_URL};
+  sourcemeta::hydra::http::Request request{SOURCEMETA_HYDRA_TEST_BASE_URL};
   request.method(sourcemeta::hydra::http::Method::GET);
   request.capture({"content-type", "content-length"});
   sourcemeta::hydra::http::Response response{request.send().get()};
@@ -212,7 +213,7 @@ TEST(HTTP_Request_1_1, GET_root_multiple_captures_match_initializer_list) {
 
 TEST(HTTP_Request_1_1,
      GET_root_multiple_captures_partial_match_initializer_list) {
-  sourcemeta::hydra::http::Request request{BASE_URL};
+  sourcemeta::hydra::http::Request request{SOURCEMETA_HYDRA_TEST_BASE_URL};
   request.method(sourcemeta::hydra::http::Method::GET);
   request.capture({"content-type", "x-foo-bar"});
   sourcemeta::hydra::http::Response response{request.send().get()};
@@ -225,7 +226,7 @@ TEST(HTTP_Request_1_1,
 }
 
 TEST(HTTP_Request_1_1, GET_root_request_header_echo) {
-  sourcemeta::hydra::http::Request request{BASE_URL};
+  sourcemeta::hydra::http::Request request{SOURCEMETA_HYDRA_TEST_BASE_URL};
   request.method(sourcemeta::hydra::http::Method::GET);
   request.header("x-foo-bar", "foo");
   request.capture("x-x-foo-bar");
@@ -238,7 +239,7 @@ TEST(HTTP_Request_1_1, GET_root_request_header_echo) {
 }
 
 TEST(HTTP_Request_1_1, GET_root_request_header_mixed_case_echo) {
-  sourcemeta::hydra::http::Request request{BASE_URL};
+  sourcemeta::hydra::http::Request request{SOURCEMETA_HYDRA_TEST_BASE_URL};
   request.method(sourcemeta::hydra::http::Method::GET);
   request.header("X-Foo-Bar", "foo");
   request.capture("x-x-foo-bar");
@@ -251,7 +252,7 @@ TEST(HTTP_Request_1_1, GET_root_request_header_mixed_case_echo) {
 }
 
 TEST(HTTP_Request_1_1, GET_root_multiple_times) {
-  sourcemeta::hydra::http::Request request{BASE_URL};
+  sourcemeta::hydra::http::Request request{SOURCEMETA_HYDRA_TEST_BASE_URL};
   request.method(sourcemeta::hydra::http::Method::GET);
 
   sourcemeta::hydra::http::Response response_1{request.send().get()};
@@ -266,7 +267,7 @@ TEST(HTTP_Request_1_1, GET_root_multiple_times) {
 }
 
 TEST(HTTP_Request_1_1, GET_root_move) {
-  sourcemeta::hydra::http::Request request{BASE_URL};
+  sourcemeta::hydra::http::Request request{SOURCEMETA_HYDRA_TEST_BASE_URL};
   request.method(sourcemeta::hydra::http::Method::GET);
   sourcemeta::hydra::http::Request new_request{std::move(request)};
   sourcemeta::hydra::http::Response response{new_request.send().get()};
@@ -276,7 +277,7 @@ TEST(HTTP_Request_1_1, GET_root_move) {
 }
 
 TEST(HTTP_Request_1_1, GET_root_response_headers_capture_none) {
-  sourcemeta::hydra::http::Request request{BASE_URL};
+  sourcemeta::hydra::http::Request request{SOURCEMETA_HYDRA_TEST_BASE_URL};
   request.method(sourcemeta::hydra::http::Method::GET);
   sourcemeta::hydra::http::Response response{request.send().get()};
   EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
@@ -289,7 +290,7 @@ TEST(HTTP_Request_1_1, GET_root_response_headers_capture_none) {
 }
 
 TEST(HTTP_Request_1_1, GET_root_response_headers_capture_one) {
-  sourcemeta::hydra::http::Request request{BASE_URL};
+  sourcemeta::hydra::http::Request request{SOURCEMETA_HYDRA_TEST_BASE_URL};
   request.method(sourcemeta::hydra::http::Method::GET);
   request.capture("content-type");
   sourcemeta::hydra::http::Response response{request.send().get()};
@@ -304,7 +305,7 @@ TEST(HTTP_Request_1_1, GET_root_response_headers_capture_one) {
 }
 
 TEST(HTTP_Request_1_1, GET_root_response_headers_capture_all) {
-  sourcemeta::hydra::http::Request request{BASE_URL};
+  sourcemeta::hydra::http::Request request{SOURCEMETA_HYDRA_TEST_BASE_URL};
   request.method(sourcemeta::hydra::http::Method::GET);
   request.capture();
   sourcemeta::hydra::http::Response response{request.send().get()};
@@ -319,7 +320,7 @@ TEST(HTTP_Request_1_1, GET_root_response_headers_capture_all) {
 }
 
 TEST(HTTP_Request_1_1, GET_root_response_headers_capture_all_aws_sigv4_s3) {
-  sourcemeta::hydra::http::Request request{BASE_URL};
+  sourcemeta::hydra::http::Request request{SOURCEMETA_HYDRA_TEST_BASE_URL};
   request.method(sourcemeta::hydra::http::Method::GET);
   request.aws_sigv4("s3", "us-east-1", "1234", "secret");
   request.capture();
@@ -335,11 +336,11 @@ TEST(HTTP_Request_1_1, GET_root_response_headers_capture_all_aws_sigv4_s3) {
   EXPECT_TRUE(headers.contains("x-host"));
 
   // The empty SHA
-  EXPECT_EQ(headers.at("x-host"), BASE_URL);
+  EXPECT_EQ(headers.at("x-host"), SOURCEMETA_HYDRA_TEST_BASE_URL);
 }
 
 TEST(HTTP_Request_1_1, GET_root_response_header_last_modified_gmt) {
-  sourcemeta::hydra::http::Request request{BASE_URL};
+  sourcemeta::hydra::http::Request request{SOURCEMETA_HYDRA_TEST_BASE_URL};
   request.method(sourcemeta::hydra::http::Method::GET);
   request.capture("last-modified");
   sourcemeta::hydra::http::Response response{request.send().get()};
@@ -368,7 +369,7 @@ TEST(HTTP_Request_1_1, GET_root_response_header_last_modified_gmt) {
 }
 
 TEST(HTTP_Request_1_1, GET_root_response_header_gmt_invalid) {
-  sourcemeta::hydra::http::Request request{BASE_URL};
+  sourcemeta::hydra::http::Request request{SOURCEMETA_HYDRA_TEST_BASE_URL};
   request.method(sourcemeta::hydra::http::Method::GET);
   request.capture("content-type");
   sourcemeta::hydra::http::Response response{request.send().get()};
@@ -377,7 +378,7 @@ TEST(HTTP_Request_1_1, GET_root_response_header_gmt_invalid) {
 }
 
 TEST(HTTP_Request_1_1, GET_root_response_header_gmt_missing) {
-  sourcemeta::hydra::http::Request request{BASE_URL};
+  sourcemeta::hydra::http::Request request{SOURCEMETA_HYDRA_TEST_BASE_URL};
   request.method(sourcemeta::hydra::http::Method::GET);
   sourcemeta::hydra::http::Response response{request.send().get()};
   EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
