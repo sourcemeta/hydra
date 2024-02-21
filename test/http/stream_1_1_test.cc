@@ -13,21 +13,22 @@ TEST(HTTP_Stream_1_1, invalid_url) {
 }
 
 TEST(HTTP_Stream_1_1, no_callbacks_get) {
-  sourcemeta::hydra::http::Stream request{BASE_URL};
+  sourcemeta::hydra::http::Stream request{SOURCEMETA_HYDRA_TEST_BASE_URL};
   request.method(sourcemeta::hydra::http::Method::GET);
   const auto status{request.send().get()};
   EXPECT_EQ(status, sourcemeta::hydra::http::Status::OK);
 }
 
 TEST(HTTP_Stream_1_1, no_callbacks_head) {
-  sourcemeta::hydra::http::Stream request{BASE_URL};
+  sourcemeta::hydra::http::Stream request{SOURCEMETA_HYDRA_TEST_BASE_URL};
   request.method(sourcemeta::hydra::http::Method::HEAD);
   const auto status{request.send().get()};
   EXPECT_EQ(status, sourcemeta::hydra::http::Status::OK);
 }
 
 TEST(HTTP_Stream_1_1, get_root_foo_bar) {
-  sourcemeta::hydra::http::Stream request{std::string{BASE_URL} + "/foo/bar"};
+  sourcemeta::hydra::http::Stream request{
+      std::string{SOURCEMETA_HYDRA_TEST_BASE_URL} + "/foo/bar"};
   request.method(sourcemeta::hydra::http::Method::GET);
   request.header("X-Code", 400);
 
@@ -69,7 +70,8 @@ TEST(HTTP_Stream_1_1, get_root_foo_bar) {
 }
 
 TEST(HTTP_Stream_1_1, get_root_foo_bar_aws_sigv4_s3) {
-  sourcemeta::hydra::http::Stream request{std::string{BASE_URL} + "/foo/bar"};
+  sourcemeta::hydra::http::Stream request{
+      std::string{SOURCEMETA_HYDRA_TEST_BASE_URL} + "/foo/bar"};
   request.method(sourcemeta::hydra::http::Method::GET);
   request.aws_sigv4("s3", "us-east-1", "1234", "secret");
   std::map<std::string, std::string> headers;
@@ -88,5 +90,5 @@ TEST(HTTP_Stream_1_1, get_root_foo_bar_aws_sigv4_s3) {
   EXPECT_TRUE(headers.contains("x-host"));
 
   // The empty SHA
-  EXPECT_EQ(headers.at("x-host"), BASE_URL);
+  EXPECT_EQ(headers.at("x-host"), SOURCEMETA_HYDRA_TEST_BASE_URL);
 }
