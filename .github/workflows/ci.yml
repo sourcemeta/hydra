@@ -130,11 +130,12 @@ jobs:
     runs-on: ubuntu-latest
     env:
       TEST_PORT: 9999
+      HOST_VIRBR0_IP: 192.168.32.1
     steps:
       - name: Install dependencies (GNU/Linux)
         run: |
           sudo apt-get update --yes
-          sudo apt-get install --yes qemu-system-x86
+          sudo apt-get install --yes qemu-system-x86 bridge-utils
       - uses: actions/checkout@v3
       - name: Install KraftKit
         run: |
@@ -142,8 +143,12 @@ jobs:
           sudo dpkg -i kraftkit_0.7.5_linux_amd64.deb
           rm kraftkit_0.7.5_linux_amd64.deb
 
-      # TODO: Automate this?
-      - run: |
+      - name: Setup virtual network
+        run: sudo ./unikraft/virbr0-host.sh ${{ env.HOST_VIRBR0_IP }}
+
+      # TODO: Automate ca-certificates step?
+      - name: Kraft Build
+        run: |
           mkdir -p build/unikraft/rootfs/etc/ssl/certs
           cp -v /etc/ssl/certs/ca-certificates.crt build/unikraft/rootfs/etc/ssl/certs
           cd unikraft && kraft build --target development --jobs 4 --log-type=basic
@@ -153,7 +158,7 @@ jobs:
 
       # TODO: Run using `kraft` once it supports outbound networking configuration
       - run: >
-          qemu-system-x86_64
+          sudo qemu-system-x86_64
           -machine pc,accel=tcg
           -cpu qemu64,-vmx,-svm,+x2apic,+pdpe1gb
           -nographic
@@ -162,8 +167,9 @@ jobs:
           -parallel none
           -serial stdio
           -monitor null
-          -netdev user,id=hostnet0
-          -device virtio-net-pci,netdev=hostnet0,id=net0
+          -netdev tap,id=hnet0,script=unikraft/virbr0-addif.sh,downscript=unikraft/virbr0-delif.sh
+          -device virtio-net-pci,netdev=hnet0
           -kernel unikraft/.unikraft/build/development_qemu-x86_64
           -initrd unikraft/.unikraft/build/initramfs-x86_64.cpio
+          -append "env.vars=[ 'SOURCEMETA_HYDRA_TEST_BASE_URL=${{ env.HOST_VIRBR0_IP }}:${{ env.TEST_PORT }}' ] --"
           -m 128
