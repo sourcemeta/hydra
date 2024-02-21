@@ -128,6 +128,8 @@ jobs:
 
   unikraft:
     runs-on: ubuntu-latest
+    env:
+      TEST_PORT: 9999
     steps:
       - name: Install dependencies (GNU/Linux)
         run: |
@@ -147,7 +149,8 @@ jobs:
           cd unikraft && kraft build --target development --jobs 4 --log-type=basic
 
       - name: Run HTTP stub
-        run: (node test/http/stub.js &) && sleep 10
+        run: (node test/http/stub.js ${{ env.TEST_PORT }} &) && sleep 10
+
       # TODO: Run using `kraft` once it supports outbound networking configuration
       - run: >
           qemu-system-x86_64
