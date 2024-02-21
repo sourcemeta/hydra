@@ -2,7 +2,7 @@ specification: v0.6
 name: sourcemeta_hydra_test
 
 unikraft:
-  version: staging
+  version: stable
 
 rootfs: ../build/unikraft/rootfs
 
@@ -53,11 +53,11 @@ libraries:
   compiler-rt:
     version: stable
   musl:
-    version: staging
+    version: stable
   openssl:
     version: stable
   lwip:
-    version: staging
+    version: stable
     kconfig:
       # Fail if no network interface was provided
       - CONFIG_LWIP_FAILNOIFACE=y
