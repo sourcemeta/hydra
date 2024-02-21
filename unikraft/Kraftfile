@@ -11,28 +11,6 @@ targets:
     platform: qemu
     architecture: x86_64
     kconfig:
-      - CONFIG_LIBCXXABI=y
-      - CONFIG_LIBCXX=y
-      - CONFIG_LIBUNWIND=y
-      - CONFIG_LIBCOMPILER_RT=y
-      - CONFIG_LIBMUSL=y
-      - CONFIG_LIBCURL=y
-      - CONFIG_LIBCURL_SSL=y
-      - CONFIG_LIBCURL_ZLIB=y
-      - CONFIG_LIBCURL_HTTP=y
-      - CONFIG_LIBCURL_VERBOSE_STRINGS=y
-      - CONFIG_LIBOPENSSL=y
-      - CONFIG_LIBSSL=y
-      - CONFIG_LIBZLIB=y
-      - CONFIG_LIBHYDRA=y
-      - CONFIG_LIBGOOGLETEST=y
-      - CONFIG_LIBGOOGLETEST_BUILD_MAIN=y
-      # Networking
-      - CONFIG_LIBLWIP=y
-      - CONFIG_LWIP_UKNETDEV=y
-      - CONFIG_LWIP_DHCP=y
-      - CONFIG_LWIP_DNS=y
-      # File-system
       - CONFIG_LIBVFSCORE=y
       - CONFIG_LIBVFSCORE_AUTOMOUNT_CI1_DEV_ARG="initrd0"
       - CONFIG_LIBVFSCORE_AUTOMOUNT_CI_INITRD=y
@@ -58,16 +36,36 @@ libraries:
     version: stable
   openssl:
     version: stable
+    kconfig:
+      - CONFIG_LIBOPENSSL=y
+      - CONFIG_LIBSSL=y
   lwip:
     version: stable
     kconfig:
+      - CONFIG_LIBLWIP=y
+      - CONFIG_LWIP_UKNETDEV=y
+      - CONFIG_LWIP_DHCP=y
+      - CONFIG_LWIP_DNS=y
       # Fail if no network interface was provided
       - CONFIG_LWIP_FAILNOIFACE=y
   zlib:
     version: stable
+    kconfig:
+      - CONFIG_LIBZLIB=y
   curl:
     version: staging
+    kconfig:
+      - CONFIG_LIBCURL=y
+      - CONFIG_LIBCURL_SSL=y
+      - CONFIG_LIBCURL_ZLIB=y
+      - CONFIG_LIBCURL_HTTP=y
+      - CONFIG_LIBCURL_VERBOSE_STRINGS=y
   googletest:
     version: stable
+    kconfig:
+      - CONFIG_LIBGOOGLETEST=y
+      - CONFIG_LIBGOOGLETEST_BUILD_MAIN=y
   hydra:
     source: ..
+    kconfig:
+      - CONFIG_LIBHYDRA=y
