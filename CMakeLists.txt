@@ -53,7 +53,7 @@ endif()
 
 if(PROJECT_IS_TOP_LEVEL)
   noa_target_clang_format(SOURCES
-    src/*.cc src/*.h test/*.cc)
+    src/*.cc src/*.h test/*.cc test/*.h)
   noa_target_clang_tidy(SOURCES
     src/*.h src/*.cc)
 endif()
