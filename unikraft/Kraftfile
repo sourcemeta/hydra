@@ -3,6 +3,8 @@ name: sourcemeta_hydra_test
 
 unikraft:
   version: stable
+  kconfig:
+    - CONFIG_LIBPOSIX_ENVIRON_LIBPARAM=y
 
 rootfs: ../build/unikraft/rootfs
 
