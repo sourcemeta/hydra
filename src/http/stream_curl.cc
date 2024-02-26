@@ -283,10 +283,6 @@ auto Stream::send() -> std::future<Status> {
       handle_curl(curl_easy_setopt(this->internal->handle,
                                    CURLOPT_CUSTOMREQUEST, "PATCH"));
       break;
-    default:
-      handle_curl(curl_easy_setopt(this->internal->handle,
-                                   CURLOPT_CUSTOMREQUEST, "GET"));
-      break;
   }
 
   handle_curl(curl_easy_setopt(this->internal->handle, CURLOPT_URL,
