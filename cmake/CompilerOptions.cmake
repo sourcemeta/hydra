@@ -3,6 +3,7 @@ function(sourcemeta_hydra_add_compile_options target)
     # See https://learn.microsoft.com/en-us/cpp/build/reference/compiler-options-listed-by-category
     target_compile_options("${target}" PRIVATE
       /options:strict
+      /permissive-
       /W4
       /WL
       /sdl)
