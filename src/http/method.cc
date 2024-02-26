@@ -34,12 +34,11 @@ auto operator<<(std::ostream &stream, const Method method) -> std::ostream & {
     case Method::PATCH:
       stream << "PATCH";
       return stream;
-
-    // Should never happen
-    default:
-      assert(false);
-      return stream;
   }
+
+  // Should never happen
+  assert(false);
+  return stream;
 }
 
 auto to_method(std::string_view method) -> Method {
