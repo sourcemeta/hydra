@@ -32,7 +32,7 @@ compile: .always
 lint: .always
 	$(CMAKE) --build ./build --config $(PRESET) --target clang_tidy
 
-test: test/http/stub.js .always
+test: test/httpclient/stub.js .always
 	$(KILLALL) $(NODE) || true
 	$(NODE) $< $(TEST_PORT) &
 	$(SLEEP) 1

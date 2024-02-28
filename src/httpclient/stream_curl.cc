@@ -1,7 +1,4 @@
-#include <sourcemeta/hydra/http_error.h>
-#include <sourcemeta/hydra/http_method.h>
-#include <sourcemeta/hydra/http_status.h>
-#include <sourcemeta/hydra/http_stream.h>
+#include <sourcemeta/hydra/httpclient_stream.h>
 
 #include <curl/curl.h>
 
@@ -23,7 +20,7 @@
 
 // The internal implementation of the cURL backend
 namespace sourcemeta::hydra::http {
-struct Stream::Internal {
+struct ClientStream::Internal {
   CURL *handle{nullptr};
   struct curl_slist *headers{nullptr};
   std::string url;
@@ -34,7 +31,7 @@ struct Stream::Internal {
   static std::uint64_t count;
 };
 
-std::uint64_t Stream::Internal::count = 0;
+std::uint64_t ClientStream::Internal::count = 0;
 } // namespace sourcemeta::hydra::http
 
 namespace {
@@ -46,7 +43,7 @@ inline auto handle_curl(CURLcode code) -> void {
 
 auto callback_on_body(
     const void *const data, const std::size_t size, const std::size_t count,
-    const sourcemeta::hydra::http::Stream *const request) noexcept
+    const sourcemeta::hydra::http::ClientStream *const request) noexcept
     -> std::size_t {
   const std::size_t total_size{size * count};
   if (request->internal->on_data) {
@@ -63,9 +60,9 @@ auto callback_on_body(
   return total_size;
 }
 
-auto callback_on_header(const void *const data, const std::size_t size,
-                        const std::size_t count,
-                        sourcemeta::hydra::http::Stream *const request) noexcept
+auto callback_on_header(
+    const void *const data, const std::size_t size, const std::size_t count,
+    sourcemeta::hydra::http::ClientStream *const request) noexcept
     -> std::size_t {
   const std::size_t total_size{size * count};
   const std::string_view line{static_cast<const char *>(data), total_size};
@@ -134,8 +131,8 @@ auto callback_on_header(const void *const data, const std::size_t size,
 
 namespace sourcemeta::hydra::http {
 
-Stream::Stream(std::string url)
-    : internal{std::make_unique<Stream::Internal>()} {
+ClientStream::ClientStream(std::string url)
+    : internal{std::make_unique<ClientStream::Internal>()} {
   // Globally initialize cURL
   if (this->internal->count == 0) {
     handle_curl(curl_global_init(CURL_GLOBAL_DEFAULT));
@@ -151,8 +148,8 @@ Stream::Stream(std::string url)
   this->internal->url = std::move(url);
 }
 
-Stream::Stream(Stream &&other) noexcept
-    : internal{std::make_unique<Stream::Internal>()} {
+ClientStream::ClientStream(ClientStream &&other) noexcept
+    : internal{std::make_unique<ClientStream::Internal>()} {
   this->internal->handle = other.internal->handle;
   this->internal->headers = other.internal->headers;
   this->internal->url = std::move(other.internal->url);
@@ -167,7 +164,7 @@ Stream::Stream(Stream &&other) noexcept
   this->internal->count -= 1;
 }
 
-auto Stream::operator=(Stream &&other) noexcept -> Stream & {
+auto ClientStream::operator=(ClientStream &&other) noexcept -> ClientStream & {
   if (this == &other) {
     return *this;
   }
@@ -187,7 +184,7 @@ auto Stream::operator=(Stream &&other) noexcept -> Stream & {
   return *this;
 }
 
-Stream::~Stream() {
+ClientStream::~ClientStream() {
   curl_slist_free_all(this->internal->headers);
   curl_easy_cleanup(this->internal->handle);
   this->internal->count -= 1;
@@ -196,19 +193,20 @@ Stream::~Stream() {
   }
 }
 
-auto Stream::method(const Method method) noexcept -> void {
+auto ClientStream::method(const Method method) noexcept -> void {
   this->internal->method = method;
 }
 
-auto Stream::on_data(DataCallback callback) noexcept -> void {
+auto ClientStream::on_data(DataCallback callback) noexcept -> void {
   this->internal->on_data = std::move(callback);
 }
 
-auto Stream::on_header(HeaderCallback callback) noexcept -> void {
+auto ClientStream::on_header(HeaderCallback callback) noexcept -> void {
   this->internal->on_header = std::move(callback);
 }
 
-auto Stream::header(std::string_view key, std::string_view value) -> void {
+auto ClientStream::header(std::string_view key, std::string_view value)
+    -> void {
   std::stringstream stream;
   stream << key << ": " << value;
   const std::string result{stream.str()};
@@ -216,13 +214,13 @@ auto Stream::header(std::string_view key, std::string_view value) -> void {
       curl_slist_append(this->internal->headers, result.c_str());
 }
 
-auto Stream::header(std::string_view key, int value) -> void {
+auto ClientStream::header(std::string_view key, int value) -> void {
   this->header(key, std::to_string(value));
 }
 
-auto Stream::aws_sigv4(std::string_view service, std::string_view region,
-                       std::string_view access_key, std::string_view secret_key)
-    -> void {
+auto ClientStream::aws_sigv4(std::string_view service, std::string_view region,
+                             std::string_view access_key,
+                             std::string_view secret_key) -> void {
   std::ostringstream parameter;
   parameter << "aws:amz:" << region << ':' << service;
   // See https://curl.se/libcurl/c/CURLOPT_AWS_SIGV4.html
@@ -235,7 +233,7 @@ auto Stream::aws_sigv4(std::string_view service, std::string_view region,
                                authentication.str().c_str()));
 }
 
-auto Stream::send() -> std::future<Status> {
+auto ClientStream::send() -> std::future<Status> {
   switch (this->internal->method) {
     case Method::GET:
       handle_curl(curl_easy_setopt(this->internal->handle,

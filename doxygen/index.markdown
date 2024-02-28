@@ -26,6 +26,7 @@ add_subdirectory("${PROJECT_SOURCE_DIR}/deps/hydra")
 
 # Link your targets accordingly
 target_link_libraries(my_executable_or_library PUBLIC sourcemeta::hydra::http)
+target_link_libraries(my_executable_or_library PUBLIC sourcemeta::hydra::httpclient)
 ```
 
 ### Using FetchContent
@@ -44,6 +45,7 @@ FetchContent_MakeAvailable(hydra)
 
 add_executable(my_example ...)
 target_link_libraries(my_example PUBLIC sourcemeta::hydra::http)
+target_link_libraries(my_example PUBLIC sourcemeta::hydra::httpclient)
 ```
 
 ### Using find_package
@@ -54,8 +56,12 @@ package config file:
 ```sh
 find_package(Hydra REQUIRED)
 
+# This package also supports component-based inclusion
+find_package(Hydra REQUIRED COMPONENTS http httpclient)
+
 # Link your targets accordingly
 target_link_libraries(my_executable_or_library PUBLIC sourcemeta::hydra::http)
+target_link_libraries(my_executable_or_library PUBLIC sourcemeta::hydra::httpclient)
 ```
 
 ### Using Unikraft
@@ -90,6 +96,7 @@ CMake
 | Option                      | Type    | Default | Description                             |
 |-----------------------------|---------|---------|-----------------------------------------|
 | `HYDRA_HTTP`                | Boolean | `ON`    | Build the Hydra HTTP library            |
+| `HYDRA_HTTPCLIENT`          | Boolean | `ON`    | Build the Hydra HTTP client library     |
 | `HYDRA_TESTS`               | Boolean | `OFF`   | Build the Hydra tests                   |
 | `HYDRA_DOCS`                | Boolean | `OFF`   | Build the Hydra docs                    |
 | `HYDRA_INSTALL`             | Boolean | `ON`    | Install the Hydra library               |

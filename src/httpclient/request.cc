@@ -1,7 +1,7 @@
-#include <sourcemeta/hydra/http_method.h>
-#include <sourcemeta/hydra/http_request.h>
-#include <sourcemeta/hydra/http_response.h>
-#include <sourcemeta/hydra/http_status.h>
+#include <sourcemeta/hydra/http.h>
+
+#include <sourcemeta/hydra/httpclient_request.h>
+#include <sourcemeta/hydra/httpclient_response.h>
 
 #include <algorithm>        // std::copy
 #include <cstdint>          // std::uint8_t
@@ -17,39 +17,41 @@
 
 namespace sourcemeta::hydra::http {
 
-Request::Request(std::string url) : stream{std::move(url)} {}
+ClientRequest::ClientRequest(std::string url) : stream{std::move(url)} {}
 
-auto Request::method(const Method method) noexcept -> void {
+auto ClientRequest::method(const Method method) noexcept -> void {
   this->stream.method(method);
 }
 
-auto Request::capture(std::string header) -> void {
+auto ClientRequest::capture(std::string header) -> void {
   this->capture_all_ = false;
   this->capture_.insert(std::move(header));
 }
 
-auto Request::capture(std::initializer_list<std::string> headers) -> void {
+auto ClientRequest::capture(std::initializer_list<std::string> headers)
+    -> void {
   this->capture_all_ = false;
   this->capture_.insert(headers);
 }
 
-auto Request::capture() -> void { this->capture_all_ = true; }
+auto ClientRequest::capture() -> void { this->capture_all_ = true; }
 
-auto Request::header(std::string_view key, std::string_view value) -> void {
+auto ClientRequest::header(std::string_view key, std::string_view value)
+    -> void {
   this->stream.header(key, value);
 }
 
-auto Request::header(std::string_view key, int value) -> void {
+auto ClientRequest::header(std::string_view key, int value) -> void {
   this->stream.header(key, value);
 }
 
-auto Request::aws_sigv4(std::string_view service, std::string_view region,
-                        std::string_view access_key,
-                        std::string_view secret_key) -> void {
+auto ClientRequest::aws_sigv4(std::string_view service, std::string_view region,
+                              std::string_view access_key,
+                              std::string_view secret_key) -> void {
   this->stream.aws_sigv4(service, region, access_key, secret_key);
 }
 
-auto Request::send() -> std::future<Response> {
+auto ClientRequest::send() -> std::future<ClientResponse> {
   std::ostringstream output;
   this->stream.on_data(
       [&output](const Status, std::span<const std::uint8_t> buffer) noexcept {
@@ -66,7 +68,7 @@ auto Request::send() -> std::future<Response> {
     }
   });
 
-  std::promise<Response> response;
+  std::promise<ClientResponse> response;
   response.set_value(
       {this->stream.send().get(), std::move(headers), std::move(output)});
   return response.get_future();

@@ -1,6 +1,6 @@
-#include <sourcemeta/hydra/http_response.h>
-#include <sourcemeta/hydra/http_status.h>
-#include <sourcemeta/hydra/http_time.h>
+#include <sourcemeta/hydra/http.h>
+
+#include <sourcemeta/hydra/httpclient_response.h>
 
 #include <cassert>  // assert
 #include <map>      // std::map
@@ -11,15 +11,15 @@
 
 namespace sourcemeta::hydra::http {
 
-Response::Response(const Status status,
-                   std::map<std::string, std::string> &&headers,
-                   std::ostringstream &&stream)
+ClientResponse::ClientResponse(const Status status,
+                               std::map<std::string, std::string> &&headers,
+                               std::ostringstream &&stream)
     : status_{status}, headers_{std::move(headers)},
       stream_{std::move(stream).str()} {}
 
-auto Response::status() const noexcept -> Status { return this->status_; }
+auto ClientResponse::status() const noexcept -> Status { return this->status_; }
 
-auto Response::header(const std::string &key) const
+auto ClientResponse::header(const std::string &key) const
     -> std::optional<std::string> {
   if (!this->headers_.contains(key)) {
     return std::nullopt;
@@ -28,7 +28,7 @@ auto Response::header(const std::string &key) const
   return this->headers_.at(key);
 }
 
-auto Response::header_gmt(const std::string &key) const
+auto ClientResponse::header_gmt(const std::string &key) const
     -> std::optional<std::chrono::system_clock::time_point> {
   const auto header_string{this->header(key)};
   if (!header_string.has_value()) {
@@ -38,13 +38,16 @@ auto Response::header_gmt(const std::string &key) const
   return from_gmt(header_string.value());
 }
 
-auto Response::headers() const -> const std::map<std::string, std::string> & {
+auto ClientResponse::headers() const
+    -> const std::map<std::string, std::string> & {
   return this->headers_;
 }
 
-auto Response::empty() noexcept -> bool { return this->stream_.peek() == -1; }
+auto ClientResponse::empty() noexcept -> bool {
+  return this->stream_.peek() == -1;
+}
 
-auto Response::body() -> std::istringstream & {
+auto ClientResponse::body() -> std::istringstream & {
   assert(!this->empty());
   return this->stream_;
 }

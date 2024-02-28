@@ -1,13 +1,13 @@
-#ifndef SOURCEMETA_HYDRA_HTTP_RESPONSE_H
-#define SOURCEMETA_HYDRA_HTTP_RESPONSE_H
+#ifndef SOURCEMETA_HYDRA_HTTPCLIENT_RESPONSE_H
+#define SOURCEMETA_HYDRA_HTTPCLIENT_RESPONSE_H
 
 #if defined(__Unikraft__)
-#define SOURCEMETA_HYDRA_HTTP_EXPORT
+#define SOURCEMETA_HYDRA_HTTPCLIENT_EXPORT
 #else
-#include "http_export.h"
+#include "httpclient_export.h"
 #endif
 
-#include <sourcemeta/hydra/http_status.h>
+#include <sourcemeta/hydra/http.h>
 
 #include <chrono>   // std::chrono::system_clock::time_point
 #include <map>      // std::map
@@ -17,25 +17,26 @@
 
 namespace sourcemeta::hydra::http {
 
-/// @ingroup http
+/// @ingroup httpclient
 /// This class represents a non-streaming HTTP response.
-class SOURCEMETA_HYDRA_HTTP_EXPORT Response {
+class SOURCEMETA_HYDRA_HTTPCLIENT_EXPORT ClientResponse {
 public:
   // We don't want to document this internal constructor
 #if !defined(DOXYGEN)
-  Response(const Status status, std::map<std::string, std::string> &&headers,
-           std::ostringstream &&stream);
+  ClientResponse(const Status status,
+                 std::map<std::string, std::string> &&headers,
+                 std::ostringstream &&stream);
 #endif
 
   /// Get the status code of the response. For example:
   ///
   /// ```cpp
-  /// #include <sourcemeta/hydra/http.h>
+  /// #include <sourcemeta/hydra/httpclient.h>
   /// #include <cassert>
   ///
-  /// sourcemeta::hydra::http::Request request{"https://www.example.com"};
+  /// sourcemeta::hydra::http::ClientRequest request{"https://www.example.com"};
   /// request.method(sourcemeta::hydra::http::Method::GET);
-  /// sourcemeta::hydra::http::Response response{request.send().get()};
+  /// sourcemeta::hydra::http::ClientResponse response{request.send().get()};
   /// assert(response.status() == sourcemeta::hydra::http::Status::OK);
   /// ```
   auto status() const noexcept -> Status;
@@ -43,19 +44,19 @@ public:
   /// Get the value of a given response header, if any. Remember that you
   /// must express your desire of capturing the response headers you are
   /// interest in when performing the request, using
-  /// sourcemeta::hydra::http::Request::capture.
+  /// sourcemeta::hydra::http::ClientRequest::capture.
   ///
   /// ```cpp
-  /// #include <sourcemeta/hydra/http.h>
+  /// #include <sourcemeta/hydra/httpclient.h>
   /// #include <cassert>
   ///
-  /// sourcemeta::hydra::http::Request request{"https://www.example.com"};
+  /// sourcemeta::hydra::http::ClientRequest request{"https://www.example.com"};
   /// request.method(sourcemeta::hydra::http::Method::GET);
   ///
   /// // Remember to capture the headers you are interested in!
   /// request.capture("content-type");
   ///
-  /// sourcemeta::hydra::http::Response response{request.send().get()};
+  /// sourcemeta::hydra::http::ClientResponse response{request.send().get()};
   /// assert(response.header("content-type").has_value());
   /// assert(response.header("content-type").value()
   ///   == "text/html; charset=UTF-8");
@@ -65,16 +66,16 @@ public:
   /// Get the value of a given response header, if any, assuming it is a GMT
   /// timestamp. Remember that you must express your desire of capturing the
   /// response headers you are interest in when performing the request, using
-  /// sourcemeta::hydra::http::Request::capture.
+  /// sourcemeta::hydra::http::ClientRequest::capture.
   ///
   /// ```cpp
-  /// #include <sourcemeta/hydra/http.h>
+  /// #include <sourcemeta/hydra/httpclient.h>
   /// #include <cassert>
   ///
-  /// sourcemeta::hydra::http::Request request{"https://www.example.com"};
+  /// sourcemeta::hydra::http::ClientRequest request{"https://www.example.com"};
   /// request.method(sourcemeta::hydra::http::Method::GET);
   /// request.capture("last-modified");
-  /// sourcemeta::hydra::http::Response response{request.send().get()};
+  /// sourcemeta::hydra::http::ClientResponse response{request.send().get()};
   /// const auto time_poimt{response.header_gmt("content-type")};
   /// assert(time_point.has_value());
   /// ```
@@ -84,16 +85,16 @@ public:
   /// Get a container for all the captured response headers. For example:
   ///
   /// ```cpp
-  /// #include <sourcemeta/hydra/http.h>
+  /// #include <sourcemeta/hydra/httpclient.h>
   /// #include <iostream>
   ///
-  /// sourcemeta::hydra::http::Request request{"https://www.example.com"};
+  /// sourcemeta::hydra::http::ClientRequest request{"https://www.example.com"};
   /// request.method(sourcemeta::hydra::http::Method::GET);
   ///
   /// // Capture all headers
   /// request.capture();
   ///
-  /// sourcemeta::hydra::http::Response response{request.send().get()};
+  /// sourcemeta::hydra::http::ClientResponse response{request.send().get()};
   /// for (const auto &[ key, value ]) {
   ///   std::cout << key << " -> " << value << "\n";
   /// }
@@ -103,34 +104,34 @@ public:
   /// Check whether a response has a body to consume or not. A request made
   /// with the `HEAD` HTTP method is almost always empty. Remember to always
   /// check if a response is empty before calling
-  /// sourcemeta::hydra::http::Response::body.
+  /// sourcemeta::hydra::http::ClientResponse::body.
   ///
   /// For example:
   ///
   /// ```cpp
-  /// #include <sourcemeta/hydra/http.h>
+  /// #include <sourcemeta/hydra/httpclient.h>
   /// #include <cassert>
   ///
-  /// sourcemeta::hydra::http::Request request{"https://www.example.com"};
+  /// sourcemeta::hydra::http::ClientRequest request{"https://www.example.com"};
   /// request.method(sourcemeta::hydra::http::Method::HEAD);
-  /// sourcemeta::hydra::http::Response response{request.send().get()};
+  /// sourcemeta::hydra::http::ClientResponse response{request.send().get()};
   /// assert(response.empty());
   /// ```
   auto empty() noexcept -> bool;
 
   /// Obtain the response body as an input stream. Getting the response body of
   /// an empty response is undefined behavior. Remember to check for this case
-  /// using sourcemeta::hydra::http::Response::empty. For example:
+  /// using sourcemeta::hydra::http::ClientResponse::empty. For example:
   ///
   /// ```cpp
-  /// #include <sourcemeta/hydra/http.h>
+  /// #include <sourcemeta/hydra/httpclient.h>
   /// #include <cassert>
   /// #include <iostream>
   /// #include <iterator>
   ///
-  /// sourcemeta::hydra::http::Request request{"https://www.example.com"};
+  /// sourcemeta::hydra::http::ClientRequest request{"https://www.example.com"};
   /// request.method(sourcemeta::hydra::http::Method::GET);
-  /// sourcemeta::hydra::http::Response response{request.send().get()};
+  /// sourcemeta::hydra::http::ClientResponse response{request.send().get()};
   /// assert(response.status() == sourcemeta::hydra::http::Status::OK);
   ///
   /// if (!response.empty()) {

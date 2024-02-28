@@ -1,15 +1,16 @@
-#ifndef SOURCEMETA_HYDRA_HTTP_REQUEST_H
-#define SOURCEMETA_HYDRA_HTTP_REQUEST_H
+#ifndef SOURCEMETA_HYDRA_HTTPCLIENT_REQUEST_H
+#define SOURCEMETA_HYDRA_HTTPCLIENT_REQUEST_H
 
 #if defined(__Unikraft__)
-#define SOURCEMETA_HYDRA_HTTP_EXPORT
+#define SOURCEMETA_HYDRA_HTTPCLIENT_EXPORT
 #else
-#include "http_export.h"
+#include "httpclient_export.h"
 #endif
 
-#include <sourcemeta/hydra/http_method.h>
-#include <sourcemeta/hydra/http_response.h>
-#include <sourcemeta/hydra/http_stream.h>
+#include <sourcemeta/hydra/http.h>
+
+#include <sourcemeta/hydra/httpclient_response.h>
+#include <sourcemeta/hydra/httpclient_stream.h>
 
 #include <future>           // std::future
 #include <initializer_list> // std::initializer_list
@@ -20,36 +21,36 @@
 namespace sourcemeta::hydra::http {
 
 // TODO: Support passing a request body
-/// @ingroup http
+/// @ingroup httpclient
 /// This class is used to perform a non-streaming HTTP request.
-class SOURCEMETA_HYDRA_HTTP_EXPORT Request {
+class SOURCEMETA_HYDRA_HTTPCLIENT_EXPORT ClientRequest {
 public:
   /// Construct an HTTP request to a given URL. For example:
   ///
   /// ```cpp
-  /// #include <sourcemeta/hydra/http.h>
+  /// #include <sourcemeta/hydra/httpclient.h>
   /// #include <cassert>
   ///
-  /// sourcemeta::hydra::http::Request request{"https://www.example.com"};
+  /// sourcemeta::hydra::http::ClientRequest request{"https://www.example.com"};
   /// request.method(sourcemeta::hydra::http::Method::GET);
-  /// sourcemeta::hydra::http::Response response{request.send().get()};
+  /// sourcemeta::hydra::http::ClientResponse response{request.send().get()};
   /// assert(response.status() == sourcemeta::hydra::http::Status::OK);
   /// ```
-  Request(std::string url);
+  ClientRequest(std::string url);
 
   /// Specify the HTTP method to use for the request. If not set, it defauls to
   /// `GET`. For example:
   ///
   /// ```cpp
-  /// #include <sourcemeta/hydra/http.h>
+  /// #include <sourcemeta/hydra/httpclient.h>
   /// #include <cassert>
   ///
-  /// sourcemeta::hydra::http::Request request{"https://www.example.com"};
+  /// sourcemeta::hydra::http::ClientRequest request{"https://www.example.com"};
   ///
   /// // Send a POST request
   /// request.method(sourcemeta::hydra::http::Method::POST);
   ///
-  /// sourcemeta::hydra::http::Response response{request.send().get()};
+  /// sourcemeta::hydra::http::ClientResponse response{request.send().get()};
   /// assert(response.status() == sourcemeta::hydra::http::Status::OK);
   /// ```
   auto method(const Method method) noexcept -> void;
@@ -58,13 +59,13 @@ public:
   /// server.
   ///
   /// ```cpp
-  /// #include <sourcemeta/hydra/http.h>
+  /// #include <sourcemeta/hydra/httpclient.h>
   /// #include <cassert>
   ///
-  /// sourcemeta::hydra::http::Request request{"https://www.example.com"};
+  /// sourcemeta::hydra::http::ClientRequest request{"https://www.example.com"};
   /// request.method(sourcemeta::hydra::http::Method::GET);
   /// request.capture("content-type");
-  /// sourcemeta::hydra::http::Response response{request.send().get()};
+  /// sourcemeta::hydra::http::ClientResponse response{request.send().get()};
   /// assert(response.header("content-type").has_value());
   /// assert(response.header("content-type").value()
   ///   == "text/html; charset=UTF-8");
@@ -75,13 +76,13 @@ public:
   /// server.
   ///
   /// ```cpp
-  /// #include <sourcemeta/hydra/http.h>
+  /// #include <sourcemeta/hydra/httpclient.h>
   /// #include <cassert>
   ///
-  /// sourcemeta::hydra::http::Request request{"https://www.example.com"};
+  /// sourcemeta::hydra::http::ClientRequest request{"https://www.example.com"};
   /// request.method(sourcemeta::hydra::http::Method::GET);
   /// request.capture({ "content-type", "content-encoding", "x-foo" });
-  /// sourcemeta::hydra::http::Response response{request.send().get()};
+  /// sourcemeta::hydra::http::ClientResponse response{request.send().get()};
   /// assert(response.header("content-type").has_value());
   /// assert(response.header("content-encoding").has_value());
   /// assert(!response.header("x-foo").has_value());
@@ -91,13 +92,13 @@ public:
   /// Express a desire of capturing every response headers. For example:
   ///
   /// ```cpp
-  /// #include <sourcemeta/hydra/http.h>
+  /// #include <sourcemeta/hydra/httpclient.h>
   /// #include <cassert>
   ///
-  /// sourcemeta::hydra::http::Request request{"https://www.example.com"};
+  /// sourcemeta::hydra::http::ClientRequest request{"https://www.example.com"};
   /// request.method(sourcemeta::hydra::http::Method::GET);
   /// request.capture();
-  /// sourcemeta::hydra::http::Response response{request.send().get()};
+  /// sourcemeta::hydra::http::ClientResponse response{request.send().get()};
   /// assert(response.header("content-type").has_value());
   /// assert(response.header("content-encoding").has_value());
   /// ```
@@ -106,12 +107,12 @@ public:
   /// Set an HTTP request header. For example:
   ///
   /// ```cpp
-  /// #include <sourcemeta/hydra/http.h>
+  /// #include <sourcemeta/hydra/httpclient.h>
   /// #include <cassert>
   ///
-  /// sourcemeta::hydra::http::Request request{"https://www.example.com"};
+  /// sourcemeta::hydra::http::ClientRequest request{"https://www.example.com"};
   /// request.header("X-Send-With", "Hydra");
-  /// sourcemeta::hydra::http::Response response{request.send().get()};
+  /// sourcemeta::hydra::http::ClientResponse response{request.send().get()};
   /// assert(response.status() == sourcemeta::hydra::http::Status::OK);
   /// ```
   auto header(std::string_view key, std::string_view value) -> void;
@@ -119,12 +120,12 @@ public:
   /// Set an HTTP request header whose value is an integer. For example:
   ///
   /// ```cpp
-  /// #include <sourcemeta/hydra/http.h>
+  /// #include <sourcemeta/hydra/httpclient.h>
   /// #include <cassert>
   ///
-  /// sourcemeta::hydra::http::Request request{"https://www.example.com"};
+  /// sourcemeta::hydra::http::ClientRequest request{"https://www.example.com"};
   /// request.header("X-Favourite-Number", 3);
-  /// sourcemeta::hydra::http::Response response{request.send().get()};
+  /// sourcemeta::hydra::http::ClientResponse response{request.send().get()};
   /// assert(response.status() == sourcemeta::hydra::http::Status::OK);
   /// ```
   auto header(std::string_view key, int value) -> void;
@@ -133,12 +134,12 @@ public:
   /// request to an S3-compatible API:
   ///
   /// ```cpp
-  /// #include <sourcemeta/hydra/http.h>
+  /// #include <sourcemeta/hydra/httpclient.h>
   /// #include <cassert>
   ///
-  /// sourcemeta::hydra::http::Request request{"https://www.example.com"};
+  /// sourcemeta::hydra::http::ClientRequest request{"https://www.example.com"};
   /// request.aws_sigv4("s3", "us-east-1", "1234567", "my-secret");
-  /// sourcemeta::hydra::http::Response response{request.send().get()};
+  /// sourcemeta::hydra::http::ClientResponse response{request.send().get()};
   /// assert(response.status() == sourcemeta::hydra::http::Status::OK);
   /// ```
   ///
@@ -151,18 +152,18 @@ public:
   /// Perform the HTTP request. For example:
   ///
   /// ```cpp
-  /// #include <sourcemeta/hydra/http.h>
+  /// #include <sourcemeta/hydra/httpclient.h>
   /// #include <cassert>
   ///
-  /// sourcemeta::hydra::http::Request request{"https://www.example.com"};
+  /// sourcemeta::hydra::http::ClientRequest request{"https://www.example.com"};
   /// request.method(sourcemeta::hydra::http::Method::GET);
-  /// sourcemeta::hydra::http::Response response{request.send().get()};
+  /// sourcemeta::hydra::http::ClientResponse response{request.send().get()};
   /// assert(response.status() == sourcemeta::hydra::http::Status::OK);
   /// ```
-  auto send() -> std::future<Response>;
+  auto send() -> std::future<ClientResponse>;
 
 private:
-  Stream stream;
+  ClientStream stream;
 // Exporting symbols that depends on the standard C++ library is considered
 // safe.
 // https://learn.microsoft.com/en-us/cpp/error-messages/compiler-warnings/compiler-warning-level-2-c4275?view=msvc-170&redirectedfrom=MSDN

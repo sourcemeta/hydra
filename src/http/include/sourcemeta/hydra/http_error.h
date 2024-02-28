@@ -9,7 +9,6 @@
 
 #include <exception> // std::exception
 #include <string>    // std::string
-#include <utility>   // std::move
 
 namespace sourcemeta::hydra::http {
 
@@ -26,13 +25,11 @@ class SOURCEMETA_HYDRA_HTTP_EXPORT Error : public std::exception {
 public:
   // We don't want to document this internal constructor
 #if !defined(DOXYGEN)
-  Error(std::string message) : message_{std::move(message)} {}
+  Error(std::string message);
 #endif
 
   /// Get the error message
-  [[nodiscard]] auto what() const noexcept -> const char * override {
-    return this->message_.c_str();
-  }
+  [[nodiscard]] auto what() const noexcept -> const char * override;
 
 private:
   std::string message_;
