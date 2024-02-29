@@ -1,3 +1,4 @@
 {
-  "dependencies": [ "curl" ]
+  "dependencies": [ "curl" ],
+  "builtin-baseline": "3f966cf6a8654a0bc067738bcb95d489e197ad68"
 }
