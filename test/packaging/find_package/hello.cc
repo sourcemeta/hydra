@@ -1,4 +1,5 @@
 #include <sourcemeta/hydra/http.h>
+#include <sourcemeta/hydra/httpclient.h>
 
 #include <cstdlib>  // EXIT_SUCCESS
 #include <iostream> // std::cout

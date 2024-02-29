@@ -1,5 +1,5 @@
-#ifndef SOURCEMETA_HYDRA_TEST_HTTP_BASE_URL_H_
-#define SOURCEMETA_HYDRA_TEST_HTTP_BASE_URL_H_
+#ifndef SOURCEMETA_HYDRA_TEST_HTTPCLIENT_BASE_URL_H_
+#define SOURCEMETA_HYDRA_TEST_HTTPCLIENT_BASE_URL_H_
 
 #include <cstdlib>  // std::exit, std::getenv
 #include <iostream> // std::cerr

@@ -6,5 +6,7 @@ TEST_BASE := $(SOURCEMETA_HYDRA_TEST_BASE)/../test
 # HTTP
 SOURCEMETA_HYDRA_TEST_SRCS-y += $(TEST_BASE)/http/method_test.cc
 SOURCEMETA_HYDRA_TEST_SRCS-y += $(TEST_BASE)/http/time_test.cc
-SOURCEMETA_HYDRA_TEST_SRCS-y += $(TEST_BASE)/http/request_1_1_test.cc
-SOURCEMETA_HYDRA_TEST_SRCS-y += $(TEST_BASE)/http/stream_1_1_test.cc
+
+# HTTP Client
+SOURCEMETA_HYDRA_TEST_SRCS-y += $(TEST_BASE)/httpclient/request_1_1_test.cc
+SOURCEMETA_HYDRA_TEST_SRCS-y += $(TEST_BASE)/httpclient/stream_1_1_test.cc
