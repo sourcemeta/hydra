@@ -159,6 +159,7 @@ public:
   /// ```
   auto header(std::string_view key, int value) -> void;
 
+  // TODO: Move to the bucket module instead
   /// Sign the request using Amazon's Signature v4. For example, to send a
   /// request to an S3-compatible API:
   ///

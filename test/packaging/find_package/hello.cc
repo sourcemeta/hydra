@@ -1,3 +1,4 @@
+#include <sourcemeta/hydra/bucket.h>
 #include <sourcemeta/hydra/http.h>
 #include <sourcemeta/hydra/httpclient.h>
 

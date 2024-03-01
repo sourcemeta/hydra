@@ -16,3 +16,8 @@ CXXINCLUDES-$(CONFIG_LIBHYDRA) += -I$(LIBHYDRA_SRC)/httpclient/include
 LIBHYDRA_SRCS-y += $(LIBHYDRA_SRC)/httpclient/request.cc
 LIBHYDRA_SRCS-y += $(LIBHYDRA_SRC)/httpclient/response.cc
 LIBHYDRA_SRCS-y += $(LIBHYDRA_SRC)/httpclient/stream_curl.cc
+
+# Bucket
+CXXINCLUDES-$(CONFIG_LIBHYDRA) += -I$(LIBHYDRA_SRC)/bucket/include
+LIBHYDRA_SRCS-y += $(LIBHYDRA_SRC)/bucket/bucket.cc
+LIBHYDRA_SRCS-y += $(LIBHYDRA_SRC)/bucket/bucket_error.cc

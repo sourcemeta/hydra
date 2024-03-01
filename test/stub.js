@@ -7,7 +7,52 @@ if (!PORT || isNaN(PORT)) {
   process.exit(1);
 }
 
+let increment = 0;
+
 http.createServer((request, response) => {
+  if (request.url === '/bucket/1.json') {
+    if (!request.headers.authorization ||
+      !request.headers.host ||
+      !request.headers['x-amz-date']) {
+      response.statusCode = 401;
+      return response.end();
+    }
+
+    if (request.headers['if-none-match'] === '"1111111111"') {
+      response.statusCode = 304;
+      return response.end();
+    }
+
+    response.statusCode = 200;
+    response.setHeader('Content-Type', 'application/json');
+    response.setHeader('Last-Modified', 'Wed, 21 Oct 2015 11:28:00 GMT');
+    response.setHeader('ETag', '"1111111111"');
+    return response.end(JSON.stringify({ foo: 1 }));
+  }
+
+  if (request.url === '/bucket/incremental.json') {
+    if (!request.headers.authorization ||
+      !request.headers.host ||
+      !request.headers['x-amz-date']) {
+      response.statusCode = 401;
+      return response.end();
+    }
+
+    const etag = `"${String(increment).repeat(10)}"`;
+    if (request.headers['if-none-match'] === etag) {
+      response.statusCode = 304;
+      return response.end();
+    }
+
+    response.statusCode = 200;
+    response.setHeader('Content-Type', 'application/json');
+    response.setHeader('Last-Modified', 'Wed, 21 Oct 2015 11:28:00 GMT');
+    response.setHeader('ETag', etag);
+    response.end(JSON.stringify({ value: increment }));
+    increment += 1;
+    return;
+  }
+
   for (const [key, value] of Object.entries(request.headers)) {
     response.setHeader(`X-${key}`, value);
   }
