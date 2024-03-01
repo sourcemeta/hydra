@@ -111,10 +111,10 @@ jobs:
 
       # Run stubs
       - name: Run HTTP client stub (Windows)
-        run: cmd /c "start /b node test\httpclient\stub.js ${{ env.TEST_PORT }}" && Start-Sleep -Seconds 10
+        run: cmd /c "start /b node test\stub.js ${{ env.TEST_PORT }}" && Start-Sleep -Seconds 10
         if: runner.os == 'windows'
       - name: Run HTTP client stub (*nix)
-        run: (node test/httpclient/stub.js ${{ env.TEST_PORT }} &) && sleep 10
+        run: (node test/stub.js ${{ env.TEST_PORT }} &) && sleep 10
         if: runner.os != 'windows'
 
       # Not every CTest version supports the --test-dir option. If such option
@@ -150,7 +150,7 @@ jobs:
           cd unikraft && kraft build --target development --jobs 4 --log-type=basic
 
       - name: Run HTTP client stub
-        run: (node test/httpclient/stub.js ${{ env.TEST_PORT }} &) && sleep 10
+        run: (node test/stub.js ${{ env.TEST_PORT }} &) && sleep 10
 
       - name: Store IP address
         id: ip-address
