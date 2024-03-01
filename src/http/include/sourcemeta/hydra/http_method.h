@@ -35,7 +35,7 @@ enum class Method {
 /// #include <sstream>
 ///
 /// std::ostringstream output;
-/// output << sourcemeta::hydra::Method::GET;
+/// output << sourcemeta::hydra::http::Method::GET;
 /// assert(output.str() == "GET");
 /// ```
 auto SOURCEMETA_HYDRA_HTTP_EXPORT operator<<(std::ostream &stream,
@@ -52,7 +52,7 @@ auto SOURCEMETA_HYDRA_HTTP_EXPORT operator<<(std::ostream &stream,
 ///
 /// const sourcemeta::hydra::http::Method method =
 ///   sourcemeta::hydra::http::to_method("GET");
-/// assert(method == sourcemeta::hydra::Method::GET);
+/// assert(method == sourcemeta::hydra::http::Method::GET);
 /// ```
 auto SOURCEMETA_HYDRA_HTTP_EXPORT to_method(std::string_view method) -> Method;
 
