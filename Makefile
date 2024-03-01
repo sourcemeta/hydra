@@ -38,7 +38,7 @@ test: test/httpclient/stub.js .always
 	$(SLEEP) 1
 	$(CMAKE) -E env \
 		UBSAN_OPTIONS=print_stacktrace=1 \
-		SOURCEMETA_HYDRA_TEST_BASE_URL=localhost:$(TEST_PORT) \
+		SOURCEMETA_HYDRA_TEST_SERVER_BASE_URL=localhost:$(TEST_PORT) \
 		$(CTEST) --test-dir ./build --build-config $(PRESET) \
 			--output-on-failure --parallel
 	$(KILLALL) $(NODE)
