@@ -3,6 +3,7 @@ doxygen
 test
 vendor/googletest
 vendor/googletest.mask
+vendor/bearssl.mask
 vendor/vendorpull
 .ackrc
 .editorconfig

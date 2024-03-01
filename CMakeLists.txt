@@ -5,7 +5,7 @@ if(WIN32)
   include(cmake/VCPKG.cmake)
 endif()
 
-project(hydra VERSION 0.0.1 LANGUAGES CXX
+project(hydra VERSION 0.0.1 LANGUAGES C CXX
   DESCRIPTION "A convenience networking library for modern C++")
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 include(vendor/noa/cmake/noa.cmake)
@@ -41,13 +41,13 @@ if(HYDRA_HTTP OR HYDRA_HTTPCLIENT OR HYDRA_BUCKET)
 endif()
 
 if(HYDRA_HTTPCLIENT OR HYDRA_BUCKET)
-  # Mainly due to CURLOPT_AWS_SIGV4
-  find_package(CURL 7.75.0 REQUIRED)
+  find_package(CURL REQUIRED)
   add_subdirectory(src/httpclient)
 endif()
 
 if(HYDRA_BUCKET)
   find_package(JSONToolkit REQUIRED COMPONENTS json uri)
+  find_package(BearSSL REQUIRED)
   add_subdirectory(src/bucket)
 endif()
 

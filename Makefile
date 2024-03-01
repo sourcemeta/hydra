@@ -25,6 +25,8 @@ compile: .always
 	$(CMAKE) --build ./build --config $(PRESET) --target clang_format
 	$(CMAKE) --build ./build --config $(PRESET) --parallel 4
 	$(CMAKE) --install ./build --prefix ./build/dist --config $(PRESET) --verbose \
+		--component bearssl
+	$(CMAKE) --install ./build --prefix ./build/dist --config $(PRESET) --verbose \
 		--component sourcemeta_jsontoolkit
 	$(CMAKE) --install ./build --prefix ./build/dist --config $(PRESET) --verbose \
 		--component sourcemeta_jsontoolkit_dev
@@ -42,7 +44,7 @@ test: test/stub.js .always
 	$(SLEEP) 1
 	$(CMAKE) -E env \
 		UBSAN_OPTIONS=print_stacktrace=1 \
-		SOURCEMETA_HYDRA_TEST_SERVER_BASE_URL=localhost:$(TEST_PORT) \
+		SOURCEMETA_HYDRA_TEST_SERVER_BASE_URL=http://localhost:$(TEST_PORT) \
 		$(CTEST) --test-dir ./build --build-config $(PRESET) \
 			--output-on-failure --parallel
 	$(KILLALL) $(NODE)

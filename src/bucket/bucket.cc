@@ -1,7 +1,11 @@
 #include <sourcemeta/hydra/bucket.h>
+#include <sourcemeta/hydra/bucket_aws_sigv4.h>
 #include <sourcemeta/hydra/httpclient.h>
 
+#include <sourcemeta/jsontoolkit/uri.h>
+
 #include <cassert> // assert
+#include <chrono>  // std::chrono::system_clock
 #include <sstream> // std::ostringstream
 #include <utility> // std::move
 
@@ -46,8 +50,14 @@ auto Bucket::fetch_json(const std::string &key) -> std::optional<ResponseJSON> {
     request.header("If-None-Match", cached_result.value().etag);
   }
 
-  // TODO: Do AWS Signature v4 in this module instead
-  request.aws_sigv4("s3", this->region, this->access_key, this->secret_key);
+  for (auto &&[header, value] :
+       aws_sigv4(request.method(),
+                 // TODO: Support constructing a URL given a string_view
+                 sourcemeta::jsontoolkit::URI{std::string{request.url()}},
+                 this->access_key, this->secret_key, this->region,
+                 std::chrono::system_clock::now())) {
+    request.header(std::move(header), std::move(value));
+  }
 
   sourcemeta::hydra::http::ClientResponse response{request.send().get()};
 
