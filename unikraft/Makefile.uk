@@ -10,3 +10,7 @@ SOURCEMETA_HYDRA_TEST_SRCS-y += $(TEST_BASE)/http/time_test.cc
 # HTTP Client
 SOURCEMETA_HYDRA_TEST_SRCS-y += $(TEST_BASE)/httpclient/request_1_1_test.cc
 SOURCEMETA_HYDRA_TEST_SRCS-y += $(TEST_BASE)/httpclient/stream_1_1_test.cc
+
+# Bucket
+SOURCEMETA_HYDRA_TEST_SRCS-y += $(TEST_BASE)/bucket/cache_test.cc
+SOURCEMETA_HYDRA_TEST_SRCS-y += $(TEST_BASE)/bucket/fetch_json_test.cc

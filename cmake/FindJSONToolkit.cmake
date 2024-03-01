@@ -1,0 +1,7 @@
+if(NOT JSONToolkit_FOUND)
+  set(JSONTOOLKIT_JSONL OFF CACHE BOOL "disable JSONL support")
+  set(JSONTOOLKIT_JSONPOINTER OFF CACHE BOOL "disable JSON Pointer support")
+  set(JSONTOOLKIT_JSONSCHEMA OFF CACHE BOOL "disable JSON Schema support")
+  add_subdirectory("${PROJECT_SOURCE_DIR}/vendor/jsontoolkit")
+  set(JSONToolkit_FOUND ON)
+endif()

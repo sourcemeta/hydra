@@ -67,6 +67,8 @@ libraries:
     kconfig:
       - CONFIG_LIBGOOGLETEST=y
       - CONFIG_LIBGOOGLETEST_BUILD_MAIN=y
+  jsontoolkit:
+    source: ../vendor/jsontoolkit
   hydra:
     source: ..
     kconfig:

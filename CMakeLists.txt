@@ -14,6 +14,7 @@ include(cmake/CompilerOptions.cmake)
 # Options
 option(HYDRA_HTTP "Build the Hydra HTTP library" ON)
 option(HYDRA_HTTPCLIENT "Build the Hydra HTTP client library" ON)
+option(HYDRA_BUCKET "Build the Hydra bucket library" ON)
 option(HYDRA_TESTS "Build the Hydra tests" OFF)
 option(HYDRA_DOCS "Build the Hydra docs" OFF)
 option(HYDRA_INSTALL "Install the Hydra library" ON)
@@ -35,14 +36,19 @@ install(FILES
   DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}"
   COMPONENT sourcemeta_hydra_dev)
 
-if(HYDRA_HTTP OR HYDRA_HTTPCLIENT)
+if(HYDRA_HTTP OR HYDRA_HTTPCLIENT OR HYDRA_BUCKET)
   add_subdirectory(src/http)
 endif()
 
-if(HYDRA_HTTPCLIENT)
+if(HYDRA_HTTPCLIENT OR HYDRA_BUCKET)
   # Mainly due to CURLOPT_AWS_SIGV4
   find_package(CURL 7.75.0 REQUIRED)
   add_subdirectory(src/httpclient)
+endif()
+
+if(HYDRA_BUCKET)
+  find_package(JSONToolkit REQUIRED)
+  add_subdirectory(src/bucket)
 endif()
 
 if(HYDRA_ADDRESS_SANITIZER)
@@ -74,6 +80,10 @@ if(HYDRA_TESTS)
 
   if(HYDRA_HTTPCLIENT)
     add_subdirectory(test/httpclient)
+  endif()
+
+  if(HYDRA_BUCKET)
+    add_subdirectory(test/bucket)
   endif()
 
   if(PROJECT_IS_TOP_LEVEL)

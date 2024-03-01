@@ -3,4 +3,5 @@ menuconfig LIBHYDRA
 	select LIBCXX
 	select CXX_THREADS
 	select LIBCURL
+	select LIBJSONTOOLKIT
 	default n
