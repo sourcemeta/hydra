@@ -53,8 +53,5 @@ doxygen: .always
 clean: .always
 	$(CMAKE) -E rm -R -f build
 
-# TODO: Support a `unikraft` target once `kraft` support
-# auto-networking and CA certificates integration
-
 # For NMake, which doesn't support .PHONY
 .always:

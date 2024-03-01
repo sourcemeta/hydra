@@ -1,7 +1,0 @@
-menuconfig LIBHYDRA
-	bool "libhydra - A convenience networking library for modern C++"
-	select LIBCXX
-	select CXX_THREADS
-	select LIBCURL
-	select LIBJSONTOOLKIT
-	default n
