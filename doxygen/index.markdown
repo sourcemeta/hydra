@@ -8,9 +8,8 @@ abstracts the gory details of making HTTP requests using
 [`libcurl`](https://curl.se/libcurl/), including streaming.
 
 It targets C++20 and supports the Clang, GCC, and MSVC compilers on macOS,
-GNU/Linux, Windows, and Unikraft, and it is designed to integrate well with
-other Sourcemeta libraries like [JSON
-Toolkit](https://jsontoolkit.sourcemeta.com).
+GNU/Linux, and Windows, and it is designed to integrate well with other
+Sourcemeta libraries like [JSON Toolkit](https://jsontoolkit.sourcemeta.com).
 
 Installation
 ------------
@@ -66,30 +65,6 @@ target_link_libraries(my_executable_or_library PUBLIC sourcemeta::hydra::http)
 target_link_libraries(my_executable_or_library PUBLIC sourcemeta::hydra::httpclient)
 target_link_libraries(my_executable_or_library PUBLIC sourcemeta::hydra::bucket)
 ```
-
-### Using Unikraft
-
-On your [`Kraftfile`](https://unikraft.org/docs/cli/reference/kraftfile/v0.5)
-libraries, declare Hydra as follows:
-
-```yml
-libraries:
-  ...
-  hydra:
-    source: https://github.com/sourcemeta/hydra.git
-    version: <sha-or-tag>
-```
-
-Then, on your target `kconfig` configuration, specify:
-
-```yml
-- CONFIG_LIBHYDRA=y
-```
-
-Keep in mind that setting up outbound networking in Unikraft can be tricky. For
-the nitty-gritty details, take a look at our test
-[`Kraftfile`](./unikraft/Kraftfile) and [GitHub
-Actions](./.github/workflows/ci.yml) setup.
 
 CMake
 -----
