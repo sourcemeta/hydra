@@ -218,6 +218,10 @@ auto ClientStream::header(std::string_view key, int value) -> void {
   this->header(key, std::to_string(value));
 }
 
+auto ClientStream::url() const -> std::string_view {
+  return this->internal->url;
+}
+
 auto ClientStream::aws_sigv4(std::string_view service, std::string_view region,
                              std::string_view access_key,
                              std::string_view secret_key) -> void {

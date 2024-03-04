@@ -28,6 +28,11 @@ TEST(HTTP_Request_1_1, invalid_url) {
   EXPECT_THROW(request.send().get(), sourcemeta::hydra::http::Error);
 }
 
+TEST(HTTP_Request_1_1, retrieve_url) {
+  sourcemeta::hydra::http::ClientRequest request{"https://www.example.com"};
+  EXPECT_EQ(request.url(), "https://www.example.com");
+}
+
 TEST(HTTP_Request_1_1, GET_root) {
   sourcemeta::hydra::http::ClientRequest request{HTTP_BASE_URL()};
   request.method(sourcemeta::hydra::http::Method::GET);

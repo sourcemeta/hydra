@@ -130,6 +130,17 @@ public:
   /// ```
   auto header(std::string_view key, int value) -> void;
 
+  /// Retrieve the URL that the request will be sent to. For example:
+  ///
+  /// ```cpp
+  /// #include <sourcemeta/hydra/httpclient.h>
+  /// #include <iostream>
+  ///
+  /// sourcemeta::hydra::http::ClientRequest request{"https://www.example.com"};
+  /// std::cout << request.url() << "\n";
+  /// ```
+  auto url() const -> std::string_view;
+
   // TODO: Move to the bucket module instead
   /// Sign the request using Amazon's Signature v4. For example, to send a
   /// request to an S3-compatible API:
