@@ -45,6 +45,10 @@ auto ClientRequest::header(std::string_view key, int value) -> void {
   this->stream.header(key, value);
 }
 
+auto ClientRequest::url() const -> std::string_view {
+  return this->stream.url();
+}
+
 auto ClientRequest::aws_sigv4(std::string_view service, std::string_view region,
                               std::string_view access_key,
                               std::string_view secret_key) -> void {

@@ -14,6 +14,11 @@ TEST(HTTP_Stream_1_1, invalid_url) {
   EXPECT_THROW(request.send().wait(), sourcemeta::hydra::http::Error);
 }
 
+TEST(HTTP_Stream_1_1, retrieve_url) {
+  sourcemeta::hydra::http::ClientStream request{"https://www.example.com"};
+  EXPECT_EQ(request.url(), "https://www.example.com");
+}
+
 TEST(HTTP_Stream_1_1, no_callbacks_get) {
   sourcemeta::hydra::http::ClientStream request{HTTP_BASE_URL()};
   request.method(sourcemeta::hydra::http::Method::GET);
