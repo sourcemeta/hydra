@@ -2,7 +2,7 @@
 
 #include <curl/curl.h>
 
-#include <algorithm>    // std::transform
+#include <algorithm>    // std::transform, std::copy
 #include <cassert>      // assert
 #include <cctype>       // std::tolower
 #include <charconv>     // std::from_chars
@@ -26,6 +26,7 @@ struct ClientStream::Internal {
   std::string url;
   DataCallback on_data;
   HeaderCallback on_header;
+  BodyCallback on_body;
   Method method{Method::GET};
   std::optional<Status> status;
   static std::uint64_t count;
@@ -41,7 +42,7 @@ inline auto handle_curl(CURLcode code) -> void {
   }
 }
 
-auto callback_on_body(
+auto callback_on_response_body(
     const void *const data, const std::size_t size, const std::size_t count,
     const sourcemeta::hydra::http::ClientStream *const request) noexcept
     -> std::size_t {
@@ -127,6 +128,28 @@ auto callback_on_header(
   return total_size;
 }
 
+auto callback_on_request_body(
+    char *buffer, const std::size_t size, const std::size_t count,
+    sourcemeta::hydra::http::ClientStream *const request) noexcept
+    -> std::size_t {
+  assert(buffer);
+  assert(request->internal->on_body);
+  const std::size_t total_size{size * count};
+
+  try {
+    const auto bytes{request->internal->on_body(total_size)};
+    assert(bytes.size() <= total_size);
+    std::copy(bytes.cbegin(), bytes.cend(), buffer);
+    return bytes.size();
+  } catch (...) {
+    // The read callback may return CURL_READFUNC_ABORT to stop the current
+    // operation immediately, resulting in a CURLE_ABORTED_BY_CALLBACK error
+    // code from the transfer. See
+    // https://curl.se/libcurl/c/CURLOPT_READFUNCTION.html
+    return CURL_READFUNC_ABORT;
+  }
+}
+
 } // namespace
 
 namespace sourcemeta::hydra::http {
@@ -155,12 +178,14 @@ ClientStream::ClientStream(ClientStream &&other) noexcept
   this->internal->url = std::move(other.internal->url);
   this->internal->on_data = other.internal->on_data;
   this->internal->on_header = other.internal->on_header;
+  this->internal->on_body = other.internal->on_body;
   this->internal->method = other.internal->method;
   this->internal->status = other.internal->status;
   other.internal->handle = nullptr;
   other.internal->headers = nullptr;
   other.internal->on_data = nullptr;
   other.internal->on_header = nullptr;
+  other.internal->on_body = nullptr;
   this->internal->count -= 1;
 }
 
@@ -174,12 +199,14 @@ auto ClientStream::operator=(ClientStream &&other) noexcept -> ClientStream & {
   this->internal->url = std::move(other.internal->url);
   this->internal->on_data = other.internal->on_data;
   this->internal->on_header = other.internal->on_header;
+  this->internal->on_body = other.internal->on_body;
   this->internal->method = other.internal->method;
   this->internal->status = other.internal->status;
   other.internal->handle = nullptr;
   other.internal->headers = nullptr;
   other.internal->on_data = nullptr;
   other.internal->on_header = nullptr;
+  other.internal->on_body = nullptr;
   this->internal->count -= 1;
   return *this;
 }
@@ -207,6 +234,10 @@ auto ClientStream::on_data(DataCallback callback) noexcept -> void {
 
 auto ClientStream::on_header(HeaderCallback callback) noexcept -> void {
   this->internal->on_header = std::move(callback);
+}
+
+auto ClientStream::on_body(BodyCallback callback) noexcept -> void {
+  this->internal->on_body = std::move(callback);
 }
 
 auto ClientStream::header(std::string_view key, std::string_view value)
@@ -290,9 +321,24 @@ auto ClientStream::send() -> std::future<Status> {
     handle_curl(curl_easy_setopt(this->internal->handle, CURLOPT_NOBODY, 1L));
   } else {
     handle_curl(curl_easy_setopt(this->internal->handle, CURLOPT_WRITEFUNCTION,
-                                 callback_on_body));
+                                 callback_on_response_body));
     handle_curl(
         curl_easy_setopt(this->internal->handle, CURLOPT_WRITEDATA, this));
+  }
+
+  if (this->internal->on_body) {
+    handle_curl(curl_easy_setopt(this->internal->handle, CURLOPT_READFUNCTION,
+                                 callback_on_request_body));
+    handle_curl(
+        curl_easy_setopt(this->internal->handle, CURLOPT_READDATA, this));
+    // Otherwise the read function is never called
+    handle_curl(curl_easy_setopt(this->internal->handle, CURLOPT_UPLOAD, 1L));
+    // Disable the default "Expect: 100-continue" header that cURL will
+    // automatically add when enabling `CURLOPT_UPLOAD`.
+    // See https://curl.se/libcurl/c/CURLOPT_UPLOAD.html
+    // TODO: Let clients manually specify this header if they want
+    this->internal->headers =
+        curl_slist_append(this->internal->headers, "Expect:");
   }
 
   handle_curl(curl_easy_setopt(this->internal->handle, CURLOPT_HEADERFUNCTION,

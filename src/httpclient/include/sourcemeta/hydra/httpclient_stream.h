@@ -16,6 +16,7 @@
 #include <span>        // std::span
 #include <string>      // std::string
 #include <string_view> // std::string_view
+#include <vector>      // std::vector
 
 namespace sourcemeta::hydra::http {
 
@@ -221,6 +222,8 @@ public:
       std::function<void(const Status, std::span<const std::uint8_t>)>;
   using HeaderCallback =
       std::function<void(const Status, std::string_view, std::string_view)>;
+  using BodyCallback =
+      std::function<std::vector<std::uint8_t>(const std::size_t)>;
 
   /// Set a function that gets called every time there is new data to process.
   /// The callback gets passed the response status code and a buffer. Make sure
@@ -270,6 +273,32 @@ public:
   /// request.send().wait();
   /// ```
   auto on_header(HeaderCallback callback) noexcept -> void;
+
+  /// Set a function that gets called (potentially multiple times) to pass a
+  /// request body. The callback gets passed the number of bytes to read, and
+  /// its expected to return an array of bytes to pass to the request. If the
+  /// number of returned bytes is less than the bytes argument, then the body is
+  /// assumed to have ended. For example:
+  ///
+  /// ```cpp
+  /// #include <sourcemeta/hydra/httpclient.h>
+  /// #include <sstream>
+  ///
+  /// sourcemeta::hydra::http::ClientStream request{"https://www.example.com"};
+  ///
+  /// std::istringstream body{"foo bar baz"};
+  /// request.on_body([&body](const std::size_t bytes) {
+  ///   std::vector<std::uint8_t> result;
+  ///   while (result.size() < bytes && request_body.peek() != EOF) {
+  ///     result.push_back(static_cast<std::uint8_t>(request_body.get()));
+  ///   }
+  ///
+  ///   return result;
+  /// });
+  ///
+  /// request.send().wait();
+  /// ```
+  auto on_body(BodyCallback callback) noexcept -> void;
 
 private:
   struct Internal;

@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <map>
 #include <sstream>
+#include <stdexcept>
 #include <vector>
 
 #include <sourcemeta/hydra/httpclient.h>
@@ -169,4 +170,184 @@ TEST(HTTP_Stream_1_1, get_root_foo_bar) {
 
   // Body
   EXPECT_EQ(body.str(), "RECEIVED GET /foo/bar");
+}
+
+TEST(HTTP_Stream_1_1, on_body_exception) {
+  sourcemeta::hydra::http::ClientStream request{HTTP_BASE_URL()};
+  request.method(sourcemeta::hydra::http::Method::POST);
+
+  request.on_body([](const std::size_t) -> std::vector<std::uint8_t> {
+    throw std::runtime_error("Error!");
+  });
+
+  EXPECT_THROW(request.send().get(), sourcemeta::hydra::http::Error);
+}
+
+TEST(HTTP_Stream_1_1, post_root_hello_world) {
+  sourcemeta::hydra::http::ClientStream request{HTTP_BASE_URL()};
+  request.method(sourcemeta::hydra::http::Method::POST);
+
+  std::vector<sourcemeta::hydra::http::Status> statuses;
+  std::istringstream request_body{"hello world"};
+  std::ostringstream response_body;
+
+  request.on_data([&statuses, &response_body](
+                      const sourcemeta::hydra::http::Status status,
+                      std::span<const std::uint8_t> buffer) noexcept {
+    statuses.push_back(status);
+    for (const auto byte : buffer) {
+      response_body << static_cast<char>(byte);
+    }
+  });
+
+  request.on_header([&statuses](const sourcemeta::hydra::http::Status status,
+                                std::string_view, std::string_view) noexcept {
+    statuses.push_back(status);
+  });
+
+  request.on_body([&request_body](const std::size_t bytes) {
+    std::vector<std::uint8_t> result;
+    while (result.size() < bytes && request_body.peek() != EOF) {
+      result.push_back(static_cast<std::uint8_t>(request_body.get()));
+    }
+
+    return result;
+  });
+
+  const auto status{request.send().get()};
+
+  // Status
+  EXPECT_EQ(status, sourcemeta::hydra::http::Status::OK);
+  EXPECT_FALSE(statuses.empty());
+  EXPECT_TRUE(std::all_of(statuses.cbegin(), statuses.cend(), [](auto value) {
+    return value == sourcemeta::hydra::http::Status::OK;
+  }));
+
+  // Body
+  EXPECT_EQ(response_body.str(), "RECEIVED POST hello world");
+}
+
+TEST(HTTP_Stream_1_1, put_root_hello_world) {
+  sourcemeta::hydra::http::ClientStream request{HTTP_BASE_URL()};
+  request.method(sourcemeta::hydra::http::Method::PUT);
+
+  std::vector<sourcemeta::hydra::http::Status> statuses;
+  std::istringstream request_body{"hello world"};
+  std::ostringstream response_body;
+
+  request.on_data([&statuses, &response_body](
+                      const sourcemeta::hydra::http::Status status,
+                      std::span<const std::uint8_t> buffer) noexcept {
+    statuses.push_back(status);
+    for (const auto byte : buffer) {
+      response_body << static_cast<char>(byte);
+    }
+  });
+
+  request.on_header([&statuses](const sourcemeta::hydra::http::Status status,
+                                std::string_view, std::string_view) noexcept {
+    statuses.push_back(status);
+  });
+
+  request.on_body([&request_body](const std::size_t bytes) {
+    std::vector<std::uint8_t> result;
+    while (result.size() < bytes && request_body.peek() != EOF) {
+      result.push_back(static_cast<std::uint8_t>(request_body.get()));
+    }
+
+    return result;
+  });
+
+  const auto status{request.send().get()};
+
+  // Status
+  EXPECT_EQ(status, sourcemeta::hydra::http::Status::OK);
+  EXPECT_FALSE(statuses.empty());
+  EXPECT_TRUE(std::all_of(statuses.cbegin(), statuses.cend(), [](auto value) {
+    return value == sourcemeta::hydra::http::Status::OK;
+  }));
+
+  // Body
+  EXPECT_EQ(response_body.str(), "RECEIVED PUT hello world");
+}
+
+TEST(HTTP_Stream_1_1, get_root_hello_world) {
+  sourcemeta::hydra::http::ClientStream request{HTTP_BASE_URL()};
+  request.method(sourcemeta::hydra::http::Method::GET);
+
+  std::vector<sourcemeta::hydra::http::Status> statuses;
+  std::istringstream request_body{"hello world"};
+  std::ostringstream response_body;
+
+  request.on_data([&statuses, &response_body](
+                      const sourcemeta::hydra::http::Status status,
+                      std::span<const std::uint8_t> buffer) noexcept {
+    statuses.push_back(status);
+    for (const auto byte : buffer) {
+      response_body << static_cast<char>(byte);
+    }
+  });
+
+  request.on_header([&statuses](const sourcemeta::hydra::http::Status status,
+                                std::string_view, std::string_view) noexcept {
+    statuses.push_back(status);
+  });
+
+  request.on_body([&request_body](const std::size_t bytes) {
+    std::vector<std::uint8_t> result;
+    while (result.size() < bytes && request_body.peek() != EOF) {
+      result.push_back(static_cast<std::uint8_t>(request_body.get()));
+    }
+
+    return result;
+  });
+
+  const auto status{request.send().get()};
+
+  // Status
+  EXPECT_EQ(status, sourcemeta::hydra::http::Status::OK);
+  EXPECT_FALSE(statuses.empty());
+  EXPECT_TRUE(std::all_of(statuses.cbegin(), statuses.cend(), [](auto value) {
+    return value == sourcemeta::hydra::http::Status::OK;
+  }));
+
+  // Body
+  EXPECT_EQ(response_body.str(), "RECEIVED GET hello world");
+}
+
+TEST(HTTP_Stream_1_1, post_root_empty_body) {
+  sourcemeta::hydra::http::ClientStream request{HTTP_BASE_URL()};
+  request.method(sourcemeta::hydra::http::Method::POST);
+
+  std::vector<sourcemeta::hydra::http::Status> statuses;
+  std::ostringstream response_body;
+
+  request.on_data([&statuses, &response_body](
+                      const sourcemeta::hydra::http::Status status,
+                      std::span<const std::uint8_t> buffer) noexcept {
+    statuses.push_back(status);
+    for (const auto byte : buffer) {
+      response_body << static_cast<char>(byte);
+    }
+  });
+
+  request.on_header([&statuses](const sourcemeta::hydra::http::Status status,
+                                std::string_view, std::string_view) noexcept {
+    statuses.push_back(status);
+  });
+
+  request.on_body(
+      [](const std::size_t) -> std::vector<std::uint8_t> { return {}; });
+
+  const auto status{request.send().get()};
+
+  // Status
+  EXPECT_EQ(status, sourcemeta::hydra::http::Status::OK);
+  EXPECT_FALSE(statuses.empty());
+  EXPECT_TRUE(std::all_of(statuses.cbegin(), statuses.cend(), [](auto value) {
+    return value == sourcemeta::hydra::http::Status::OK;
+  }));
+
+  // Body
+  EXPECT_EQ(response_body.str(), "RECEIVED POST /");
 }
