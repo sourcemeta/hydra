@@ -23,6 +23,10 @@ auto ClientRequest::method(const Method method) noexcept -> void {
   this->stream.method(method);
 }
 
+auto ClientRequest::method() const noexcept -> Method {
+  return this->stream.method();
+}
+
 auto ClientRequest::capture(std::string header) -> void {
   this->capture_all_ = false;
   this->capture_.insert(std::move(header));

@@ -19,6 +19,17 @@ TEST(HTTP_Stream_1_1, retrieve_url) {
   EXPECT_EQ(request.url(), "https://www.example.com");
 }
 
+TEST(HTTP_Stream_1_1, retrieve_method) {
+  sourcemeta::hydra::http::ClientStream request{"https://www.example.com"};
+  request.method(sourcemeta::hydra::http::Method::HEAD);
+  EXPECT_EQ(request.method(), sourcemeta::hydra::http::Method::HEAD);
+}
+
+TEST(HTTP_Stream_1_1, method_get_by_default) {
+  sourcemeta::hydra::http::ClientStream request{"https://www.example.com"};
+  EXPECT_EQ(request.method(), sourcemeta::hydra::http::Method::GET);
+}
+
 TEST(HTTP_Stream_1_1, no_callbacks_get) {
   sourcemeta::hydra::http::ClientStream request{HTTP_BASE_URL()};
   request.method(sourcemeta::hydra::http::Method::GET);

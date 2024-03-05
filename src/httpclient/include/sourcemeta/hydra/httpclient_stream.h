@@ -113,6 +113,19 @@ public:
   /// ```
   auto method(const Method method) noexcept -> void;
 
+  /// Retrieve the HTTP method that the request will be sent with. For example:
+  ///
+  /// ```cpp
+  /// #include <sourcemeta/hydra/httpclient.h>
+  /// #include <iostream>
+  /// #include <cassert>
+  ///
+  /// sourcemeta::hydra::http::ClientStream request{"https://www.example.com"};
+  /// request.method(sourcemeta::hydra::http::Method::HEAD);
+  /// assert(request.method() == sourcemeta::hydra::http::Method::HEAD);
+  /// ```
+  auto method() const noexcept -> Method;
+
   /// Set an HTTP request header. For example:
   ///
   /// ```cpp
