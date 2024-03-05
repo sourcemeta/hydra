@@ -33,6 +33,17 @@ TEST(HTTP_Request_1_1, retrieve_url) {
   EXPECT_EQ(request.url(), "https://www.example.com");
 }
 
+TEST(HTTP_Request_1_1, retrieve_method) {
+  sourcemeta::hydra::http::ClientRequest request{"https://www.example.com"};
+  request.method(sourcemeta::hydra::http::Method::HEAD);
+  EXPECT_EQ(request.method(), sourcemeta::hydra::http::Method::HEAD);
+}
+
+TEST(HTTP_Request_1_1, method_get_by_default) {
+  sourcemeta::hydra::http::ClientRequest request{"https://www.example.com"};
+  EXPECT_EQ(request.method(), sourcemeta::hydra::http::Method::GET);
+}
+
 TEST(HTTP_Request_1_1, GET_root) {
   sourcemeta::hydra::http::ClientRequest request{HTTP_BASE_URL()};
   request.method(sourcemeta::hydra::http::Method::GET);

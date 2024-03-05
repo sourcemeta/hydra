@@ -197,6 +197,10 @@ auto ClientStream::method(const Method method) noexcept -> void {
   this->internal->method = method;
 }
 
+auto ClientStream::method() const noexcept -> Method {
+  return this->internal->method;
+}
+
 auto ClientStream::on_data(DataCallback callback) noexcept -> void {
   this->internal->on_data = std::move(callback);
 }
