@@ -47,7 +47,7 @@ if(HYDRA_HTTPCLIENT OR HYDRA_BUCKET)
 endif()
 
 if(HYDRA_BUCKET)
-  find_package(JSONToolkit REQUIRED)
+  find_package(JSONToolkit REQUIRED COMPONENTS json uri)
   add_subdirectory(src/bucket)
 endif()
 
