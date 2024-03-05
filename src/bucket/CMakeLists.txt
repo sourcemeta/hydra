@@ -8,5 +8,6 @@ if(HYDRA_INSTALL)
 endif()
 
 target_link_libraries(sourcemeta_hydra_bucket PUBLIC sourcemeta::jsontoolkit::json)
+target_link_libraries(sourcemeta_hydra_bucket PRIVATE sourcemeta::jsontoolkit::uri)
 target_link_libraries(sourcemeta_hydra_bucket PRIVATE sourcemeta::hydra::httpclient)
 sourcemeta_hydra_add_compile_options(sourcemeta_hydra_bucket)
