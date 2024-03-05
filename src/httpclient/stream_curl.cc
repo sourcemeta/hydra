@@ -226,21 +226,6 @@ auto ClientStream::url() const -> std::string_view {
   return this->internal->url;
 }
 
-auto ClientStream::aws_sigv4(std::string_view service, std::string_view region,
-                             std::string_view access_key,
-                             std::string_view secret_key) -> void {
-  std::ostringstream parameter;
-  parameter << "aws:amz:" << region << ':' << service;
-  // See https://curl.se/libcurl/c/CURLOPT_AWS_SIGV4.html
-  handle_curl(curl_easy_setopt(this->internal->handle, CURLOPT_AWS_SIGV4,
-                               parameter.str().c_str()));
-
-  std::ostringstream authentication;
-  authentication << access_key << ':' << secret_key;
-  handle_curl(curl_easy_setopt(this->internal->handle, CURLOPT_USERPWD,
-                               authentication.str().c_str()));
-}
-
 auto ClientStream::send() -> std::future<Status> {
   switch (this->internal->method) {
     case Method::GET:

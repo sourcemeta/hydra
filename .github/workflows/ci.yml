@@ -104,6 +104,9 @@ jobs:
       - run: cmake --build ./build --config Release --parallel 4
       - run: >
           cmake --install ./build --prefix ./build/dist --config Release --verbose
+          --component bearssl
+      - run: >
+          cmake --install ./build --prefix ./build/dist --config Release --verbose
           --component sourcemeta_jsontoolkit
       - run: >
           cmake --install ./build --prefix ./build/dist --config Release --verbose
@@ -128,6 +131,6 @@ jobs:
       # Better to be sure and `cd` all the time here.
       - run: cd ./build && ctest --build-config Release --output-on-failure --parallel
         env:
-          SOURCEMETA_HYDRA_TEST_SERVER_BASE_URL: localhost:${{ env.TEST_PORT }}
+          SOURCEMETA_HYDRA_TEST_SERVER_BASE_URL: 'http://localhost:${{ env.TEST_PORT }}'
           # See https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html
           UBSAN_OPTIONS: print_stacktrace=1

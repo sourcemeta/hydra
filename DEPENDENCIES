@@ -1,4 +1,5 @@
 vendorpull https://github.com/sourcemeta/vendorpull 70342aaf458e6cb80baeb5b718901075fc42ede6
 noa https://github.com/sourcemeta/noa 3306a608d66f2e7fc3b691435c421aaf0e0c2e01
 jsontoolkit https://github.com/sourcemeta/jsontoolkit 28ae6d10e976a0c7d532ee18b90b6a8fd81cdc75
+bearssl https://www.bearssl.org/git/BearSSL 8ef7680081c61b486622f2d983c0d3d21e83caad
 googletest https://github.com/google/googletest 987e225614755fec7253aa95bf959c09e0d380d7

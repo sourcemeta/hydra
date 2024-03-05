@@ -53,12 +53,6 @@ auto ClientRequest::url() const -> std::string_view {
   return this->stream.url();
 }
 
-auto ClientRequest::aws_sigv4(std::string_view service, std::string_view region,
-                              std::string_view access_key,
-                              std::string_view secret_key) -> void {
-  this->stream.aws_sigv4(service, region, access_key, secret_key);
-}
-
 auto ClientRequest::send() -> std::future<ClientResponse> {
   std::ostringstream output;
   this->stream.on_data(
