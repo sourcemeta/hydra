@@ -78,7 +78,7 @@ http.createServer((request, response) => {
   request.on('end', () => {
     const responseData = requestBody.length === 0
       ? `RECEIVED ${request.method} ${request.url}`
-      : Buffer.concat(requestBody).toString();
+      : `RECEIVED ${request.method} ${Buffer.concat(requestBody).toString()}`;
     const acceptEncoding = request.headers['accept-encoding'];
     if (acceptEncoding && acceptEncoding.includes('gzip')) {
       response.setHeader('Content-Encoding', 'gzip');
