@@ -50,12 +50,17 @@ auto Bucket::fetch_json(const std::string &key) -> std::optional<ResponseJSON> {
     request.header("If-None-Match", cached_result.value().etag);
   }
 
-  for (auto &&[header, value] :
-       aws_sigv4(request.method(),
-                 // TODO: Support constructing a URL given a string_view
-                 sourcemeta::jsontoolkit::URI{std::string{request.url()}},
-                 this->access_key, this->secret_key, this->region,
-                 std::chrono::system_clock::now())) {
+  // The empty content SHA256
+  // TODO: Support sending a body
+  auto content_checksum{
+      "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"};
+
+  for (auto &&[header, value] : aws_sigv4(
+           request.method(),
+           // TODO: Support constructing a URL given a string_view
+           sourcemeta::jsontoolkit::URI{std::string{request.url()}},
+           this->access_key, this->secret_key, this->region,
+           std::move(content_checksum), std::chrono::system_clock::now())) {
     request.header(std::move(header), std::move(value));
   }
 
