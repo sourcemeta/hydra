@@ -14,13 +14,13 @@
 
 #include <future>           // std::future
 #include <initializer_list> // std::initializer_list
+#include <istream>          // std::istream
 #include <set>              // std::set
 #include <string>           // std::string
 #include <string_view>      // std::string_view
 
 namespace sourcemeta::hydra::http {
 
-// TODO: Support passing a request body
 /// @ingroup httpclient
 /// This class is used to perform a non-streaming HTTP request.
 class SOURCEMETA_HYDRA_HTTPCLIENT_EXPORT ClientRequest {
@@ -154,7 +154,7 @@ public:
   /// ```
   auto url() const -> std::string_view;
 
-  /// Perform the HTTP request. For example:
+  /// Perform the HTTP request without a body. For example:
   ///
   /// ```cpp
   /// #include <sourcemeta/hydra/httpclient.h>
@@ -166,6 +166,22 @@ public:
   /// assert(response.status() == sourcemeta::hydra::http::Status::OK);
   /// ```
   auto send() -> std::future<ClientResponse>;
+
+  /// Perform the HTTP request with a body. For example:
+  ///
+  /// ```cpp
+  /// #include <sourcemeta/hydra/httpclient.h>
+  /// #include <cassert>
+  /// #include <sstream>
+  ///
+  /// sourcemeta::hydra::http::ClientRequest request{"https://www.example.com"};
+  /// request.method(sourcemeta::hydra::http::Method::GET);
+  /// std::istringstream body{"hello world"};
+  /// sourcemeta::hydra::http::ClientResponse response{
+  ///   request.send(body).get()};
+  /// assert(response.status() == sourcemeta::hydra::http::Status::OK);
+  /// ```
+  auto send(std::istream &body) -> std::future<ClientResponse>;
 
 private:
   ClientStream stream;

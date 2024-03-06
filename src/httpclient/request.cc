@@ -53,7 +53,7 @@ auto ClientRequest::url() const -> std::string_view {
   return this->stream.url();
 }
 
-auto ClientRequest::send() -> std::future<ClientResponse> {
+auto ClientRequest::send(std::istream &body) -> std::future<ClientResponse> {
   std::ostringstream output;
   this->stream.on_data(
       [&output](const Status, std::span<const std::uint8_t> buffer) noexcept {
@@ -70,10 +70,25 @@ auto ClientRequest::send() -> std::future<ClientResponse> {
     }
   });
 
+  this->stream.on_body([&body](const std::size_t bytes) {
+    std::vector<std::uint8_t> result;
+    while (result.size() < bytes &&
+           body.peek() != std::istream::traits_type::eof()) {
+      result.push_back(static_cast<decltype(result)::value_type>(body.get()));
+    }
+
+    return result;
+  });
+
   std::promise<ClientResponse> response;
   response.set_value(
       {this->stream.send().get(), std::move(headers), std::move(output)});
   return response.get_future();
+}
+
+auto ClientRequest::send() -> std::future<ClientResponse> {
+  static std::istringstream empty_body;
+  return this->send(empty_body);
 }
 
 } // namespace sourcemeta::hydra::http
