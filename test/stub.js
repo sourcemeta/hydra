@@ -30,6 +30,12 @@ http.createServer((request, response) => {
     return response.end(JSON.stringify({ foo: 1 }));
   }
 
+  if (request.url === '/empty') {
+    response.statusCode = 200;
+    response.end();
+    return;
+  }
+
   if (request.url === '/bucket/incremental.json') {
     if (!request.headers.authorization ||
       !request.headers.host ||
