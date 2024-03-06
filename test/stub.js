@@ -64,15 +64,23 @@ http.createServer((request, response) => {
   response.setHeader('Content-Type', 'text/plain');
   response.setHeader('Last-Modified', 'Wed, 21 Oct 2015 11:28:00 GMT');
 
-  const responseData = `RECEIVED ${request.method} ${request.url}`;
-  const acceptEncoding = request.headers['accept-encoding'];
-  if (acceptEncoding && acceptEncoding.includes('gzip')) {
-    response.setHeader('Content-Encoding', 'gzip');
-    response.end(zlib.gzipSync(responseData));
-  } else {
-    response.end(responseData);
-  }
+  let requestBody = [];
+  request.on('data', (chunk) => {
+    requestBody.push(chunk);
+  });
 
+  request.on('end', () => {
+    const responseData = requestBody.length === 0
+      ? `RECEIVED ${request.method} ${request.url}`
+      : Buffer.concat(requestBody).toString();
+    const acceptEncoding = request.headers['accept-encoding'];
+    if (acceptEncoding && acceptEncoding.includes('gzip')) {
+      response.setHeader('Content-Encoding', 'gzip');
+      response.end(zlib.gzipSync(responseData));
+    } else {
+      response.end(responseData);
+    }
+  });
 }).listen(PORT, () => {
   console.log(`Server is listening on port ${PORT}`);
 });
