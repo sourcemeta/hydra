@@ -326,7 +326,7 @@ auto ClientStream::send() -> std::future<Status> {
         curl_easy_setopt(this->internal->handle, CURLOPT_WRITEDATA, this));
   }
 
-  if (this->internal->on_body) {
+  if (this->internal->method != Method::HEAD && this->internal->on_body) {
     handle_curl(curl_easy_setopt(this->internal->handle, CURLOPT_READFUNCTION,
                                  callback_on_request_body));
     handle_curl(

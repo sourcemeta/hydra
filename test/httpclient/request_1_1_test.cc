@@ -384,3 +384,47 @@ TEST(HTTP_Request_1_1, GET_root_response_header_gmt_missing) {
   const auto last_modified{response.header_gmt("last-modified")};
   EXPECT_FALSE(last_modified.has_value());
 }
+
+TEST(HTTP_Request_1_1, POST_root_hello_world) {
+  sourcemeta::hydra::http::ClientRequest request{HTTP_BASE_URL()};
+  request.method(sourcemeta::hydra::http::Method::POST);
+  std::istringstream request_body{"hello world"};
+  sourcemeta::hydra::http::ClientResponse response{
+      request.send(request_body).get()};
+  EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_FALSE(response.empty());
+  EXPECT_EQ(body(response), "RECEIVED POST hello world");
+}
+
+TEST(HTTP_Request_1_1, GET_root_hello_world) {
+  sourcemeta::hydra::http::ClientRequest request{HTTP_BASE_URL()};
+  request.method(sourcemeta::hydra::http::Method::GET);
+  std::istringstream request_body{"hello world"};
+  sourcemeta::hydra::http::ClientResponse response{
+      request.send(request_body).get()};
+  EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_FALSE(response.empty());
+  EXPECT_EQ(body(response), "RECEIVED GET hello world");
+}
+
+TEST(HTTP_Request_1_1, PUT_root_hello_world) {
+  sourcemeta::hydra::http::ClientRequest request{HTTP_BASE_URL()};
+  request.method(sourcemeta::hydra::http::Method::PUT);
+  std::istringstream request_body{"hello world"};
+  sourcemeta::hydra::http::ClientResponse response{
+      request.send(request_body).get()};
+  EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_FALSE(response.empty());
+  EXPECT_EQ(body(response), "RECEIVED PUT hello world");
+}
+
+TEST(HTTP_Request_1_1, root_empty_istringstream) {
+  sourcemeta::hydra::http::ClientRequest request{HTTP_BASE_URL()};
+  request.method(sourcemeta::hydra::http::Method::POST);
+  std::istringstream request_body;
+  sourcemeta::hydra::http::ClientResponse response{
+      request.send(request_body).get()};
+  EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_FALSE(response.empty());
+  EXPECT_EQ(body(response), "RECEIVED POST /");
+}
