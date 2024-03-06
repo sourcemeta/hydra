@@ -27,12 +27,9 @@ Bucket::Bucket(std::string bucket_url, std::string bucket_region,
 auto Bucket::fetch_json(const std::string &key)
     -> std::future<std::optional<ResponseJSON>> {
   std::promise<std::optional<ResponseJSON>> promise;
-  std::ostringstream normalized_key;
-  if (key.front() != '/')
-    normalized_key << '/';
-  normalized_key << key;
+  assert(key.front() == '/');
 
-  const auto cached_result{this->cache.at(normalized_key.str())};
+  const auto cached_result{this->cache.at(key)};
   if (cached_result.has_value() &&
       this->cache_policy == BucketCachePolicy::Indefinitely) {
     promise.set_value(cached_result.value());
@@ -42,7 +39,7 @@ auto Bucket::fetch_json(const std::string &key)
   // TODO: Properly build, concat, and canonicalize the string using URI Kit
   std::ostringstream request_url;
   request_url << this->url;
-  request_url << normalized_key.str();
+  request_url << key;
 
   sourcemeta::hydra::http::ClientRequest request{request_url.str()};
   request.method(sourcemeta::hydra::http::Method::GET);
@@ -90,7 +87,7 @@ auto Bucket::fetch_json(const std::string &key)
                          response.header("etag").value(),
                          response.header_gmt("last-modified").value(), false};
 
-  this->cache.upsert(normalized_key.str(),
+  this->cache.upsert(key,
                      {result.data, result.etag, result.last_modified, true},
                      result.data.estimated_byte_size());
 

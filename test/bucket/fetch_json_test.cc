@@ -8,7 +8,7 @@ TEST(Bucket_JSON, no_cache_single) {
   sourcemeta::hydra::Bucket bucket{HTTP_BASE_URL() + "/bucket", "us-east-1",
                                    "123456789", "ultra-secret"};
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response{
-      bucket.fetch_json("1.json").get()};
+      bucket.fetch_json("/1.json").get()};
   EXPECT_TRUE(response.has_value());
   EXPECT_TRUE(response.value().data.is_object());
   EXPECT_EQ(response.value().data.size(), 1);
@@ -24,11 +24,11 @@ TEST(Bucket_JSON, no_cache_idempotent) {
                                    "123456789", "ultra-secret"};
 
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_1{
-      bucket.fetch_json("1.json").get()};
+      bucket.fetch_json("/1.json").get()};
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_2{
-      bucket.fetch_json("1.json").get()};
+      bucket.fetch_json("/1.json").get()};
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_3{
-      bucket.fetch_json("1.json").get()};
+      bucket.fetch_json("/1.json").get()};
 
   EXPECT_TRUE(response_1.has_value());
   EXPECT_TRUE(response_1.value().data.is_object());
@@ -64,11 +64,11 @@ TEST(Bucket_JSON, cache_none_with_policy) {
       sourcemeta::hydra::BucketCachePolicy::Indefinitely};
 
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_1{
-      bucket.fetch_json("1.json").get()};
+      bucket.fetch_json("/1.json").get()};
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_2{
-      bucket.fetch_json("1.json").get()};
+      bucket.fetch_json("/1.json").get()};
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_3{
-      bucket.fetch_json("1.json").get()};
+      bucket.fetch_json("/1.json").get()};
 
   EXPECT_TRUE(response_1.has_value());
   EXPECT_TRUE(response_1.value().data.is_object());
@@ -108,11 +108,11 @@ TEST(Bucket_JSON, cache_indefinitely) {
       100000};
 
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_1{
-      bucket.fetch_json("1.json").get()};
+      bucket.fetch_json("/1.json").get()};
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_2{
-      bucket.fetch_json("1.json").get()};
+      bucket.fetch_json("/1.json").get()};
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_3{
-      bucket.fetch_json("1.json").get()};
+      bucket.fetch_json("/1.json").get()};
 
   EXPECT_TRUE(response_1.has_value());
   EXPECT_TRUE(response_1.value().data.is_object());
@@ -142,39 +142,6 @@ TEST(Bucket_JSON, cache_indefinitely) {
   EXPECT_TRUE(response_3.value().cache_hit);
 }
 
-TEST(Bucket_JSON, cache_indefinitely_with_without_prefix_slash) {
-  sourcemeta::hydra::Bucket bucket{
-      HTTP_BASE_URL() + "/bucket",
-      "us-east-1",
-      "123456789",
-      "ultra-secret",
-      sourcemeta::hydra::BucketCachePolicy::Indefinitely,
-      100000};
-
-  const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_1{
-      bucket.fetch_json("1.json").get()};
-  const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_2{
-      bucket.fetch_json("/1.json").get()};
-
-  EXPECT_TRUE(response_1.has_value());
-  EXPECT_TRUE(response_1.value().data.is_object());
-  EXPECT_EQ(response_1.value().data.size(), 1);
-  EXPECT_TRUE(response_1.value().data.defines("foo"));
-  EXPECT_TRUE(response_1.value().data.at("foo").is_integer());
-  EXPECT_EQ(response_1.value().data.at("foo").to_integer(), 1);
-  EXPECT_EQ(response_1.value().etag, "\"1111111111\"");
-  EXPECT_FALSE(response_1.value().cache_hit);
-
-  EXPECT_TRUE(response_2.has_value());
-  EXPECT_TRUE(response_2.value().data.is_object());
-  EXPECT_EQ(response_2.value().data.size(), 1);
-  EXPECT_TRUE(response_2.value().data.defines("foo"));
-  EXPECT_TRUE(response_2.value().data.at("foo").is_integer());
-  EXPECT_EQ(response_2.value().data.at("foo").to_integer(), 1);
-  EXPECT_EQ(response_2.value().etag, "\"1111111111\"");
-  EXPECT_TRUE(response_2.value().cache_hit);
-}
-
 TEST(Bucket_JSON, cache_etag_match) {
   sourcemeta::hydra::Bucket bucket{HTTP_BASE_URL() + "/bucket",
                                    "us-east-1",
@@ -184,11 +151,11 @@ TEST(Bucket_JSON, cache_etag_match) {
                                    100000};
 
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_1{
-      bucket.fetch_json("1.json").get()};
+      bucket.fetch_json("/1.json").get()};
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_2{
-      bucket.fetch_json("1.json").get()};
+      bucket.fetch_json("/1.json").get()};
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_3{
-      bucket.fetch_json("1.json").get()};
+      bucket.fetch_json("/1.json").get()};
 
   EXPECT_TRUE(response_1.has_value());
   EXPECT_TRUE(response_1.value().data.is_object());
@@ -227,11 +194,11 @@ TEST(Bucket_JSON, cache_etag_mismatch) {
                                    100000};
 
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_1{
-      bucket.fetch_json("incremental.json").get()};
+      bucket.fetch_json("/incremental.json").get()};
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_2{
-      bucket.fetch_json("incremental.json").get()};
+      bucket.fetch_json("/incremental.json").get()};
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_3{
-      bucket.fetch_json("incremental.json").get()};
+      bucket.fetch_json("/incremental.json").get()};
 
   EXPECT_TRUE(response_1.has_value());
   EXPECT_TRUE(response_1.value().data.is_object());

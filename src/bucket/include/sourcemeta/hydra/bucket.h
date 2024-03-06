@@ -78,7 +78,8 @@ public:
   /// Represents a JSON response from a bucket
   using ResponseJSON = BucketResponse<sourcemeta::jsontoolkit::JSON>;
 
-  /// Fetch a JSON document from the given bucket. For example:
+  /// Fetch a JSON document from the given bucket. The key must start with a
+  /// forward slash. For example:
   ///
   /// ```cpp
   /// #include <sourcemeta/hydra/bucket.h>
@@ -110,6 +111,10 @@ public:
   ///   }
   /// }
   /// ```
+  ///
+  /// Keep in mind this function does not perform any normalization to the key,
+  /// so to avoid unexpected results (mainly around caching), make sure to pass
+  /// keys in a consistent manner (i.e. casing, etc).
   auto fetch_json(const std::string &key)
       -> std::future<std::optional<ResponseJSON>>;
 
