@@ -24,7 +24,9 @@ Bucket::Bucket(std::string bucket_url, std::string bucket_region,
       secret_key{std::move(bucket_secret_key)} {}
 // clang-format on
 
-auto Bucket::fetch_json(const std::string &key) -> std::optional<ResponseJSON> {
+auto Bucket::fetch_json(const std::string &key)
+    -> std::future<std::optional<ResponseJSON>> {
+  std::promise<std::optional<ResponseJSON>> promise;
   std::ostringstream normalized_key;
   if (key.front() != '/')
     normalized_key << '/';
@@ -33,7 +35,8 @@ auto Bucket::fetch_json(const std::string &key) -> std::optional<ResponseJSON> {
   const auto cached_result{this->cache.at(normalized_key.str())};
   if (cached_result.has_value() &&
       this->cache_policy == BucketCachePolicy::Indefinitely) {
-    return cached_result.value();
+    promise.set_value(cached_result.value());
+    return promise.get_future();
   }
 
   // TODO: Properly build, concat, and canonicalize the string using URI Kit
@@ -67,11 +70,13 @@ auto Bucket::fetch_json(const std::string &key) -> std::optional<ResponseJSON> {
 
   const auto status{response.status()};
   if (status == sourcemeta::hydra::http::Status::NOT_FOUND) {
-    return std::nullopt;
+    promise.set_value(std::nullopt);
+    return promise.get_future();
   } else if (status == sourcemeta::hydra::http::Status::NOT_MODIFIED &&
              cached_result.has_value() &&
              this->cache_policy == BucketCachePolicy::ETag) {
-    return cached_result.value();
+    promise.set_value(cached_result.value());
+    return promise.get_future();
   } else if (status != sourcemeta::hydra::http::Status::OK) {
     throw BucketError("Failed to fetch JSON from storage");
   }
@@ -89,7 +94,8 @@ auto Bucket::fetch_json(const std::string &key) -> std::optional<ResponseJSON> {
                      {result.data, result.etag, result.last_modified, true},
                      result.data.estimated_byte_size());
 
-  return std::optional<ResponseJSON>{std::move(result)};
+  promise.set_value(std::move(result));
+  return promise.get_future();
 }
 
 } // namespace sourcemeta::hydra
