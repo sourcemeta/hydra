@@ -8,7 +8,7 @@ TEST(Bucket_JSON, no_cache_single) {
   sourcemeta::hydra::Bucket bucket{HTTP_BASE_URL() + "/bucket", "us-east-1",
                                    "123456789", "ultra-secret"};
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response{
-      bucket.fetch_json("1.json")};
+      bucket.fetch_json("1.json").get()};
   EXPECT_TRUE(response.has_value());
   EXPECT_TRUE(response.value().data.is_object());
   EXPECT_EQ(response.value().data.size(), 1);
@@ -24,11 +24,11 @@ TEST(Bucket_JSON, no_cache_idempotent) {
                                    "123456789", "ultra-secret"};
 
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_1{
-      bucket.fetch_json("1.json")};
+      bucket.fetch_json("1.json").get()};
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_2{
-      bucket.fetch_json("1.json")};
+      bucket.fetch_json("1.json").get()};
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_3{
-      bucket.fetch_json("1.json")};
+      bucket.fetch_json("1.json").get()};
 
   EXPECT_TRUE(response_1.has_value());
   EXPECT_TRUE(response_1.value().data.is_object());
@@ -64,11 +64,11 @@ TEST(Bucket_JSON, cache_none_with_policy) {
       sourcemeta::hydra::BucketCachePolicy::Indefinitely};
 
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_1{
-      bucket.fetch_json("1.json")};
+      bucket.fetch_json("1.json").get()};
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_2{
-      bucket.fetch_json("1.json")};
+      bucket.fetch_json("1.json").get()};
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_3{
-      bucket.fetch_json("1.json")};
+      bucket.fetch_json("1.json").get()};
 
   EXPECT_TRUE(response_1.has_value());
   EXPECT_TRUE(response_1.value().data.is_object());
@@ -108,11 +108,11 @@ TEST(Bucket_JSON, cache_indefinitely) {
       100000};
 
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_1{
-      bucket.fetch_json("1.json")};
+      bucket.fetch_json("1.json").get()};
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_2{
-      bucket.fetch_json("1.json")};
+      bucket.fetch_json("1.json").get()};
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_3{
-      bucket.fetch_json("1.json")};
+      bucket.fetch_json("1.json").get()};
 
   EXPECT_TRUE(response_1.has_value());
   EXPECT_TRUE(response_1.value().data.is_object());
@@ -152,9 +152,9 @@ TEST(Bucket_JSON, cache_indefinitely_with_without_prefix_slash) {
       100000};
 
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_1{
-      bucket.fetch_json("1.json")};
+      bucket.fetch_json("1.json").get()};
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_2{
-      bucket.fetch_json("/1.json")};
+      bucket.fetch_json("/1.json").get()};
 
   EXPECT_TRUE(response_1.has_value());
   EXPECT_TRUE(response_1.value().data.is_object());
@@ -184,11 +184,11 @@ TEST(Bucket_JSON, cache_etag_match) {
                                    100000};
 
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_1{
-      bucket.fetch_json("1.json")};
+      bucket.fetch_json("1.json").get()};
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_2{
-      bucket.fetch_json("1.json")};
+      bucket.fetch_json("1.json").get()};
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_3{
-      bucket.fetch_json("1.json")};
+      bucket.fetch_json("1.json").get()};
 
   EXPECT_TRUE(response_1.has_value());
   EXPECT_TRUE(response_1.value().data.is_object());
@@ -227,11 +227,11 @@ TEST(Bucket_JSON, cache_etag_mismatch) {
                                    100000};
 
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_1{
-      bucket.fetch_json("incremental.json")};
+      bucket.fetch_json("incremental.json").get()};
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_2{
-      bucket.fetch_json("incremental.json")};
+      bucket.fetch_json("incremental.json").get()};
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_3{
-      bucket.fetch_json("incremental.json")};
+      bucket.fetch_json("incremental.json").get()};
 
   EXPECT_TRUE(response_1.has_value());
   EXPECT_TRUE(response_1.value().data.is_object());

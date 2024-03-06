@@ -25,6 +25,7 @@
 #include <sourcemeta/jsontoolkit/json.h>
 
 #include <cstdint>  // std::uint64_t
+#include <future>   // std::future
 #include <optional> // std::optional
 #include <string>   // std::string
 
@@ -95,7 +96,7 @@ public:
   ///   5000000};
   ///
   /// std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response{
-  ///   bucket.fetch_json("/foo/bar.json")};
+  ///   bucket.fetch_json("/foo/bar.json").get()};
   ///
   /// if (response.has_value()) {
   ///   sourcemeta::jsontoolkit::prettify(response.value().data, std::cout);
@@ -109,7 +110,8 @@ public:
   ///   }
   /// }
   /// ```
-  auto fetch_json(const std::string &key) -> std::optional<ResponseJSON>;
+  auto fetch_json(const std::string &key)
+      -> std::future<std::optional<ResponseJSON>>;
 
 private:
 #if defined(_MSC_VER)
