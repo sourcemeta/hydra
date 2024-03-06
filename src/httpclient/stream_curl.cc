@@ -278,8 +278,6 @@ auto ClientStream::send() -> std::future<Status> {
 
   handle_curl(curl_easy_setopt(this->internal->handle, CURLOPT_URL,
                                this->internal->url.c_str()));
-  handle_curl(curl_easy_setopt(this->internal->handle, CURLOPT_HTTPHEADER,
-                               this->internal->headers));
 
   // Accept all supported compression mechanisms
   // See https://curl.se/libcurl/c/CURLOPT_ACCEPT_ENCODING.html
@@ -301,6 +299,8 @@ auto ClientStream::send() -> std::future<Status> {
                                callback_on_header));
   handle_curl(
       curl_easy_setopt(this->internal->handle, CURLOPT_HEADERDATA, this));
+  handle_curl(curl_easy_setopt(this->internal->handle, CURLOPT_HTTPHEADER,
+                               this->internal->headers));
 
   // Perform request
   handle_curl(curl_easy_perform(this->internal->handle));
