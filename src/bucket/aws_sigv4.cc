@@ -183,13 +183,9 @@ auto aws_sigv4_canonical(const http::Method method, std::string_view host,
 auto aws_sigv4(const http::Method method,
                const sourcemeta::jsontoolkit::URI &url,
                std::string_view access_key, std::string_view secret_key,
-               std::string_view region,
+               std::string_view region, std::string &&content_checksum,
                const std::chrono::system_clock::time_point now)
     -> std::map<std::string, std::string> {
-  // The empty content SHA256
-  // TODO: Support sending a body
-  auto content_checksum{
-      "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"};
   std::ostringstream request_date_iso8601;
   aws_sigv4_iso8601(now, request_date_iso8601);
   std::ostringstream request_date_datastamp;

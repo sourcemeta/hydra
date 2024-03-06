@@ -22,10 +22,11 @@
 
 namespace sourcemeta::hydra {
 
-auto SOURCEMETA_HYDRA_BUCKET_EXPORT aws_sigv4(
-    const http::Method method, const sourcemeta::jsontoolkit::URI &url,
-    std::string_view access_key, std::string_view secret_key,
-    std::string_view region, const std::chrono::system_clock::time_point now)
+auto SOURCEMETA_HYDRA_BUCKET_EXPORT
+aws_sigv4(const http::Method method, const sourcemeta::jsontoolkit::URI &url,
+          std::string_view access_key, std::string_view secret_key,
+          std::string_view region, std::string &&content_checksum,
+          const std::chrono::system_clock::time_point now)
     -> std::map<std::string, std::string>;
 
 auto SOURCEMETA_HYDRA_BUCKET_EXPORT aws_sigv4_scope(std::string_view datastamp,
