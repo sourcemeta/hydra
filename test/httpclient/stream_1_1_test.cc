@@ -351,3 +351,30 @@ TEST(HTTP_Stream_1_1, post_root_empty_body) {
   // Body
   EXPECT_EQ(response_body.str(), "RECEIVED POST /");
 }
+
+TEST(HTTP_Stream_1_1, upload_no_content_length_by_default) {
+  sourcemeta::hydra::http::ClientStream request{HTTP_BASE_URL()};
+  request.method(sourcemeta::hydra::http::Method::PUT);
+
+  std::istringstream request_body{"hello world"};
+  std::map<std::string, std::string> headers;
+
+  request.on_header([&headers](const sourcemeta::hydra::http::Status,
+                               std::string_view key,
+                               std::string_view value) noexcept {
+    headers.emplace(key, value);
+  });
+
+  request.on_body([&request_body](const std::size_t bytes) {
+    std::vector<std::uint8_t> result;
+    while (result.size() < bytes && request_body.peek() != EOF) {
+      result.push_back(static_cast<std::uint8_t>(request_body.get()));
+    }
+
+    return result;
+  });
+
+  const auto status{request.send().get()};
+  EXPECT_EQ(status, sourcemeta::hydra::http::Status::OK);
+  EXPECT_FALSE(headers.contains("x-content-length"));
+}
