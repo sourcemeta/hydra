@@ -107,9 +107,6 @@ jobs:
       - run: cmake --build ./build --config Release --parallel 4
       - run: >
           cmake --install ./build --prefix ./build/dist --config Release --verbose
-          --component bearssl
-      - run: >
-          cmake --install ./build --prefix ./build/dist --config Release --verbose
           --component sourcemeta_jsontoolkit
       - run: >
           cmake --install ./build --prefix ./build/dist --config Release --verbose

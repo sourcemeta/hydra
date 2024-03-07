@@ -334,19 +334,19 @@ if(NOT BearSSL_FOUND)
   install(TARGETS bearssl
     EXPORT bearssl
     PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
-      COMPONENT bearssl
+      COMPONENT sourcemeta_hydra_dev
     PRIVATE_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
-      COMPONENT bearssl
+      COMPONENT sourcemeta_hydra_dev
     RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
-      COMPONENT bearssl
+      COMPONENT sourcemeta_hydra
     LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-      COMPONENT bearssl
-      NAMELINK_COMPONENT bearssl
+      COMPONENT sourcemeta_hydra
+      NAMELINK_COMPONENT sourcemeta_hydra_dev
     ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-    COMPONENT bearssl)
+      COMPONENT sourcemeta_hydra_dev)
   install(EXPORT bearssl
     DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/bearssl"
-    COMPONENT bearssl)
+    COMPONENT sourcemeta_hydra_dev)
 
   file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/bearssl-config.cmake
     "include(\"\${CMAKE_CURRENT_LIST_DIR}/bearssl.cmake\")\n"
@@ -354,7 +354,7 @@ if(NOT BearSSL_FOUND)
   install(FILES
     "${CMAKE_CURRENT_BINARY_DIR}/bearssl-config.cmake"
     DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/bearssl"
-    COMPONENT bearssl)
+    COMPONENT sourcemeta_hydra_dev)
 
   set(BearSSL_FOUND ON)
 endif()
