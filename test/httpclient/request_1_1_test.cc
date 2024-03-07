@@ -13,8 +13,8 @@
 
 #include "http_base_url.h"
 
-static auto body(sourcemeta::hydra::http::ClientResponse &response)
-    -> std::string {
+static auto
+body(sourcemeta::hydra::http::ClientResponse &response) -> std::string {
   std::ostringstream result;
   std::copy(
       std::istreambuf_iterator<std::ostringstream::char_type>(response.body()),
