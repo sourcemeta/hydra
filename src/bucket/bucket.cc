@@ -139,4 +139,21 @@ auto Bucket::upsert_json(const std::string &key,
   return promise.get_future();
 }
 
+auto Bucket::fetch_or_upsert(const std::string &key,
+                             std::function<sourcemeta::jsontoolkit::JSON()>
+                                 callback) -> std::future<ResponseJSON> {
+  std::promise<ResponseJSON> promise;
+  auto maybe_response{this->fetch_json(key).get()};
+  if (maybe_response.has_value()) {
+    promise.set_value(std::move(maybe_response).value());
+  } else {
+    this->upsert_json(key, callback());
+    auto response{this->fetch_json(key).get()};
+    assert(response.has_value());
+    promise.set_value(std::move(response).value());
+  }
+
+  return promise.get_future();
+}
+
 } // namespace sourcemeta::hydra
