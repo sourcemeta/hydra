@@ -87,6 +87,29 @@ TEST(HTTP_Stream_1_1, get_empty) {
   EXPECT_EQ(body.str(), "");
 }
 
+TEST(HTTP_Stream_1_1, unsigned_long_header) {
+  sourcemeta::hydra::http::ClientStream request{HTTP_BASE_URL()};
+  request.method(sourcemeta::hydra::http::Method::GET);
+  const unsigned long number{11};
+  request.header("x-foo", number);
+
+  std::map<std::string, std::string> headers;
+  request.on_header([&headers](const sourcemeta::hydra::http::Status,
+                               std::string_view key,
+                               std::string_view value) noexcept {
+    headers.emplace(key, value);
+  });
+
+  const auto status{request.send().get()};
+
+  // Status
+  EXPECT_EQ(status, sourcemeta::hydra::http::Status::OK);
+
+  // Headers
+  EXPECT_TRUE(headers.contains("x-x-foo"));
+  EXPECT_EQ(headers.at("x-x-foo"), std::to_string(number));
+}
+
 TEST(HTTP_Stream_1_1, post_empty) {
   sourcemeta::hydra::http::ClientStream request{std::string{HTTP_BASE_URL()} +
                                                 "/empty"};

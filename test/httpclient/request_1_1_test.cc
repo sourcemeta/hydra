@@ -428,3 +428,15 @@ TEST(HTTP_Request_1_1, root_empty_istringstream) {
   EXPECT_FALSE(response.empty());
   EXPECT_EQ(body(response), "RECEIVED POST /");
 }
+
+TEST(HTTP_Request_1_1, unsigned_long_header) {
+  sourcemeta::hydra::http::ClientRequest request{HTTP_BASE_URL()};
+  request.method(sourcemeta::hydra::http::Method::GET);
+  const unsigned long number{11};
+  request.header("x-foo", number);
+  request.capture({"x-x-foo"});
+  sourcemeta::hydra::http::ClientResponse response{request.send().get()};
+  EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_TRUE(response.header("x-x-foo").has_value());
+  EXPECT_EQ(response.header("x-x-foo").value(), "11");
+}
