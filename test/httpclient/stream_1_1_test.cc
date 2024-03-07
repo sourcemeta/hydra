@@ -375,7 +375,7 @@ TEST(HTTP_Stream_1_1, post_root_empty_body) {
   EXPECT_EQ(response_body.str(), "RECEIVED POST /");
 }
 
-TEST(HTTP_Stream_1_1, upload_no_content_length_by_default) {
+TEST(HTTP_Stream_1_1, upload_chunked_encoding_by_default) {
   sourcemeta::hydra::http::ClientStream request{HTTP_BASE_URL()};
   request.method(sourcemeta::hydra::http::Method::PUT);
 
@@ -400,4 +400,6 @@ TEST(HTTP_Stream_1_1, upload_no_content_length_by_default) {
   const auto status{request.send().get()};
   EXPECT_EQ(status, sourcemeta::hydra::http::Status::OK);
   EXPECT_FALSE(headers.contains("x-content-length"));
+  EXPECT_TRUE(headers.contains("x-transfer-encoding"));
+  EXPECT_EQ(headers.at("x-transfer-encoding"), "chunked");
 }
