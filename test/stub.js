@@ -59,6 +59,31 @@ http.createServer((request, response) => {
     return;
   }
 
+  if (request.url === '/upload.json') {
+    if (request.method !== 'PUT') {
+      response.statusCode = 405;
+      return response.end();
+    }
+
+    if (!request.headers['content-length']) {
+      response.statusCode = 400;
+      return response.end();
+    }
+
+    if (request.headers['transfer-encoding']) {
+      if (request.headers['transfer-encoding'] === 'chunked') {
+        response.statusCode = 411;
+        return response.end();
+      } else {
+        response.statusCode = 501;
+        return response.end();
+      }
+    }
+
+    response.statusCode = 200;
+    return response.end();
+  }
+
   for (const [key, value] of Object.entries(request.headers)) {
     response.setHeader(`X-${key}`, value);
   }
