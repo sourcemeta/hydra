@@ -278,7 +278,13 @@ public:
   /// request body. The callback gets passed the number of bytes to read, and
   /// its expected to return an array of bytes to pass to the request. If the
   /// number of returned bytes is less than the bytes argument, then the body is
-  /// assumed to have ended. For example:
+  /// assumed to have ended.
+  ///
+  /// Keep in mind that passing a request body in this way will result in
+  /// chunked encoding. See
+  /// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Transfer-Encoding.
+  ///
+  /// For example:
   ///
   /// ```cpp
   /// #include <sourcemeta/hydra/httpclient.h>
