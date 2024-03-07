@@ -253,10 +253,6 @@ auto ClientStream::header(std::string_view key, int value) -> void {
   this->header(key, std::to_string(value));
 }
 
-auto ClientStream::header(std::string_view key, unsigned long value) -> void {
-  this->header(key, std::to_string(value));
-}
-
 auto ClientStream::url() const -> std::string_view {
   return this->internal->url;
 }

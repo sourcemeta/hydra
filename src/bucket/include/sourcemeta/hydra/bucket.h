@@ -118,6 +118,27 @@ public:
   auto fetch_json(const std::string &key)
       -> std::future<std::optional<ResponseJSON>>;
 
+  /// Upsert a JSON document into the given bucket. The key must start with a
+  /// forward slash. For example:
+  ///
+  /// ```cpp
+  /// #include <sourcemeta/hydra/bucket.h>
+  /// #include <sourcemeta/jsontoolkit/json.h>
+  ///
+  /// sourcemeta::hydra::Bucket bucket{
+  ///   // A Backblaze B2 bucket
+  ///   "https://s3.us-east-005.backblazeb2.com/my-bucket",
+  ///   "us-east-005", "123456789", "ultra-secret"};
+  ///
+  /// const sourcemeta::jsontoolkit::JSON document =
+  ///   sourcemeta::jsontoolkit::parse("{ \"foo\": \"bar\" }");
+  ///
+  /// bucket.upsert_json("/foo/bar.json", document).wait();
+  /// ```
+  auto upsert_json(const std::string &key,
+                   const sourcemeta::jsontoolkit::JSON &document)
+      -> std::future<void>;
+
 private:
 #if defined(_MSC_VER)
 #pragma warning(disable : 4251)

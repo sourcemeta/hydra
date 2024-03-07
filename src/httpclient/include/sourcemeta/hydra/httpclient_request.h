@@ -143,21 +143,6 @@ public:
   /// ```
   auto header(std::string_view key, int value) -> void;
 
-  /// Set an HTTP request header whose value is an unsigned long integer. For
-  /// example:
-  ///
-  /// ```cpp
-  /// #include <sourcemeta/hydra/httpclient.h>
-  /// #include <cassert>
-  ///
-  /// sourcemeta::hydra::http::ClientRequest request{"https://www.example.com"};
-  /// const unsigned long value = 3;
-  /// request.header("X-Favourite-Number", value);
-  /// sourcemeta::hydra::http::ClientResponse response{request.send().get()};
-  /// assert(response.status() == sourcemeta::hydra::http::Status::OK);
-  /// ```
-  auto header(std::string_view key, unsigned long value) -> void;
-
   /// Retrieve the URL that the request will be sent to. For example:
   ///
   /// ```cpp

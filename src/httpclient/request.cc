@@ -49,10 +49,6 @@ auto ClientRequest::header(std::string_view key, int value) -> void {
   this->stream.header(key, value);
 }
 
-auto ClientRequest::header(std::string_view key, unsigned long value) -> void {
-  this->stream.header(key, value);
-}
-
 auto ClientRequest::url() const -> std::string_view {
   return this->stream.url();
 }

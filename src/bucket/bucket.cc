@@ -95,4 +95,47 @@ auto Bucket::fetch_json(const std::string &key)
   return promise.get_future();
 }
 
+auto Bucket::upsert_json(const std::string &key,
+                         const sourcemeta::jsontoolkit::JSON &document)
+    -> std::future<void> {
+  std::promise<void> promise;
+  assert(key.front() == '/');
+
+  // TODO: Properly build, concat, and canonicalize the string using URI Kit
+  std::ostringstream request_url;
+  request_url << this->url;
+  request_url << key;
+
+  sourcemeta::hydra::http::ClientRequest request{request_url.str()};
+  request.method(sourcemeta::hydra::http::Method::PUT);
+
+  // TODO: Support chunked streaming uploads instead
+  // See https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-streaming.html
+  std::stringstream content;
+  sourcemeta::jsontoolkit::prettify(document, content);
+  std::ostringstream content_checksum;
+  aws_sigv4_sha256(content.str(), content_checksum);
+  request.header("content-length", std::to_string(content.str().size()));
+  request.header("transfer-encoding", "");
+
+  for (auto &&[header, value] :
+       aws_sigv4(request.method(),
+                 // TODO: Support constructing a URL given a string_view
+                 sourcemeta::jsontoolkit::URI{std::string{request.url()}},
+                 this->access_key, this->secret_key, this->region,
+                 content_checksum.str(), std::chrono::system_clock::now())) {
+    request.header(std::move(header), std::move(value));
+  }
+
+  sourcemeta::hydra::http::ClientResponse response{request.send(content).get()};
+  const auto status{response.status()};
+  if (status != sourcemeta::hydra::http::Status::OK) {
+    std::ostringstream error;
+    error << "Failed to upsert JSON to storage: " << status;
+    throw BucketError(error.str());
+  }
+
+  return promise.get_future();
+}
+
 } // namespace sourcemeta::hydra
