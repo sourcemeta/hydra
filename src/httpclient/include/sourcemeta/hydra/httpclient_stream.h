@@ -173,6 +173,30 @@ public:
   /// ```
   auto header(std::string_view key, int value) -> void;
 
+  /// Set an HTTP request header whose value is an unsigned long. For example:
+  ///
+  /// ```cpp
+  /// #include <sourcemeta/hydra/httpclient.h>
+  /// #include <iostream>
+  ///
+  /// sourcemeta::hydra::http::ClientStream request{"https://www.example.com"};
+  /// const unsigned long value = 3;
+  /// request.header("X-Favourite-Number", value);
+  ///
+  /// request.on_data([](const sourcemeta::hydra::http::Status status,
+  ///                    std::span<const std::uint8_t> buffer) noexcept {
+  ///   std::cerr << "Code: " << status << "\n";
+  ///
+  ///   // Copy to standard output
+  ///   for (const auto byte : buffer) {
+  ///     std::cout << static_cast<char>(byte);
+  ///   }
+  /// });
+  ///
+  /// request.send().wait();
+  /// ```
+  auto header(std::string_view key, unsigned long value) -> void;
+
   /// Retrieve the URL that the request will be sent to. For example:
   ///
   /// ```cpp
