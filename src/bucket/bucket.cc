@@ -108,6 +108,7 @@ auto Bucket::upsert_json(const std::string &key,
 
   sourcemeta::hydra::http::ClientRequest request{request_url.str()};
   request.method(sourcemeta::hydra::http::Method::PUT);
+  request.header("content-type", "application/json");
 
   // TODO: Support chunked streaming uploads instead
   // See https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-streaming.html
