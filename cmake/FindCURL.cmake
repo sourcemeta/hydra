@@ -356,11 +356,11 @@ if(NOT CURL_FOUND)
   target_compile_definitions(curl PRIVATE ENABLE_IPV6)
   target_compile_definitions(curl PRIVATE USE_BEARSSL)
   target_compile_definitions(curl PRIVATE SIZEOF_CURL_OFF_T=8)
-
   if(NOT BUILD_SHARED_LIBS)
     target_compile_definitions(curl PRIVATE CURL_STATICLIB)
   endif()
 
+  # TODO: Move under platform-specific options
   if(UNIX)
     target_compile_definitions(curl PRIVATE HAVE_RECV)
     target_compile_definitions(curl PRIVATE HAVE_SEND)
@@ -377,6 +377,7 @@ if(NOT CURL_FOUND)
     target_compile_definitions(curl PRIVATE HAVE_STRUCT_TIMEVAL)
   endif()
 
+  # Platform specific options
   if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     target_compile_definitions(curl PRIVATE "OS=\"Linux\"")
     # POSIX.1-2008
