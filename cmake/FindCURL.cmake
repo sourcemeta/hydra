@@ -356,6 +356,8 @@ if(NOT CURL_FOUND)
   target_compile_definitions(curl PRIVATE ENABLE_IPV6)
   target_compile_definitions(curl PRIVATE USE_BEARSSL)
   target_compile_definitions(curl PRIVATE SIZEOF_CURL_OFF_T=8)
+  # To support HTTP compression
+  target_compile_definitions(curl PRIVATE HAVE_LIBZ)
   if(NOT BUILD_SHARED_LIBS)
     target_compile_definitions(curl PUBLIC CURL_STATICLIB)
   endif()
