@@ -41,6 +41,7 @@ if(HYDRA_HTTP OR HYDRA_HTTPCLIENT OR HYDRA_BUCKET)
 endif()
 
 if(HYDRA_HTTPCLIENT OR HYDRA_BUCKET)
+  find_package(ZLIB REQUIRED)
   find_package(CURL REQUIRED)
   add_subdirectory(src/httpclient)
 endif()
