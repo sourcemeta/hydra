@@ -1,10 +1,4 @@
 cmake_minimum_required(VERSION 3.24)
-
-# Needs to happen before the first call to "project()".
-if(WIN32)
-  include(cmake/VCPKG.cmake)
-endif()
-
 project(hydra VERSION 0.0.1 LANGUAGES C CXX
   DESCRIPTION "A convenience networking library for modern C++")
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
@@ -42,13 +36,13 @@ endif()
 
 if(HYDRA_HTTPCLIENT OR HYDRA_BUCKET)
   find_package(ZLIB REQUIRED)
+  find_package(BearSSL REQUIRED)
   find_package(CURL REQUIRED)
   add_subdirectory(src/httpclient)
 endif()
 
 if(HYDRA_BUCKET)
   find_package(JSONToolkit REQUIRED COMPONENTS json uri)
-  find_package(BearSSL REQUIRED)
   add_subdirectory(src/bucket)
 endif()
 

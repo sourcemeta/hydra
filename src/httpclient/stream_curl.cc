@@ -113,9 +113,11 @@ auto callback_on_header(const void *const data, const std::size_t size,
 
       // Convert headers to lowercase
       std::string key_lowercase;
-      std::transform(
-          key.cbegin(), key.cend(), std::back_inserter(key_lowercase),
-          [](unsigned char character) { return std::tolower(character); });
+      std::transform(key.cbegin(), key.cend(),
+                     std::back_inserter(key_lowercase),
+                     [](unsigned char character) {
+                       return static_cast<char>(std::tolower(character));
+                     });
 
       request->internal->on_header(
           request->internal->status.value(), key_lowercase,
