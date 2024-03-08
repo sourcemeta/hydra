@@ -52,3 +52,4 @@ lib/Makefile.am
 lib/Makefile.inc
 lib/Makefile.mk
 lib/Makefile.soname
+lib/curl_config.h.cmake
