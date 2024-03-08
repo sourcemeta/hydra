@@ -410,11 +410,8 @@ if(NOT CURL_FOUND)
     target_link_libraries(curl PRIVATE "-framework Foundation")
     target_link_libraries(curl PRIVATE "-framework SystemConfiguration")
   elseif(WIN32)
-    # TODO: Can we remove some of these? Can they be private?
-    target_link_libraries(curl PUBLIC wldap32)
-    target_link_libraries(curl PUBLIC ws2_32)
-    target_link_libraries(curl PUBLIC Crypt32.lib)
-    target_link_libraries(curl PUBLIC Wldap32)
+    target_link_libraries(curl PRIVATE ws2_32)
+    target_link_libraries(curl PRIVATE Crypt32.lib)
   endif()
 
   target_include_directories(curl PUBLIC
