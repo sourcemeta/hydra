@@ -357,7 +357,7 @@ if(NOT CURL_FOUND)
   target_compile_definitions(curl PRIVATE USE_BEARSSL)
   target_compile_definitions(curl PRIVATE SIZEOF_CURL_OFF_T=8)
   if(NOT BUILD_SHARED_LIBS)
-    target_compile_definitions(curl PRIVATE CURL_STATICLIB)
+    target_compile_definitions(curl PUBLIC CURL_STATICLIB)
   endif()
 
   # Platform specific options
@@ -409,6 +409,12 @@ if(NOT CURL_FOUND)
   if(APPLE)
     target_link_libraries(curl PRIVATE "-framework Foundation")
     target_link_libraries(curl PRIVATE "-framework SystemConfiguration")
+  elseif(WIN32)
+    # TODO: Can we remove some of these? Can they be private?
+    target_link_libraries(curl PUBLIC wldap32)
+    target_link_libraries(curl PUBLIC ws2_32)
+    target_link_libraries(curl PUBLIC Crypt32.lib)
+    target_link_libraries(curl PUBLIC Wldap32)
   endif()
 
   target_include_directories(curl PUBLIC
