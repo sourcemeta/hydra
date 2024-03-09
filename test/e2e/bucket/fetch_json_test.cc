@@ -16,14 +16,15 @@ TEST(e2e_Bucket_JSON, missing) {
 TEST(e2e_Bucket_JSON, no_cache_single) {
   sourcemeta::hydra::Bucket bucket{BUCKET_BASE_URL(), BUCKET_REGION(),
                                    BUCKET_ACCESS_KEY(), BUCKET_SECRET_KEY()};
+
+  const sourcemeta::jsontoolkit::JSON document =
+      sourcemeta::jsontoolkit::parse(R"JSON({ "foo": 1 })JSON");
+  bucket.upsert_json("/data/no_cache_single.json", document).wait();
+
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response{
-      bucket.fetch_json("/data/1.json").get()};
+      bucket.fetch_json("/data/no_cache_single.json").get()};
   EXPECT_TRUE(response.has_value());
-  EXPECT_TRUE(response.value().data.is_object());
-  EXPECT_EQ(response.value().data.size(), 1);
-  EXPECT_TRUE(response.value().data.defines("foo"));
-  EXPECT_TRUE(response.value().data.at("foo").is_integer());
-  EXPECT_EQ(response.value().data.at("foo").to_integer(), 1);
+  EXPECT_EQ(response.value().data, document);
   EXPECT_FALSE(response.value().cache_hit);
 }
 
@@ -31,19 +32,19 @@ TEST(e2e_Bucket_JSON, no_cache_idempotent) {
   sourcemeta::hydra::Bucket bucket{BUCKET_BASE_URL(), BUCKET_REGION(),
                                    BUCKET_ACCESS_KEY(), BUCKET_SECRET_KEY()};
 
+  const sourcemeta::jsontoolkit::JSON document =
+      sourcemeta::jsontoolkit::parse(R"JSON({ "foo": 1 })JSON");
+  bucket.upsert_json("/data/no_cache_idempotent.json", document).wait();
+
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_1{
-      bucket.fetch_json("/data/1.json").get()};
+      bucket.fetch_json("/data/no_cache_idempotent.json").get()};
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_2{
-      bucket.fetch_json("/data/1.json").get()};
+      bucket.fetch_json("/data/no_cache_idempotent.json").get()};
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_3{
-      bucket.fetch_json("/data/1.json").get()};
+      bucket.fetch_json("/data/no_cache_idempotent.json").get()};
 
   EXPECT_TRUE(response_1.has_value());
-  EXPECT_TRUE(response_1.value().data.is_object());
-  EXPECT_EQ(response_1.value().data.size(), 1);
-  EXPECT_TRUE(response_1.value().data.defines("foo"));
-  EXPECT_TRUE(response_1.value().data.at("foo").is_integer());
-  EXPECT_EQ(response_1.value().data.at("foo").to_integer(), 1);
+  EXPECT_EQ(response_1.value().data, document);
   EXPECT_FALSE(response_1.value().cache_hit);
 
   EXPECT_TRUE(response_2.has_value());
@@ -64,19 +65,19 @@ TEST(e2e_Bucket_JSON, cache_none_with_policy) {
       BUCKET_BASE_URL(), BUCKET_REGION(), BUCKET_ACCESS_KEY(),
       BUCKET_SECRET_KEY(), sourcemeta::hydra::BucketCachePolicy::Indefinitely};
 
+  const sourcemeta::jsontoolkit::JSON document =
+      sourcemeta::jsontoolkit::parse(R"JSON({ "foo": 1 })JSON");
+  bucket.upsert_json("/data/cache_none_with_policy.json", document).wait();
+
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_1{
-      bucket.fetch_json("/data/1.json").get()};
+      bucket.fetch_json("/data/cache_none_with_policy.json").get()};
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_2{
-      bucket.fetch_json("/data/1.json").get()};
+      bucket.fetch_json("/data/cache_none_with_policy.json").get()};
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_3{
-      bucket.fetch_json("/data/1.json").get()};
+      bucket.fetch_json("/data/cache_none_with_policy.json").get()};
 
   EXPECT_TRUE(response_1.has_value());
-  EXPECT_TRUE(response_1.value().data.is_object());
-  EXPECT_EQ(response_1.value().data.size(), 1);
-  EXPECT_TRUE(response_1.value().data.defines("foo"));
-  EXPECT_TRUE(response_1.value().data.at("foo").is_integer());
-  EXPECT_EQ(response_1.value().data.at("foo").to_integer(), 1);
+  EXPECT_EQ(response_1.value().data, document);
   EXPECT_FALSE(response_1.value().cache_hit);
 
   EXPECT_TRUE(response_2.has_value());
@@ -101,19 +102,19 @@ TEST(e2e_Bucket_JSON, cache_indefinitely) {
       sourcemeta::hydra::BucketCachePolicy::Indefinitely,
       100000};
 
+  const sourcemeta::jsontoolkit::JSON document =
+      sourcemeta::jsontoolkit::parse(R"JSON({ "foo": 1 })JSON");
+  bucket.upsert_json("/data/cache_indefinitely.json", document).wait();
+
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_1{
-      bucket.fetch_json("/data/1.json").get()};
+      bucket.fetch_json("/data/cache_indefinitely.json").get()};
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_2{
-      bucket.fetch_json("/data/1.json").get()};
+      bucket.fetch_json("/data/cache_indefinitely.json").get()};
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_3{
-      bucket.fetch_json("/data/1.json").get()};
+      bucket.fetch_json("/data/cache_indefinitely.json").get()};
 
   EXPECT_TRUE(response_1.has_value());
-  EXPECT_TRUE(response_1.value().data.is_object());
-  EXPECT_EQ(response_1.value().data.size(), 1);
-  EXPECT_TRUE(response_1.value().data.defines("foo"));
-  EXPECT_TRUE(response_1.value().data.at("foo").is_integer());
-  EXPECT_EQ(response_1.value().data.at("foo").to_integer(), 1);
+  EXPECT_EQ(response_1.value().data, document);
   EXPECT_FALSE(response_1.value().cache_hit);
 
   EXPECT_TRUE(response_2.has_value());
@@ -137,19 +138,19 @@ TEST(e2e_Bucket_JSON, cache_etag_match) {
                                    sourcemeta::hydra::BucketCachePolicy::ETag,
                                    100000};
 
+  const sourcemeta::jsontoolkit::JSON document =
+      sourcemeta::jsontoolkit::parse(R"JSON({ "foo": 1 })JSON");
+  bucket.upsert_json("/data/cache_etag_match.json", document).wait();
+
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_1{
-      bucket.fetch_json("/data/1.json").get()};
+      bucket.fetch_json("/data/cache_etag_match.json").get()};
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_2{
-      bucket.fetch_json("/data/1.json").get()};
+      bucket.fetch_json("/data/cache_etag_match.json").get()};
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_3{
-      bucket.fetch_json("/data/1.json").get()};
+      bucket.fetch_json("/data/cache_etag_match.json").get()};
 
   EXPECT_TRUE(response_1.has_value());
-  EXPECT_TRUE(response_1.value().data.is_object());
-  EXPECT_EQ(response_1.value().data.size(), 1);
-  EXPECT_TRUE(response_1.value().data.defines("foo"));
-  EXPECT_TRUE(response_1.value().data.at("foo").is_integer());
-  EXPECT_EQ(response_1.value().data.at("foo").to_integer(), 1);
+  EXPECT_EQ(response_1.value().data, document);
   EXPECT_FALSE(response_1.value().cache_hit);
 
   EXPECT_TRUE(response_2.has_value());
