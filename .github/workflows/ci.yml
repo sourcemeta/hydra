@@ -54,7 +54,19 @@ jobs:
             options: -DHYDRA_UNDEFINED_SANITIZER:BOOL=ON
 
     runs-on: ${{ matrix.platform.os }}
+
     env:
+      MINIO_ROOT_USER: sourcemeta
+      MINIO_ROOT_PASSWORD: sourcemeta
+      MINIO_PORT: 9000
+      MINIO_PROTOCOL: http
+      MINIO_ADDRESS: 127.0.0.1
+      MINIO_REGION: us-east-1
+      MINIO_ALIAS: sourcemeta
+      MINIO_ACCESS_KEY: sourcemeta-test
+      MINIO_SECRET_KEY: 12345678
+      MINIO_BUCKET: test
+
       CC: ${{ matrix.platform.cc }}
       CXX: ${{ matrix.platform.cxx }}
       TEST_PORT: 9999
@@ -67,6 +79,15 @@ jobs:
         run: |
           sudo apt-get update --yes
           sudo apt-get install --yes nodejs
+          wget https://dl.min.io/server/minio/release/linux-amd64/archive/minio_20240307004348.0.0_amd64.deb -O minio.deb
+          sudo dpkg -i minio.deb
+          rm minio.deb
+          curl https://dl.min.io/client/mc/release/linux-amd64/mc --output /usr/local/bin/mc
+          chmod +x /usr/local/bin/mc
+
+      - name: Install dependencies (Windows)
+        if: runner.os == 'windows'
+        run: choco install --ignore-checksums minio-server minio-client
 
       # See https://github.com/actions/runner-images/issues/8659
       - name: Workaround Clang issue (GNU/Linux)
@@ -118,16 +139,13 @@ jobs:
           cmake --install ./build --prefix ./build/dist --config Release --verbose
           --component sourcemeta_hydra_dev
 
-      - name: Unit Tests
-        # Not every CTest version supports the --test-dir option. If such option
-        # is not recognized, `ctest` will successfully exit finding no tests.
-        # Better to be sure and `cd` all the time here.
-        run: cd ./build && ctest --build-config Release --exclude-regex e2e --output-on-failure --parallel
-        env:
-          # See https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html
-          UBSAN_OPTIONS: print_stacktrace=1
-
       # Run stubs
+      - name: Run MinIO stub (Windows)
+        run: cmd /c "start /b nmake up-minio" && Start-Sleep -Seconds 10 && nmake configure-minio
+        if: runner.os == 'windows'
+      - name: Run MinIO stub (*nix)
+        run: (make up-minio &) && sleep 10 && make configure-minio
+        if: runner.os != 'windows'
       - name: Run HTTP client stub (Windows)
         run: cmd /c "start /b node test\stub.js ${{ env.TEST_PORT }}" && Start-Sleep -Seconds 10
         if: runner.os == 'windows'
@@ -135,12 +153,17 @@ jobs:
         run: (node test/stub.js ${{ env.TEST_PORT }} &) && sleep 10
         if: runner.os != 'windows'
 
-      - name: E2E Tests
-        # Not every CTest version supports the --test-dir option. If such option
-        # is not recognized, `ctest` will successfully exit finding no tests.
-        # Better to be sure and `cd` all the time here.
-        run: cd ./build && ctest --build-config Release --tests-regex e2e --output-on-failure --parallel
+      # Not every CTest version supports the --test-dir option. If such option
+      # is not recognized, `ctest` will successfully exit finding no tests.
+      # Better to be sure and `cd` all the time here.
+      - run: cd ./build && ctest --build-config Release --output-on-failure --parallel
         env:
+          # TODO: Rename this variable and get rid of TEST_PORT
           SOURCEMETA_HYDRA_TEST_SERVER_BASE_URL: 'http://localhost:${{ env.TEST_PORT }}'
+          SOURCEMETA_HYDRA_TEST_BUCKET_BASE_URL: ${{ env.MINIO_PROTOCOL }}://${{ env.MINIO_ADDRESS }}:${{ env.MINIO_PORT }}/${{ env.MINIO_BUCKET }}
+          SOURCEMETA_HYDRA_TEST_BUCKET_REGION: ${{ env.MINIO_REGION }}
+          SOURCEMETA_HYDRA_TEST_BUCKET_ACCESS_KEY: ${{ env.MINIO_ACCESS_KEY }}
+          SOURCEMETA_HYDRA_TEST_BUCKET_SECRET_KEY: ${{ env.MINIO_SECRET_KEY }}
+
           # See https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html
           UBSAN_OPTIONS: print_stacktrace=1
