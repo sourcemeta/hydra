@@ -1,5 +1,5 @@
 add_executable(sourcemeta_hydra_http_unit
-  time_test.cc method_test.cc)
+  time_test.cc status_test.cc method_test.cc)
 sourcemeta_hydra_add_compile_options(sourcemeta_hydra_http_unit)
 target_link_libraries(sourcemeta_hydra_http_unit
   PRIVATE GTest::gtest GTest::gtest_main)
