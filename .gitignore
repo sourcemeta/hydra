@@ -11,3 +11,4 @@ _deps
 /build
 /unikraft/.unikraft
 /unikraft/.config.*
+.data
