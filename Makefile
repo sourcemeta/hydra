@@ -74,7 +74,6 @@ configure-minio: .always
 	$(MC) alias set $(MINIO_ALIAS) $(MINIO_PROTOCOL)://$(MINIO_ADDRESS):$(MINIO_PORT) \
 		$(MINIO_ROOT_USER) $(MINIO_ROOT_PASSWORD)
 	$(MC) mb --region $(MINIO_REGION) --ignore-existing $(MINIO_ALIAS)/$(MINIO_BUCKET)
-	$(MC) cp --recursive test/e2e/bucket/data $(MINIO_ALIAS)/$(MINIO_BUCKET)
 	$(MC) admin user svcacct remove $(MINIO_ALIAS) $(MINIO_ACCESS_KEY) || true
 	$(MC) admin user svcacct add \
 		--name "Test" \
