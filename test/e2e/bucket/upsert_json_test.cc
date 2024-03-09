@@ -5,7 +5,7 @@
 
 #include "http_base_url.h"
 
-TEST(Bucket_JSON, upsert_example_1) {
+TEST(e2e_Bucket_JSON, upsert_example_1) {
   const sourcemeta::jsontoolkit::JSON document =
       sourcemeta::jsontoolkit::parse(R"JSON({ "foo": 9999 })JSON");
   sourcemeta::hydra::Bucket bucket{HTTP_BASE_URL(), "us-east-1", "123456789",

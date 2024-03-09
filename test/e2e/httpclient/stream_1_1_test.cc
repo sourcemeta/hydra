@@ -10,42 +10,42 @@
 
 #include "http_base_url.h"
 
-TEST(HTTP_Stream_1_1, invalid_url) {
+TEST(e2e_HTTP_Stream_1_1, invalid_url) {
   sourcemeta::hydra::http::ClientStream request{"foobarbaz"};
   EXPECT_THROW(request.send().wait(), sourcemeta::hydra::http::Error);
 }
 
-TEST(HTTP_Stream_1_1, retrieve_url) {
+TEST(e2e_HTTP_Stream_1_1, retrieve_url) {
   sourcemeta::hydra::http::ClientStream request{"https://www.example.com"};
   EXPECT_EQ(request.url(), "https://www.example.com");
 }
 
-TEST(HTTP_Stream_1_1, retrieve_method) {
+TEST(e2e_HTTP_Stream_1_1, retrieve_method) {
   sourcemeta::hydra::http::ClientStream request{"https://www.example.com"};
   request.method(sourcemeta::hydra::http::Method::HEAD);
   EXPECT_EQ(request.method(), sourcemeta::hydra::http::Method::HEAD);
 }
 
-TEST(HTTP_Stream_1_1, method_get_by_default) {
+TEST(e2e_HTTP_Stream_1_1, method_get_by_default) {
   sourcemeta::hydra::http::ClientStream request{"https://www.example.com"};
   EXPECT_EQ(request.method(), sourcemeta::hydra::http::Method::GET);
 }
 
-TEST(HTTP_Stream_1_1, no_callbacks_get) {
+TEST(e2e_HTTP_Stream_1_1, no_callbacks_get) {
   sourcemeta::hydra::http::ClientStream request{HTTP_BASE_URL()};
   request.method(sourcemeta::hydra::http::Method::GET);
   const auto status{request.send().get()};
   EXPECT_EQ(status, sourcemeta::hydra::http::Status::OK);
 }
 
-TEST(HTTP_Stream_1_1, no_callbacks_head) {
+TEST(e2e_HTTP_Stream_1_1, no_callbacks_head) {
   sourcemeta::hydra::http::ClientStream request{HTTP_BASE_URL()};
   request.method(sourcemeta::hydra::http::Method::HEAD);
   const auto status{request.send().get()};
   EXPECT_EQ(status, sourcemeta::hydra::http::Status::OK);
 }
 
-TEST(HTTP_Stream_1_1, get_empty) {
+TEST(e2e_HTTP_Stream_1_1, get_empty) {
   sourcemeta::hydra::http::ClientStream request{std::string{HTTP_BASE_URL()} +
                                                 "/empty"};
   request.method(sourcemeta::hydra::http::Method::GET);
@@ -87,7 +87,7 @@ TEST(HTTP_Stream_1_1, get_empty) {
   EXPECT_EQ(body.str(), "");
 }
 
-TEST(HTTP_Stream_1_1, unsigned_long_header) {
+TEST(e2e_HTTP_Stream_1_1, unsigned_long_header) {
   sourcemeta::hydra::http::ClientStream request{HTTP_BASE_URL()};
   request.method(sourcemeta::hydra::http::Method::GET);
   const unsigned long number{11};
@@ -110,7 +110,7 @@ TEST(HTTP_Stream_1_1, unsigned_long_header) {
   EXPECT_EQ(headers.at("x-x-foo"), std::to_string(number));
 }
 
-TEST(HTTP_Stream_1_1, post_empty) {
+TEST(e2e_HTTP_Stream_1_1, post_empty) {
   sourcemeta::hydra::http::ClientStream request{std::string{HTTP_BASE_URL()} +
                                                 "/empty"};
   request.method(sourcemeta::hydra::http::Method::POST);
@@ -152,7 +152,7 @@ TEST(HTTP_Stream_1_1, post_empty) {
   EXPECT_EQ(body.str(), "");
 }
 
-TEST(HTTP_Stream_1_1, get_root_foo_bar) {
+TEST(e2e_HTTP_Stream_1_1, get_root_foo_bar) {
   sourcemeta::hydra::http::ClientStream request{std::string{HTTP_BASE_URL()} +
                                                 "/foo/bar"};
   request.method(sourcemeta::hydra::http::Method::GET);
@@ -195,7 +195,7 @@ TEST(HTTP_Stream_1_1, get_root_foo_bar) {
   EXPECT_EQ(body.str(), "RECEIVED GET /foo/bar");
 }
 
-TEST(HTTP_Stream_1_1, on_body_exception) {
+TEST(e2e_HTTP_Stream_1_1, on_body_exception) {
   sourcemeta::hydra::http::ClientStream request{HTTP_BASE_URL()};
   request.method(sourcemeta::hydra::http::Method::POST);
 
@@ -206,7 +206,7 @@ TEST(HTTP_Stream_1_1, on_body_exception) {
   EXPECT_THROW(request.send().get(), sourcemeta::hydra::http::Error);
 }
 
-TEST(HTTP_Stream_1_1, post_root_hello_world) {
+TEST(e2e_HTTP_Stream_1_1, post_root_hello_world) {
   sourcemeta::hydra::http::ClientStream request{HTTP_BASE_URL()};
   request.method(sourcemeta::hydra::http::Method::POST);
 
@@ -250,7 +250,7 @@ TEST(HTTP_Stream_1_1, post_root_hello_world) {
   EXPECT_EQ(response_body.str(), "RECEIVED POST hello world");
 }
 
-TEST(HTTP_Stream_1_1, put_root_hello_world) {
+TEST(e2e_HTTP_Stream_1_1, put_root_hello_world) {
   sourcemeta::hydra::http::ClientStream request{HTTP_BASE_URL()};
   request.method(sourcemeta::hydra::http::Method::PUT);
 
@@ -294,7 +294,7 @@ TEST(HTTP_Stream_1_1, put_root_hello_world) {
   EXPECT_EQ(response_body.str(), "RECEIVED PUT hello world");
 }
 
-TEST(HTTP_Stream_1_1, get_root_hello_world) {
+TEST(e2e_HTTP_Stream_1_1, get_root_hello_world) {
   sourcemeta::hydra::http::ClientStream request{HTTP_BASE_URL()};
   request.method(sourcemeta::hydra::http::Method::GET);
 
@@ -338,7 +338,7 @@ TEST(HTTP_Stream_1_1, get_root_hello_world) {
   EXPECT_EQ(response_body.str(), "RECEIVED GET hello world");
 }
 
-TEST(HTTP_Stream_1_1, post_root_empty_body) {
+TEST(e2e_HTTP_Stream_1_1, post_root_empty_body) {
   sourcemeta::hydra::http::ClientStream request{HTTP_BASE_URL()};
   request.method(sourcemeta::hydra::http::Method::POST);
 
@@ -375,7 +375,7 @@ TEST(HTTP_Stream_1_1, post_root_empty_body) {
   EXPECT_EQ(response_body.str(), "RECEIVED POST /");
 }
 
-TEST(HTTP_Stream_1_1, upload_chunked_encoding_by_default) {
+TEST(e2e_HTTP_Stream_1_1, upload_chunked_encoding_by_default) {
   sourcemeta::hydra::http::ClientStream request{HTTP_BASE_URL()};
   request.method(sourcemeta::hydra::http::Method::PUT);
 

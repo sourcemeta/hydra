@@ -70,15 +70,16 @@ if(HYDRA_TESTS)
   enable_testing()
 
   if(HYDRA_HTTP)
-    add_subdirectory(test/http)
+    add_subdirectory(test/unit/http)
   endif()
 
   if(HYDRA_HTTPCLIENT)
-    add_subdirectory(test/httpclient)
+    add_subdirectory(test/e2e/httpclient)
   endif()
 
   if(HYDRA_BUCKET)
-    add_subdirectory(test/bucket)
+    add_subdirectory(test/unit/bucket)
+    add_subdirectory(test/e2e/bucket)
   endif()
 
   if(PROJECT_IS_TOP_LEVEL)

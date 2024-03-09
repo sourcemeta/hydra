@@ -108,9 +108,9 @@ cmake -S . -B ./build \
 cmake --build ./build --config <Debug|Release> --target clang_format
 # Build the project
 cmake --build ./build --config <Debug|Release>
-# Run the test suite
-node test/stub.js
-ctest --test-dir ./build --build-config <Debug|Release> --output-on-failure --progress
+# Run the test suite. For information on running the e2e test suite,
+# refer to the GitHub Actions CI configuration.
+ctest --test-dir ./build --build-config <Debug|Release> --output-on-failure --progress --exclude-regex e2e
 ```
 
 Or simply run:
