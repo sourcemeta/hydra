@@ -4,7 +4,7 @@
 
 #include "http_base_url.h"
 
-TEST(Bucket_JSON, no_cache_single) {
+TEST(e2e_Bucket_JSON, no_cache_single) {
   sourcemeta::hydra::Bucket bucket{HTTP_BASE_URL() + "/bucket", "us-east-1",
                                    "123456789", "ultra-secret"};
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response{
@@ -19,7 +19,7 @@ TEST(Bucket_JSON, no_cache_single) {
   EXPECT_FALSE(response.value().cache_hit);
 }
 
-TEST(Bucket_JSON, no_cache_idempotent) {
+TEST(e2e_Bucket_JSON, no_cache_idempotent) {
   sourcemeta::hydra::Bucket bucket{HTTP_BASE_URL() + "/bucket", "us-east-1",
                                    "123456789", "ultra-secret"};
 
@@ -58,7 +58,7 @@ TEST(Bucket_JSON, no_cache_idempotent) {
   EXPECT_FALSE(response_3.value().cache_hit);
 }
 
-TEST(Bucket_JSON, cache_none_with_policy) {
+TEST(e2e_Bucket_JSON, cache_none_with_policy) {
   sourcemeta::hydra::Bucket bucket{
       HTTP_BASE_URL() + "/bucket", "us-east-1", "123456789", "ultra-secret",
       sourcemeta::hydra::BucketCachePolicy::Indefinitely};
@@ -98,7 +98,7 @@ TEST(Bucket_JSON, cache_none_with_policy) {
   EXPECT_FALSE(response_3.value().cache_hit);
 }
 
-TEST(Bucket_JSON, cache_indefinitely) {
+TEST(e2e_Bucket_JSON, cache_indefinitely) {
   sourcemeta::hydra::Bucket bucket{
       HTTP_BASE_URL() + "/bucket",
       "us-east-1",
@@ -142,7 +142,7 @@ TEST(Bucket_JSON, cache_indefinitely) {
   EXPECT_TRUE(response_3.value().cache_hit);
 }
 
-TEST(Bucket_JSON, cache_etag_match) {
+TEST(e2e_Bucket_JSON, cache_etag_match) {
   sourcemeta::hydra::Bucket bucket{HTTP_BASE_URL() + "/bucket",
                                    "us-east-1",
                                    "123456789",
@@ -185,7 +185,7 @@ TEST(Bucket_JSON, cache_etag_match) {
   EXPECT_TRUE(response_3.value().cache_hit);
 }
 
-TEST(Bucket_JSON, cache_etag_mismatch) {
+TEST(e2e_Bucket_JSON, cache_etag_mismatch) {
   sourcemeta::hydra::Bucket bucket{HTTP_BASE_URL() + "/bucket",
                                    "us-east-1",
                                    "123456789",

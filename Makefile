@@ -3,8 +3,6 @@ CMAKE = cmake
 CTEST = ctest
 # For test server
 NODE = node
-KILLALL = killall
-SLEEP = sleep
 
 # Options
 PRESET = Debug
@@ -36,16 +34,23 @@ compile: .always
 lint: .always
 	$(CMAKE) --build ./build --config $(PRESET) --target clang_tidy
 
-test: test/stub.js .always
-	$(KILLALL) $(NODE) || true
-	$(NODE) $< $(TEST_PORT) &
-	$(SLEEP) 1
+test: .always
+	$(CMAKE) -E env \
+		UBSAN_OPTIONS=print_stacktrace=1 \
+		$(CTEST) --test-dir ./build --build-config $(PRESET) \
+			--exclude-regex e2e \
+			--output-on-failure --progress --parallel
+
+test-stub: test/stub.js .always
+	$(NODE) $< $(TEST_PORT)
+
+test-e2e: .always
 	$(CMAKE) -E env \
 		UBSAN_OPTIONS=print_stacktrace=1 \
 		SOURCEMETA_HYDRA_TEST_SERVER_BASE_URL=http://localhost:$(TEST_PORT) \
 		$(CTEST) --test-dir ./build --build-config $(PRESET) \
-			--output-on-failure --parallel
-	$(KILLALL) $(NODE)
+			--tests-regex e2e \
+			--output-on-failure --progress --parallel
 
 doxygen: .always
 	$(CMAKE) --build ./build --config $(PRESET) --target doxygen

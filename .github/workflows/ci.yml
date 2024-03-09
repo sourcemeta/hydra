@@ -118,6 +118,15 @@ jobs:
           cmake --install ./build --prefix ./build/dist --config Release --verbose
           --component sourcemeta_hydra_dev
 
+      - name: Unit Tests
+        # Not every CTest version supports the --test-dir option. If such option
+        # is not recognized, `ctest` will successfully exit finding no tests.
+        # Better to be sure and `cd` all the time here.
+        run: cd ./build && ctest --build-config Release --exclude-regex e2e --output-on-failure --parallel
+        env:
+          # See https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html
+          UBSAN_OPTIONS: print_stacktrace=1
+
       # Run stubs
       - name: Run HTTP client stub (Windows)
         run: cmd /c "start /b node test\stub.js ${{ env.TEST_PORT }}" && Start-Sleep -Seconds 10
@@ -126,10 +135,11 @@ jobs:
         run: (node test/stub.js ${{ env.TEST_PORT }} &) && sleep 10
         if: runner.os != 'windows'
 
-      # Not every CTest version supports the --test-dir option. If such option
-      # is not recognized, `ctest` will successfully exit finding no tests.
-      # Better to be sure and `cd` all the time here.
-      - run: cd ./build && ctest --build-config Release --output-on-failure --parallel
+      - name: E2E Tests
+        # Not every CTest version supports the --test-dir option. If such option
+        # is not recognized, `ctest` will successfully exit finding no tests.
+        # Better to be sure and `cd` all the time here.
+        run: cd ./build && ctest --build-config Release --tests-regex e2e --output-on-failure --parallel
         env:
           SOURCEMETA_HYDRA_TEST_SERVER_BASE_URL: 'http://localhost:${{ env.TEST_PORT }}'
           # See https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html
