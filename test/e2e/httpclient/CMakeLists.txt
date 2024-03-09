@@ -1,5 +1,5 @@
 add_executable(sourcemeta_hydra_httpclient_e2e
-  http_base_url.h request_1_1_test.cc stream_1_1_test.cc)
+  environment.h request_1_1_test.cc stream_1_1_test.cc)
 sourcemeta_hydra_add_compile_options(sourcemeta_hydra_httpclient_e2e)
 target_link_libraries(sourcemeta_hydra_httpclient_e2e
   PRIVATE GTest::gtest GTest::gtest_main)
