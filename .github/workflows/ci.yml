@@ -85,15 +85,6 @@ jobs:
           curl https://dl.min.io/client/mc/release/linux-amd64/mc --output /usr/local/bin/mc
           chmod +x /usr/local/bin/mc
 
-      - name: Install dependencies (Windows)
-        if: runner.os == 'windows'
-        run: choco install --ignore-checksums minio-server minio-client
-
-      # TODO DEBUG
-      - name: XXXX
-        if: runner.os == 'windows'
-        run: minio server --address :${{ env.MINIO_PORT }} .minio
-
       # See https://github.com/actions/runner-images/issues/8659
       - name: Workaround Clang issue (GNU/Linux)
         if: runner.os == 'linux' && matrix.platform.cc == 'clang'
@@ -145,9 +136,6 @@ jobs:
           --component sourcemeta_hydra_dev
 
       # Run stubs
-      - name: Run MinIO stub (Windows)
-        run: cmd /c "minio server --address :${{ env.MINIO_PORT }} build\minio" && Start-Sleep -Seconds 10 && nmake configure-minio
-        if: runner.os == 'windows'
       - name: Run MinIO stub (*nix)
         run: (minio server --address :${{ env.MINIO_PORT }} build/minio &) && sleep 10 && make configure-minio
         if: runner.os != 'windows'
@@ -161,7 +149,10 @@ jobs:
       # Not every CTest version supports the --test-dir option. If such option
       # is not recognized, `ctest` will successfully exit finding no tests.
       # Better to be sure and `cd` all the time here.
-      - run: cd ./build && ctest --build-config Release --output-on-failure --parallel
+
+      - name: Tests (*nix)
+        run: cd ./build && ctest --build-config Release --output-on-failure --parallel
+        if: runner.os != 'windows'
         env:
           # TODO: Rename this variable and get rid of TEST_PORT
           SOURCEMETA_HYDRA_TEST_SERVER_BASE_URL: 'http://localhost:${{ env.TEST_PORT }}'
@@ -172,3 +163,11 @@ jobs:
 
           # See https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html
           UBSAN_OPTIONS: print_stacktrace=1
+
+      - name: Tests (Windows)
+        # TODO: Run Bucket MinIO tests on Windows
+        run: cd ./build && ctest --build-config Release --exclude-regex e2e_Bucket --output-on-failure --parallel
+        if: runner.os == 'windows'
+        env:
+          # TODO: Rename this variable and get rid of TEST_PORT
+          SOURCEMETA_HYDRA_TEST_SERVER_BASE_URL: 'http://localhost:${{ env.TEST_PORT }}'
