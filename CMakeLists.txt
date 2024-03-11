@@ -7,7 +7,13 @@ include(cmake/CompilerOptions.cmake)
 
 # Options
 option(HYDRA_HTTPCLIENT "Build the Hydra HTTP client library" ON)
-option(HYDRA_HTTPSERVER "Build the Hydra HTTP server library" ON)
+if(WIN32)
+  # TODO: Make it work on Windows. Main challenge is that uSockets
+  # relies on libuv for that platform.
+  option(HYDRA_HTTPSERVER "Build the Hydra HTTP server library" OFF)
+else()
+  option(HYDRA_HTTPSERVER "Build the Hydra HTTP server library" ON)
+endif()
 option(HYDRA_BUCKET "Build the Hydra bucket library" ON)
 option(HYDRA_TESTS "Build the Hydra tests" OFF)
 option(HYDRA_DOCS "Build the Hydra docs" OFF)
@@ -42,6 +48,7 @@ if(HYDRA_HTTPCLIENT OR HYDRA_BUCKET)
 endif()
 
 if(HYDRA_HTTPSERVER)
+  find_package(uSockets REQUIRED)
   add_subdirectory(src/httpserver)
 endif()
 

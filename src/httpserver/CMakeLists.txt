@@ -8,4 +8,5 @@ if(HYDRA_INSTALL)
 endif()
 
 target_link_libraries(sourcemeta_hydra_httpserver PUBLIC sourcemeta::hydra::http)
+target_link_libraries(sourcemeta_hydra_httpserver PRIVATE uNetworking::uSockets)
 sourcemeta_hydra_add_compile_options(sourcemeta_hydra_httpserver)

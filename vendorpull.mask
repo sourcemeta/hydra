@@ -4,6 +4,7 @@ test
 vendor/googletest
 vendor/googletest.mask
 vendor/bearssl.mask
+vendor/uwebsockets.mask
 vendor/vendorpull
 vendor/jsontoolkit
 cmake/FindJSONToolkit.cmake
