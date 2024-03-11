@@ -49,6 +49,7 @@ endif()
 
 if(HYDRA_HTTPSERVER)
   find_package(uSockets REQUIRED)
+  find_package(uWebSockets REQUIRED)
   add_subdirectory(src/httpserver)
 endif()
 
