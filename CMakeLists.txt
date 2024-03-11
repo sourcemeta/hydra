@@ -8,6 +8,7 @@ include(cmake/CompilerOptions.cmake)
 # Options
 option(HYDRA_HTTP "Build the Hydra HTTP library" ON)
 option(HYDRA_HTTPCLIENT "Build the Hydra HTTP client library" ON)
+option(HYDRA_HTTPSERVER "Build the Hydra HTTP server library" ON)
 option(HYDRA_BUCKET "Build the Hydra bucket library" ON)
 option(HYDRA_TESTS "Build the Hydra tests" OFF)
 option(HYDRA_DOCS "Build the Hydra docs" OFF)
@@ -30,7 +31,7 @@ install(FILES
   DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}"
   COMPONENT sourcemeta_hydra_dev)
 
-if(HYDRA_HTTP OR HYDRA_HTTPCLIENT OR HYDRA_BUCKET)
+if(HYDRA_HTTP OR HYDRA_HTTPCLIENT OR HYDRA_HTTPSERVER OR HYDRA_BUCKET)
   add_subdirectory(src/http)
 endif()
 
@@ -39,6 +40,10 @@ if(HYDRA_HTTPCLIENT OR HYDRA_BUCKET)
   find_package(BearSSL REQUIRED)
   find_package(CURL REQUIRED)
   add_subdirectory(src/httpclient)
+endif()
+
+if(HYDRA_HTTPSERVER)
+  add_subdirectory(src/httpserver)
 endif()
 
 if(HYDRA_BUCKET)
@@ -75,6 +80,10 @@ if(HYDRA_TESTS)
 
   if(HYDRA_HTTPCLIENT)
     add_subdirectory(test/e2e/httpclient)
+  endif()
+
+  if(HYDRA_HTTPSERVER)
+    add_subdirectory(test/unit/httpserver)
   endif()
 
   if(HYDRA_BUCKET)
