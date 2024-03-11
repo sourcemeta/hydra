@@ -10,6 +10,7 @@
 /// #include <sourcemeta/hydra/httpserver.h>
 /// ```
 
+#include <sourcemeta/hydra/http.h>
 #include <sourcemeta/hydra/httpserver_uuid.h>
 
 #endif
