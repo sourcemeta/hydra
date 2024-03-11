@@ -6,7 +6,6 @@ include(vendor/noa/cmake/noa.cmake)
 include(cmake/CompilerOptions.cmake)
 
 # Options
-option(HYDRA_HTTP "Build the Hydra HTTP library" ON)
 option(HYDRA_HTTPCLIENT "Build the Hydra HTTP client library" ON)
 option(HYDRA_HTTPSERVER "Build the Hydra HTTP server library" ON)
 option(HYDRA_BUCKET "Build the Hydra bucket library" ON)
@@ -31,7 +30,7 @@ install(FILES
   DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}"
   COMPONENT sourcemeta_hydra_dev)
 
-if(HYDRA_HTTP OR HYDRA_HTTPCLIENT OR HYDRA_HTTPSERVER OR HYDRA_BUCKET)
+if(HYDRA_HTTPCLIENT OR HYDRA_HTTPSERVER OR HYDRA_BUCKET)
   add_subdirectory(src/http)
 endif()
 
@@ -74,7 +73,7 @@ if(HYDRA_TESTS)
   find_package(GoogleTest REQUIRED)
   enable_testing()
 
-  if(HYDRA_HTTP)
+  if(HYDRA_HTTPCLIENT OR HYDRA_HTTPSERVER OR HYDRA_BUCKET)
     add_subdirectory(test/unit/http)
   endif()
 
