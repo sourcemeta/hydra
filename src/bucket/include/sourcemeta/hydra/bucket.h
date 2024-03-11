@@ -24,10 +24,11 @@
 
 #include <sourcemeta/jsontoolkit/json.h>
 
-#include <cstdint>  // std::uint64_t
-#include <future>   // std::future
-#include <optional> // std::optional
-#include <string>   // std::string
+#include <cstdint>    // std::uint64_t
+#include <functional> // std::function
+#include <future>     // std::future
+#include <optional>   // std::optional
+#include <string>     // std::string
 
 namespace sourcemeta::hydra {
 
@@ -138,6 +139,41 @@ public:
   auto upsert_json(const std::string &key,
                    const sourcemeta::jsontoolkit::JSON &document)
       -> std::future<void>;
+
+  /// Upsert a JSON document into the given bucket unless it already exists. If
+  /// so, just return the existing one. The key must start with a forward slash.
+  /// For example:
+  ///
+  /// ```cpp
+  /// #include <sourcemeta/hydra/bucket.h>
+  /// #include <sourcemeta/jsontoolkit/json.h>
+  ///
+  /// sourcemeta::hydra::Bucket bucket{
+  ///   // A Backblaze B2 bucket
+  ///   "https://s3.us-east-005.backblazeb2.com/my-bucket",
+  ///   "us-east-005", "123456789", "ultra-secret"};
+  ///
+  /// std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response{
+  ///   bucket.fetch_or_upsert("/foo/bar.json",
+  ///     []() -> sourcemeta::jsontoolkit::JSON {
+  ///       return sourcemeta::jsontoolkit::parse("{ \"foo\": \"bar\" }");
+  ///     }).get()};
+  ///
+  /// if (response.has_value()) {
+  ///   sourcemeta::jsontoolkit::prettify(response.value().data, std::cout);
+  ///   std::cout << "\n";
+  ///   std::cout << "ETag: " << response.value().etag << "\n";
+  ///   std::cout << "Last-Modified: "
+  ///     << response.value().last_modified << "\n";
+  ///
+  ///   if (response.value().cache_hit) {
+  ///     std::cout << "This was a cache hit!\n";
+  ///   }
+  /// }
+  /// ```
+  auto fetch_or_upsert(const std::string &key,
+                       std::function<sourcemeta::jsontoolkit::JSON()> callback)
+      -> std::future<ResponseJSON>;
 
 private:
 #if defined(_MSC_VER)
