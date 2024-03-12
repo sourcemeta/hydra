@@ -1,6 +1,7 @@
 #include <sourcemeta/hydra/http_method.h>
 
 #include <cassert>   // assert
+#include <sstream>   // std::ostringstream
 #include <stdexcept> // std::invalid_argument
 
 namespace sourcemeta::hydra::http {
@@ -42,26 +43,28 @@ auto operator<<(std::ostream &stream, const Method method) -> std::ostream & {
 }
 
 auto to_method(std::string_view method) -> Method {
-  if (method == "GET") {
+  if (method == "GET" || method == "get") {
     return Method::GET;
-  } else if (method == "HEAD") {
+  } else if (method == "HEAD" || method == "head") {
     return Method::HEAD;
-  } else if (method == "POST") {
+  } else if (method == "POST" || method == "post") {
     return Method::POST;
-  } else if (method == "PUT") {
+  } else if (method == "PUT" || method == "put") {
     return Method::PUT;
-  } else if (method == "DELETE") {
+  } else if (method == "DELETE" || method == "delete") {
     return Method::DELETE;
-  } else if (method == "CONNECT") {
+  } else if (method == "CONNECT" || method == "connect") {
     return Method::CONNECT;
-  } else if (method == "OPTIONS") {
+  } else if (method == "OPTIONS" || method == "options") {
     return Method::OPTIONS;
-  } else if (method == "TRACE") {
+  } else if (method == "TRACE" || method == "trace") {
     return Method::TRACE;
-  } else if (method == "PATCH") {
+  } else if (method == "PATCH" || method == "patch") {
     return Method::PATCH;
   } else {
-    throw std::invalid_argument("Invalid HTTP method");
+    std::ostringstream error;
+    error << "Invalid HTTP method: " << method;
+    throw std::invalid_argument(error.str());
   }
 }
 
