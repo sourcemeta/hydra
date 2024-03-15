@@ -42,11 +42,13 @@ jobs:
             type: shared
 
           # Sanitizers
-          - os: ubuntu-latest
-            cc: clang
-            cxx: clang++
-            type: static
-            options: -DHYDRA_ADDRESS_SANITIZER:BOOL=ON
+          # TODO: Re-enable. Rigtht now ASAN on GitHub Actions
+          # seems broken for some reason
+          # - os: ubuntu-latest
+            # cc: clang
+            # cxx: clang++
+            # type: static
+            # options: -DHYDRA_ADDRESS_SANITIZER:BOOL=ON
           - os: ubuntu-latest
             cc: clang
             cxx: clang++
