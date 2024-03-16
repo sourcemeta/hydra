@@ -82,14 +82,14 @@ configure-minio: .always
 		--secret-key $(MINIO_SECRET_KEY) \
 		$(MINIO_ALIAS) $(MINIO_ROOT_USER)
 
-HTTP_STUB_PORT = 9999
-up-http-stub: test/e2e/httpclient/stub.js .always
-	$(NODE) $< $(HTTP_STUB_PORT)
+HTTPCLIENT_STUB_PORT = 9999
+up-httpclient-stub: test/e2e/httpclient/stub.js .always
+	$(NODE) $< $(HTTPCLIENT_STUB_PORT)
 
 test-e2e: configure compile configure-minio
 	$(CMAKE) -E env \
 		UBSAN_OPTIONS=print_stacktrace=1 \
-		SOURCEMETA_HYDRA_TEST_HTTPCLIENT_BASE_URL=http://localhost:$(HTTP_STUB_PORT) \
+		SOURCEMETA_HYDRA_TEST_HTTPCLIENT_BASE_URL=http://localhost:$(HTTPCLIENT_STUB_PORT) \
 		SOURCEMETA_HYDRA_TEST_BUCKET_BASE_URL=$(MINIO_PROTOCOL)://$(MINIO_ADDRESS):$(MINIO_PORT)/$(MINIO_BUCKET) \
 		SOURCEMETA_HYDRA_TEST_BUCKET_REGION=$(MINIO_REGION) \
 		SOURCEMETA_HYDRA_TEST_BUCKET_ACCESS_KEY=$(MINIO_ACCESS_KEY) \
