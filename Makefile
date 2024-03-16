@@ -86,10 +86,15 @@ HTTPCLIENT_STUB_PORT = 9999
 up-httpclient-stub: test/e2e/httpclient/stub.js .always
 	$(NODE) $< $(HTTPCLIENT_STUB_PORT)
 
+HTTPSERVER_STUB_PORT = 9998
+up-httpserver-stub: build/test/e2e/httpserver/sourcemeta_hydra_httpserver_e2e_stub .always
+	$< $(HTTPSERVER_STUB_PORT)
+
 test-e2e: configure compile configure-minio
 	$(CMAKE) -E env \
 		UBSAN_OPTIONS=print_stacktrace=1 \
 		SOURCEMETA_HYDRA_TEST_HTTPCLIENT_BASE_URL=http://localhost:$(HTTPCLIENT_STUB_PORT) \
+		SOURCEMETA_HYDRA_TEST_HTTPSERVER_BASE_URL=http://localhost:$(HTTPSERVER_STUB_PORT) \
 		SOURCEMETA_HYDRA_TEST_BUCKET_BASE_URL=$(MINIO_PROTOCOL)://$(MINIO_ADDRESS):$(MINIO_PORT)/$(MINIO_BUCKET) \
 		SOURCEMETA_HYDRA_TEST_BUCKET_REGION=$(MINIO_REGION) \
 		SOURCEMETA_HYDRA_TEST_BUCKET_ACCESS_KEY=$(MINIO_ACCESS_KEY) \

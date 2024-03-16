@@ -68,7 +68,9 @@ jobs:
       MINIO_ACCESS_KEY: sourcemeta-test
       MINIO_SECRET_KEY: 12345678
       MINIO_BUCKET: test
+
       HTTPCLIENT_STUB_PORT: 9999
+      HTTPSERVER_STUB_PORT: 9998
 
       CC: ${{ matrix.platform.cc }}
       CXX: ${{ matrix.platform.cxx }}
@@ -147,6 +149,9 @@ jobs:
       - name: Run HTTP client stub (*nix)
         run: (node test/e2e/httpclient/stub.js ${{ env.HTTPCLIENT_STUB_PORT }} &) && sleep 10
         if: runner.os != 'windows'
+      - name: Run HTTP server stub (*nix)
+        run: (./build/test/e2e/httpserver/sourcemeta_hydra_httpserver_e2e_stub ${{ env.HTTPSERVER_STUB_PORT }} &) && sleep 10
+        if: runner.os != 'windows'
 
       # Not every CTest version supports the --test-dir option. If such option
       # is not recognized, `ctest` will successfully exit finding no tests.
@@ -157,6 +162,7 @@ jobs:
         if: runner.os != 'windows'
         env:
           SOURCEMETA_HYDRA_TEST_HTTPCLIENT_BASE_URL: 'http://localhost:${{ env.HTTPCLIENT_STUB_PORT }}'
+          SOURCEMETA_HYDRA_TEST_HTTPSERVER_BASE_URL: 'http://localhost:${{ env.HTTPSERVER_STUB_PORT }}'
           SOURCEMETA_HYDRA_TEST_BUCKET_BASE_URL: ${{ env.MINIO_PROTOCOL }}://${{ env.MINIO_ADDRESS }}:${{ env.MINIO_PORT }}/${{ env.MINIO_BUCKET }}
           SOURCEMETA_HYDRA_TEST_BUCKET_REGION: ${{ env.MINIO_REGION }}
           SOURCEMETA_HYDRA_TEST_BUCKET_ACCESS_KEY: ${{ env.MINIO_ACCESS_KEY }}

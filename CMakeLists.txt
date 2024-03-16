@@ -91,6 +91,11 @@ if(HYDRA_TESTS)
 
   if(HYDRA_HTTPSERVER)
     add_subdirectory(test/unit/httpserver)
+    find_package(JSONToolkit REQUIRED COMPONENTS json)
+    # Because we need to test with an HTTP client
+    if(HYDRA_HTTPCLIENT)
+      add_subdirectory(test/e2e/httpserver)
+    endif()
   endif()
 
   if(HYDRA_BUCKET)
