@@ -68,7 +68,7 @@ jobs:
       MINIO_ACCESS_KEY: sourcemeta-test
       MINIO_SECRET_KEY: 12345678
       MINIO_BUCKET: test
-      HTTP_STUB_PORT: 9999
+      HTTPCLIENT_STUB_PORT: 9999
 
       CC: ${{ matrix.platform.cc }}
       CXX: ${{ matrix.platform.cxx }}
@@ -142,10 +142,10 @@ jobs:
         run: (minio server --address :${{ env.MINIO_PORT }} build/minio &) && sleep 10 && make configure-minio
         if: runner.os != 'windows'
       - name: Run HTTP client stub (Windows)
-        run: cmd /c "start /b node test\e2e\httpclient\stub.js ${{ env.HTTP_STUB_PORT }}" && Start-Sleep -Seconds 10
+        run: cmd /c "start /b node test\e2e\httpclient\stub.js ${{ env.HTTPCLIENT_STUB_PORT }}" && Start-Sleep -Seconds 10
         if: runner.os == 'windows'
       - name: Run HTTP client stub (*nix)
-        run: (node test/e2e/httpclient/stub.js ${{ env.HTTP_STUB_PORT }} &) && sleep 10
+        run: (node test/e2e/httpclient/stub.js ${{ env.HTTPCLIENT_STUB_PORT }} &) && sleep 10
         if: runner.os != 'windows'
 
       # Not every CTest version supports the --test-dir option. If such option
@@ -156,7 +156,7 @@ jobs:
         run: cd ./build && ctest --build-config Release --output-on-failure --parallel
         if: runner.os != 'windows'
         env:
-          SOURCEMETA_HYDRA_TEST_HTTPCLIENT_BASE_URL: 'http://localhost:${{ env.HTTP_STUB_PORT }}'
+          SOURCEMETA_HYDRA_TEST_HTTPCLIENT_BASE_URL: 'http://localhost:${{ env.HTTPCLIENT_STUB_PORT }}'
           SOURCEMETA_HYDRA_TEST_BUCKET_BASE_URL: ${{ env.MINIO_PROTOCOL }}://${{ env.MINIO_ADDRESS }}:${{ env.MINIO_PORT }}/${{ env.MINIO_BUCKET }}
           SOURCEMETA_HYDRA_TEST_BUCKET_REGION: ${{ env.MINIO_REGION }}
           SOURCEMETA_HYDRA_TEST_BUCKET_ACCESS_KEY: ${{ env.MINIO_ACCESS_KEY }}
@@ -170,4 +170,4 @@ jobs:
         run: cd ./build && ctest --build-config Release --exclude-regex e2e_Bucket --output-on-failure --parallel
         if: runner.os == 'windows'
         env:
-          SOURCEMETA_HYDRA_TEST_HTTPCLIENT_BASE_URL: 'http://localhost:${{ env.HTTP_STUB_PORT }}'
+          SOURCEMETA_HYDRA_TEST_HTTPCLIENT_BASE_URL: 'http://localhost:${{ env.HTTPCLIENT_STUB_PORT }}'
