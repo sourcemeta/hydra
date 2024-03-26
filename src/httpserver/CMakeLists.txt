@@ -1,7 +1,7 @@
 noa_library(NAMESPACE sourcemeta PROJECT hydra NAME httpserver
   FOLDER "Hydra/HTTP Server"
-  PRIVATE_HEADERS request.h response.h uuid.h
-  SOURCES uwebsockets.h httpserver.cc request.cc response.cc uuid.cc)
+  PRIVATE_HEADERS request.h response.h logger.h
+  SOURCES uwebsockets.h httpserver.cc request.cc response.cc logger.cc)
 
 if(HYDRA_INSTALL)
   noa_library_install(NAMESPACE sourcemeta PROJECT hydra NAME httpserver)

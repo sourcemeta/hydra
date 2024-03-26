@@ -16,13 +16,7 @@
 #include <cstdlib>  // EXIT_FAILURE
 #include <iostream> // std::cerr
 #include <ostream>  // std::ostream
-#include <thread>   // std::this_thread
 #include <utility>  // std::move
-
-static auto global_log() -> std::ostream & {
-  std::cerr << "-- Hydra (Thread #" << std::this_thread::get_id() << ") ";
-  return std::cerr;
-}
 
 static auto wrap_route(
     uWS::HttpResponse<true> *const response_handler,
@@ -130,21 +124,23 @@ auto Server::run(const std::uint32_t port) const -> int {
 #undef UWS_CALLBACK
 
     app.listen(static_cast<int>(port),
-               [port](us_listen_socket_t *const socket) -> void {
+               [port, this](us_listen_socket_t *const socket) -> void {
                  if (socket) {
                    const auto socket_port = us_socket_local_port(
                        true, reinterpret_cast<struct us_socket_t *>(socket));
                    assert(socket_port > 0);
                    assert(port == static_cast<std::uint32_t>(socket_port));
-                   global_log() << "Listening on port " << socket_port << "\n";
+                   this->logger
+                       << "Listening on port " + std::to_string(socket_port);
                  } else {
-                   global_log() << "Failed to listen on port " << port << "\n";
+                   this->logger
+                       << "Failed to listen on port " + std::to_string(port);
                  }
                });
   });
 
   // This method only returns on failure
-  global_log() << "Failed to listen on port " << port << "\n";
+  this->logger << "Failed to listen on port " + std::to_string(port);
   return EXIT_FAILURE;
 }
 

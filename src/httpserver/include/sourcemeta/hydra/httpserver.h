@@ -17,9 +17,9 @@
 /// ```
 
 #include <sourcemeta/hydra/http.h>
+#include <sourcemeta/hydra/httpserver_logger.h>
 #include <sourcemeta/hydra/httpserver_request.h>
 #include <sourcemeta/hydra/httpserver_response.h>
-#include <sourcemeta/hydra/httpserver_uuid.h>
 
 #include <cstdint>    // std::uint32_t
 #include <exception>  // std::exception_ptr
@@ -188,6 +188,7 @@ private:
   std::vector<std::tuple<Method, std::string, RouteCallback>> routes;
   RouteCallback fallback;
   ErrorCallback error_handler;
+  ServerLogger logger{"global"};
 };
 
 } // namespace sourcemeta::hydra::http
