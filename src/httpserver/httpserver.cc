@@ -30,25 +30,28 @@ static auto wrap_route(
   assert(request_handler);
 
   // These should never throw, otherwise we cannot even react to errors
+  sourcemeta::hydra::http::ServerLogger logger;
   sourcemeta::hydra::http::ServerResponse response{response_handler};
   const sourcemeta::hydra::http::ServerRequest request{request_handler};
 
   try {
-    callback(request, response);
+    callback(logger, request, response);
   } catch (...) {
-    error(std::current_exception(), request, response);
+    error(std::current_exception(), logger, request, response);
   }
 }
 
 static auto
-default_handler(const sourcemeta::hydra::http::ServerRequest &,
+default_handler(const sourcemeta::hydra::http::ServerLogger &,
+                const sourcemeta::hydra::http::ServerRequest &,
                 sourcemeta::hydra::http::ServerResponse &response) -> void {
   response.status(sourcemeta::hydra::http::Status::NOT_IMPLEMENTED);
   response.end();
 }
 
 static auto default_error_handler(
-    std::exception_ptr error, const sourcemeta::hydra::http::ServerRequest &,
+    std::exception_ptr error, const sourcemeta::hydra::http::ServerLogger &,
+    const sourcemeta::hydra::http::ServerRequest &,
     sourcemeta::hydra::http::ServerResponse &response) -> void {
   assert(error);
   response.status(sourcemeta::hydra::http::Status::INTERNAL_SERVER_ERROR);

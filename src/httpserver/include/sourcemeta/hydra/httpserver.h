@@ -48,13 +48,14 @@ public:
   Server();
 
   /// Represents a callback to an HTTP route
-  using RouteCallback =
-      std::function<void(const ServerRequest &, ServerResponse &)>;
+  using RouteCallback = std::function<void(
+      const ServerLogger &, const ServerRequest &, ServerResponse &)>;
 
   /// Represents a callback that handles an exception thrown while processing
   /// another route
-  using ErrorCallback = std::function<void(
-      std::exception_ptr, const ServerRequest &, ServerResponse &)>;
+  using ErrorCallback =
+      std::function<void(std::exception_ptr, const ServerLogger &,
+                         const ServerRequest &, ServerResponse &)>;
 
   /// Register a route to respond to HTTP requests. For example:
   ///
@@ -64,7 +65,8 @@ public:
   /// sourcemeta::hydra::http::Server server;
   ///
   /// static auto
-  /// on_hello_world(const sourcemeta::hydra::http::ServerRequest &,
+  /// on_hello_world(const sourcemeta::hydra::http::ServerLogger &,
+  ///         const sourcemeta::hydra::http::ServerRequest &,
   ///         sourcemeta::hydra::http::ServerResponse &response) -> void {
   ///   response.status(sourcemeta::hydra::http::Status::OK);
   ///   response.end("Hello World");
@@ -89,14 +91,16 @@ public:
   /// sourcemeta::hydra::http::Server server;
   ///
   /// static auto
-  /// on_hello_world(const sourcemeta::hydra::http::ServerRequest &,
+  /// on_hello_world(const sourcemeta::hydra::http::ServerLogger &,
+  ///         const sourcemeta::hydra::http::ServerRequest &,
   ///         sourcemeta::hydra::http::ServerResponse &response) -> void {
   ///   response.status(sourcemeta::hydra::http::Status::OK);
   ///   response.end("Hello World");
   /// }
   ///
   /// static auto
-  /// on_otherwise(const sourcemeta::hydra::http::ServerRequest &,
+  /// on_otherwise(const sourcemeta::hydra::http::ServerLogger &,
+  ///         const sourcemeta::hydra::http::ServerRequest &,
   ///         sourcemeta::hydra::http::ServerResponse &response) -> void {
   ///   response.status(sourcemeta::hydra::http::Status::NOT_FOUND);
   ///   response.end();
@@ -128,13 +132,15 @@ public:
   /// sourcemeta::hydra::http::Server server;
   ///
   /// static auto
-  /// on_request(const sourcemeta::hydra::http::ServerRequest &,
+  /// on_request(const sourcemeta::hydra::http::ServerLogger &,
+  ///         const sourcemeta::hydra::http::ServerRequest &,
   ///         sourcemeta::hydra::http::ServerResponse &response) -> void {
   ///   throw std::runtime_error("Something bad happened!");
   /// }
   ///
   /// static auto
   /// on_error(std::exception_ptr error,
+  ///   const sourcemeta::hydra::http::ServerLogger &,
   ///   const sourcemeta::hydra::http::ServerRequest &,
   ///   sourcemeta::hydra::http::ServerResponse &response) noexcept -> void {
   ///   response.status(sourcemeta::hydra::http::Status::INTERNAL_SERVER_ERROR);
@@ -169,7 +175,8 @@ public:
   /// #include <sourcemeta/hydra/httpserver.h>
   ///
   /// static auto
-  /// on_hello_world(const sourcemeta::hydra::http::ServerRequest &,
+  /// on_hello_world(const sourcemeta::hydra::http::ServerLogger &,
+  ///         const sourcemeta::hydra::http::ServerRequest &,
   ///         sourcemeta::hydra::http::ServerResponse &response) -> void {
   ///   response.status(sourcemeta::hydra::http::Status::OK);
   ///   response.end("Hello World");

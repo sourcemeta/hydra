@@ -32,7 +32,8 @@ public:
   /// sourcemeta::hydra::http::Server server;
   ///
   /// static auto
-  /// on_root(const sourcemeta::hydra::http::ServerRequest &,
+  /// on_root(const sourcemeta::hydra::http::ServerLogger &,
+  ///         const sourcemeta::hydra::http::ServerRequest &,
   ///         sourcemeta::hydra::http::ServerResponse &response) -> void {
   ///   response.status(sourcemeta::hydra::http::Status::BAD_REQUEST);
   ///   response.end("Bad request!");
@@ -50,7 +51,8 @@ public:
   /// sourcemeta::hydra::http::Server server;
   ///
   /// static auto
-  /// on_root(const sourcemeta::hydra::http::ServerRequest &,
+  /// on_root(const sourcemeta::hydra::http::ServerLogger &,
+  ///         const sourcemeta::hydra::http::ServerRequest &,
   ///         sourcemeta::hydra::http::ServerResponse &response) -> void {
   ///   response.status(sourcemeta::hydra::http::Status::OK);
   ///   response.header("X-Foo", "Bar");
@@ -69,7 +71,8 @@ public:
   /// sourcemeta::hydra::http::Server server;
   ///
   /// static auto
-  /// on_root(const sourcemeta::hydra::http::ServerRequest &,
+  /// on_root(const sourcemeta::hydra::http::ServerLogger &,
+  ///         const sourcemeta::hydra::http::ServerRequest &,
   ///         sourcemeta::hydra::http::ServerResponse &response) -> void {
   ///   response.status(sourcemeta::hydra::http::Status::OK);
   ///   response.end("Hello world!");
@@ -87,7 +90,8 @@ public:
   /// sourcemeta::hydra::http::Server server;
   ///
   /// static auto
-  /// on_root(const sourcemeta::hydra::http::ServerRequest &,
+  /// on_root(const sourcemeta::hydra::http::ServerLogger &,
+  ///         const sourcemeta::hydra::http::ServerRequest &,
   ///         sourcemeta::hydra::http::ServerResponse &response) -> void {
   ///   response.status(sourcemeta::hydra::http::Status::NO_CONTENT);
   ///   repsonse.end();
