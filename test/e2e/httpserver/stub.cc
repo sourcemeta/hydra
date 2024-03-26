@@ -7,9 +7,11 @@
 #include <stdexcept> // std::runtime_error
 #include <string>    // std::stoul
 
-static auto on_echo(const sourcemeta::hydra::http::ServerRequest &request,
+static auto on_echo(const sourcemeta::hydra::http::ServerLogger &logger,
+                    const sourcemeta::hydra::http::ServerRequest &request,
                     sourcemeta::hydra::http::ServerResponse &response) -> void {
   if (request.method() == sourcemeta::hydra::http::Method::HEAD) {
+    logger << "Omitting body...";
     response.status(sourcemeta::hydra::http::Status::OK);
     response.end();
     return;
@@ -30,13 +32,15 @@ static auto on_echo(const sourcemeta::hydra::http::ServerRequest &request,
   response.end(result.str());
 }
 
-static auto on_throw(const sourcemeta::hydra::http::ServerRequest &,
+static auto on_throw(const sourcemeta::hydra::http::ServerLogger &,
+                     const sourcemeta::hydra::http::ServerRequest &,
                      sourcemeta::hydra::http::ServerResponse &) -> void {
   throw std::runtime_error("Crash!");
 }
 
 static auto
-on_x_foo(const sourcemeta::hydra::http::ServerRequest &request,
+on_x_foo(const sourcemeta::hydra::http::ServerLogger &,
+         const sourcemeta::hydra::http::ServerRequest &request,
          sourcemeta::hydra::http::ServerResponse &response) -> void {
   response.status(sourcemeta::hydra::http::Status::OK);
   if (request.header("x-foo").has_value()) {
@@ -47,7 +51,8 @@ on_x_foo(const sourcemeta::hydra::http::ServerRequest &request,
 }
 
 static auto
-on_query_foo(const sourcemeta::hydra::http::ServerRequest &request,
+on_query_foo(const sourcemeta::hydra::http::ServerLogger &,
+             const sourcemeta::hydra::http::ServerRequest &request,
              sourcemeta::hydra::http::ServerResponse &response) -> void {
   response.status(sourcemeta::hydra::http::Status::OK);
   if (request.query("foo").has_value()) {
@@ -58,14 +63,16 @@ on_query_foo(const sourcemeta::hydra::http::ServerRequest &request,
 }
 
 static auto
-on_otherwise(const sourcemeta::hydra::http::ServerRequest &,
+on_otherwise(const sourcemeta::hydra::http::ServerLogger &,
+             const sourcemeta::hydra::http::ServerRequest &,
              sourcemeta::hydra::http::ServerResponse &response) -> void {
   response.status(sourcemeta::hydra::http::Status::NOT_IMPLEMENTED);
   response.end();
 }
 
 static auto
-on_parameters(const sourcemeta::hydra::http::ServerRequest &request,
+on_parameters(const sourcemeta::hydra::http::ServerLogger &,
+              const sourcemeta::hydra::http::ServerRequest &request,
               sourcemeta::hydra::http::ServerResponse &response) -> void {
   response.status(sourcemeta::hydra::http::Status::OK);
   std::ostringstream result;
@@ -79,6 +86,7 @@ on_parameters(const sourcemeta::hydra::http::ServerRequest &request,
 
 static auto
 on_error(std::exception_ptr error,
+         const sourcemeta::hydra::http::ServerLogger &,
          const sourcemeta::hydra::http::ServerRequest &,
          sourcemeta::hydra::http::ServerResponse &response) noexcept -> void {
   response.status(sourcemeta::hydra::http::Status::BAD_REQUEST);

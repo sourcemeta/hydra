@@ -36,7 +36,8 @@ public:
   /// sourcemeta::hydra::http::Server server;
   ///
   /// static auto
-  /// on_root(const sourcemeta::hydra::http::ServerRequest &request,
+  /// on_root(const sourcemeta::hydra::http::ServerLogger &,
+  ///         const sourcemeta::hydra::http::ServerRequest &request,
   ///         sourcemeta::hydra::http::ServerResponse &response) -> void {
   ///   response.status(sourcemeta::hydra::http::Status::OK);
   ///   std::ostringstream result;
@@ -59,7 +60,8 @@ public:
   /// sourcemeta::hydra::http::Server server;
   ///
   /// static auto
-  /// on_root(const sourcemeta::hydra::http::ServerRequest &request,
+  /// on_root(const sourcemeta::hydra::http::ServerLogger &,
+  ///         const sourcemeta::hydra::http::ServerRequest &request,
   ///         sourcemeta::hydra::http::ServerResponse &response) -> void {
   ///   response.status(sourcemeta::hydra::http::Status::OK);
   ///   const auto host{request.header("host")};
@@ -83,7 +85,8 @@ public:
   /// sourcemeta::hydra::http::Server server;
   ///
   /// static auto
-  /// on_root(const sourcemeta::hydra::http::ServerRequest &request,
+  /// on_root(const sourcemeta::hydra::http::ServerLogger &,
+  ///         const sourcemeta::hydra::http::ServerRequest &request,
   ///         sourcemeta::hydra::http::ServerResponse &response) -> void {
   ///   response.status(sourcemeta::hydra::http::Status::OK);
   ///   std::ostringstream result;
@@ -112,7 +115,8 @@ public:
   /// sourcemeta::hydra::http::Server server;
   ///
   /// static auto
-  /// on_root(const sourcemeta::hydra::http::ServerRequest &request,
+  /// on_root(const sourcemeta::hydra::http::ServerLogger &,
+  ///         const sourcemeta::hydra::http::ServerRequest &request,
   ///         sourcemeta::hydra::http::ServerResponse &response) -> void {
   ///   response.status(sourcemeta::hydra::http::Status::OK);
   ///   std::ostringstream result;
@@ -134,7 +138,8 @@ public:
   /// sourcemeta::hydra::http::Server server;
   ///
   /// static auto
-  /// on_root(const sourcemeta::hydra::http::ServerRequest &request,
+  /// on_root(const sourcemeta::hydra::http::ServerLogger &,
+  ///         const sourcemeta::hydra::http::ServerRequest &request,
   ///         sourcemeta::hydra::http::ServerResponse &response) -> void {
   ///   response.status(sourcemeta::hydra::http::Status::OK);
   ///   std::ostringstream result;
