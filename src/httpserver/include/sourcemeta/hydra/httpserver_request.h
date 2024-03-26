@@ -9,6 +9,7 @@
 
 #include <sourcemeta/hydra/http.h>
 
+#include <cstdint>     // std::uint8_t
 #include <memory>      // std::unique_ptr
 #include <optional>    // std::optional
 #include <string>      // std::string
@@ -122,6 +123,29 @@ public:
   /// server.route(sourcemeta::hydra::http::Method::GET, "/", on_root);
   /// ```
   auto path() const -> std::string;
+
+  /// Get a parameter of the request URL by position. For example:
+  ///
+  /// ```cpp
+  /// #include <sourcemeta/hydra/httpserver.h>
+  /// #include <sstream>
+  /// #include <cassert>
+  ///
+  /// sourcemeta::hydra::http::Server server;
+  ///
+  /// static auto
+  /// on_root(const sourcemeta::hydra::http::ServerRequest &request,
+  ///         sourcemeta::hydra::http::ServerResponse &response) -> void {
+  ///   response.status(sourcemeta::hydra::http::Status::OK);
+  ///   std::ostringstream result;
+  ///   // Matches ":bar"
+  ///   result << request.parameter(0);
+  ///   response.end(result.str());
+  /// }
+  ///
+  /// server.route(sourcemeta::hydra::http::Method::GET, "/foo/:bar", on_root);
+  /// ```
+  auto parameter(const std::uint8_t index) const -> std::string;
 
 private:
   // PIMPL idiom to hide uWebSockets
