@@ -1,10 +1,11 @@
 #include <sourcemeta/hydra/httpserver.h>
 #include <sourcemeta/jsontoolkit/json.h>
 
-#include <cstdlib>  // EXIT_FAILURE
-#include <iostream> // std::cerr
-#include <sstream>  // std::ostringstream
-#include <string>   // std::stoul
+#include <cstdlib>   // EXIT_FAILURE
+#include <iostream>  // std::cerr
+#include <sstream>   // std::ostringstream
+#include <stdexcept> // std::runtime_error
+#include <string>    // std::stoul
 
 static auto on_echo(const sourcemeta::hydra::http::ServerRequest &request,
                     sourcemeta::hydra::http::ServerResponse &response) -> void {
@@ -28,6 +29,30 @@ static auto on_echo(const sourcemeta::hydra::http::ServerRequest &request,
   response.end(result.str());
 }
 
+static auto on_throw(const sourcemeta::hydra::http::ServerRequest &,
+                     sourcemeta::hydra::http::ServerResponse &) -> void {
+  throw std::runtime_error("Crash!");
+}
+
+static auto
+on_otherwise(const sourcemeta::hydra::http::ServerRequest &,
+             sourcemeta::hydra::http::ServerResponse &response) -> void {
+  response.status(sourcemeta::hydra::http::Status::NOT_IMPLEMENTED);
+  response.end();
+}
+
+static auto
+on_error(std::exception_ptr error,
+         const sourcemeta::hydra::http::ServerRequest &,
+         sourcemeta::hydra::http::ServerResponse &response) noexcept -> void {
+  response.status(sourcemeta::hydra::http::Status::BAD_REQUEST);
+  try {
+    std::rethrow_exception(error);
+  } catch (const std::exception &exception) {
+    response.end(exception.what());
+  }
+}
+
 auto main(int argc, char *argv[]) -> int {
   if (argc < 2) {
     std::cerr << "Usage: " << argv[0] << " <port>\n";
@@ -45,6 +70,10 @@ auto main(int argc, char *argv[]) -> int {
   server.route(sourcemeta::hydra::http::Method::OPTIONS, "/echo", on_echo);
   server.route(sourcemeta::hydra::http::Method::TRACE, "/echo", on_echo);
   server.route(sourcemeta::hydra::http::Method::PATCH, "/echo", on_echo);
+  server.route(sourcemeta::hydra::http::Method::GET, "/throw", on_throw);
+
+  server.otherwise(on_otherwise);
+  server.error(on_error);
 
   return server.run(static_cast<std::uint32_t>(std::stoul(argv[1])));
 }
