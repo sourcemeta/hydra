@@ -46,4 +46,8 @@ auto ServerRequest::path() const -> std::string {
   return std::string{this->internal->handler->getUrl()};
 }
 
+auto ServerRequest::parameter(const std::uint8_t index) const -> std::string {
+  return std::string{this->internal->handler->getParameter(index)};
+}
+
 } // namespace sourcemeta::hydra::http

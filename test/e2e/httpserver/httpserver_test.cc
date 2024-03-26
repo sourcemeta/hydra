@@ -291,3 +291,35 @@ TEST(e2e_HTTP_Server, echo_query_foo_with) {
   EXPECT_EQ(response.header("x-foo").value(), "hello");
   EXPECT_TRUE(response.empty());
 }
+
+TEST(e2e_HTTP_Server, parameters_foo_bar_baz) {
+  sourcemeta::hydra::http::ClientRequest request{
+      std::string{HTTPSERVER_BASE_URL()} + "/parameters/foo/bar/baz"};
+  request.capture();
+  request.method(sourcemeta::hydra::http::Method::GET);
+  sourcemeta::hydra::http::ClientResponse response{request.send().get()};
+  EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_FALSE(response.empty());
+  std::ostringstream result;
+  std::copy(
+      std::istreambuf_iterator<std::ostringstream::char_type>(response.body()),
+      std::istreambuf_iterator<std::ostringstream::char_type>(),
+      std::ostreambuf_iterator<std::ostringstream::char_type>(result));
+  EXPECT_EQ(result.str(), "foo bar baz");
+}
+
+TEST(e2e_HTTP_Server, parameters_one_two_three) {
+  sourcemeta::hydra::http::ClientRequest request{
+      std::string{HTTPSERVER_BASE_URL()} + "/parameters/one/two/three"};
+  request.capture();
+  request.method(sourcemeta::hydra::http::Method::GET);
+  sourcemeta::hydra::http::ClientResponse response{request.send().get()};
+  EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_FALSE(response.empty());
+  std::ostringstream result;
+  std::copy(
+      std::istreambuf_iterator<std::ostringstream::char_type>(response.body()),
+      std::istreambuf_iterator<std::ostringstream::char_type>(),
+      std::ostreambuf_iterator<std::ostringstream::char_type>(result));
+  EXPECT_EQ(result.str(), "one two three");
+}

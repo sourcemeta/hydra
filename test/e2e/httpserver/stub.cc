@@ -65,6 +65,19 @@ on_otherwise(const sourcemeta::hydra::http::ServerRequest &,
 }
 
 static auto
+on_parameters(const sourcemeta::hydra::http::ServerRequest &request,
+              sourcemeta::hydra::http::ServerResponse &response) -> void {
+  response.status(sourcemeta::hydra::http::Status::OK);
+  std::ostringstream result;
+  result << request.parameter(0);
+  result << ' ';
+  result << request.parameter(1);
+  result << ' ';
+  result << request.parameter(2);
+  response.end(result.str());
+}
+
+static auto
 on_error(std::exception_ptr error,
          const sourcemeta::hydra::http::ServerRequest &,
          sourcemeta::hydra::http::ServerResponse &response) noexcept -> void {
@@ -97,6 +110,8 @@ auto main(int argc, char *argv[]) -> int {
   server.route(sourcemeta::hydra::http::Method::GET, "/echo-x-foo", on_x_foo);
   server.route(sourcemeta::hydra::http::Method::GET, "/echo-query-foo",
                on_query_foo);
+  server.route(sourcemeta::hydra::http::Method::GET,
+               "/parameters/:foo/:bar/:baz", on_parameters);
 
   server.otherwise(on_otherwise);
   server.error(on_error);
