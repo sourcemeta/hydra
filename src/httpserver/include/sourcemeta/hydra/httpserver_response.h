@@ -43,6 +43,28 @@ public:
   /// ```
   auto status(const Status code) -> void;
 
+  /// Get the status code of the response. For example:
+  ///
+  /// ```cpp
+  /// #include <sourcemeta/hydra/httpserver.h>
+  /// #include <cassert>
+  ///
+  /// sourcemeta::hydra::http::Server server;
+  ///
+  /// static auto
+  /// on_root(const sourcemeta::hydra::http::ServerLogger &,
+  ///         const sourcemeta::hydra::http::ServerRequest &,
+  ///         sourcemeta::hydra::http::ServerResponse &response) -> void {
+  ///   response.status(sourcemeta::hydra::http::Status::BAD_REQUEST);
+  ///   assert(response.status() ==
+  ///     sourcemeta::hydra::http::Status::BAD_REQUEST);
+  ///   response.end("Bad request!");
+  /// }
+  ///
+  /// server.route(sourcemeta::hydra::http::Method::GET, "/", on_root);
+  /// ```
+  auto status() const -> Status;
+
   /// Set a header in the response. For example:
   ///
   /// ```cpp
@@ -102,6 +124,7 @@ public:
   auto end() -> void;
 
 private:
+  Status code{Status::OK};
   // PIMPL idiom to hide uWebSockets
   struct Internal;
   std::unique_ptr<Internal> internal;
