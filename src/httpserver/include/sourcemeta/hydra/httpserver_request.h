@@ -71,6 +71,33 @@ public:
   /// ```
   auto header(std::string_view key) const -> std::optional<std::string>;
 
+  /// Get the value of a query string in the incoming request URL. For example:
+  ///
+  /// ```cpp
+  /// #include <sourcemeta/hydra/httpserver.h>
+  /// #include <sstream>
+  /// #include <cassert>
+  ///
+  /// sourcemeta::hydra::http::Server server;
+  ///
+  /// static auto
+  /// on_root(const sourcemeta::hydra::http::ServerRequest &request,
+  ///         sourcemeta::hydra::http::ServerResponse &response) -> void {
+  ///   response.status(sourcemeta::hydra::http::Status::OK);
+  ///   const auto foo{request.query("foo")};
+  ///   if (foo.has_value()) {
+  ///     result << "Foo: " << foo.value();
+  ///   } else {
+  ///     result << "Try passing a ?foo= query string\n";
+  ///   }
+  ///
+  ///   response.end(result.str());
+  /// }
+  ///
+  /// server.route(sourcemeta::hydra::http::Method::GET, "/", on_root);
+  /// ```
+  auto query(std::string_view key) const -> std::optional<std::string>;
+
 private:
   // PIMPL idiom to hide uWebSockets
   struct Internal;
