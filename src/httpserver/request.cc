@@ -42,4 +42,8 @@ auto ServerRequest::query(std::string_view key) const
   }
 }
 
+auto ServerRequest::path() const -> std::string {
+  return std::string{this->internal->handler->getUrl()};
+}
+
 } // namespace sourcemeta::hydra::http

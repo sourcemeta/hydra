@@ -21,6 +21,7 @@ static auto on_echo(const sourcemeta::hydra::http::ServerRequest &request,
   std::ostringstream method;
   method << request.method();
   document.assign("method", sourcemeta::jsontoolkit::JSON{method.str()});
+  document.assign("path", sourcemeta::jsontoolkit::JSON{request.path()});
 
   std::ostringstream result;
   sourcemeta::jsontoolkit::prettify(document, result);

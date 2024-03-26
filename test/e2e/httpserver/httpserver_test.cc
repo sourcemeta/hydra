@@ -23,6 +23,9 @@ TEST(e2e_HTTP_Server, echo_get) {
   EXPECT_TRUE(document.defines("method"));
   EXPECT_TRUE(document.at("method").is_string());
   EXPECT_EQ(document.at("method").to_string(), "GET");
+  EXPECT_TRUE(document.defines("path"));
+  EXPECT_TRUE(document.at("path").is_string());
+  EXPECT_EQ(document.at("path").to_string(), "/echo");
 }
 
 TEST(e2e_HTTP_Server, echo_head) {
@@ -49,6 +52,9 @@ TEST(e2e_HTTP_Server, echo_post) {
   EXPECT_TRUE(document.defines("method"));
   EXPECT_TRUE(document.at("method").is_string());
   EXPECT_EQ(document.at("method").to_string(), "POST");
+  EXPECT_TRUE(document.defines("path"));
+  EXPECT_TRUE(document.at("path").is_string());
+  EXPECT_EQ(document.at("path").to_string(), "/echo");
 }
 
 TEST(e2e_HTTP_Server, echo_put) {
@@ -66,6 +72,9 @@ TEST(e2e_HTTP_Server, echo_put) {
   EXPECT_TRUE(document.defines("method"));
   EXPECT_TRUE(document.at("method").is_string());
   EXPECT_EQ(document.at("method").to_string(), "PUT");
+  EXPECT_TRUE(document.defines("path"));
+  EXPECT_TRUE(document.at("path").is_string());
+  EXPECT_EQ(document.at("path").to_string(), "/echo");
 }
 
 TEST(e2e_HTTP_Server, echo_delete) {
@@ -83,6 +92,9 @@ TEST(e2e_HTTP_Server, echo_delete) {
   EXPECT_TRUE(document.defines("method"));
   EXPECT_TRUE(document.at("method").is_string());
   EXPECT_EQ(document.at("method").to_string(), "DELETE");
+  EXPECT_TRUE(document.defines("path"));
+  EXPECT_TRUE(document.at("path").is_string());
+  EXPECT_EQ(document.at("path").to_string(), "/echo");
 }
 
 TEST(e2e_HTTP_Server, echo_connect) {
@@ -100,6 +112,9 @@ TEST(e2e_HTTP_Server, echo_connect) {
   EXPECT_TRUE(document.defines("method"));
   EXPECT_TRUE(document.at("method").is_string());
   EXPECT_EQ(document.at("method").to_string(), "CONNECT");
+  EXPECT_TRUE(document.defines("path"));
+  EXPECT_TRUE(document.at("path").is_string());
+  EXPECT_EQ(document.at("path").to_string(), "/echo");
 }
 
 TEST(e2e_HTTP_Server, echo_options) {
@@ -117,6 +132,9 @@ TEST(e2e_HTTP_Server, echo_options) {
   EXPECT_TRUE(document.defines("method"));
   EXPECT_TRUE(document.at("method").is_string());
   EXPECT_EQ(document.at("method").to_string(), "OPTIONS");
+  EXPECT_TRUE(document.defines("path"));
+  EXPECT_TRUE(document.at("path").is_string());
+  EXPECT_EQ(document.at("path").to_string(), "/echo");
 }
 
 TEST(e2e_HTTP_Server, echo_trace) {
@@ -134,6 +152,9 @@ TEST(e2e_HTTP_Server, echo_trace) {
   EXPECT_TRUE(document.defines("method"));
   EXPECT_TRUE(document.at("method").is_string());
   EXPECT_EQ(document.at("method").to_string(), "TRACE");
+  EXPECT_TRUE(document.defines("path"));
+  EXPECT_TRUE(document.at("path").is_string());
+  EXPECT_EQ(document.at("path").to_string(), "/echo");
 }
 
 TEST(e2e_HTTP_Server, echo_patch) {
@@ -151,6 +172,29 @@ TEST(e2e_HTTP_Server, echo_patch) {
   EXPECT_TRUE(document.defines("method"));
   EXPECT_TRUE(document.at("method").is_string());
   EXPECT_EQ(document.at("method").to_string(), "PATCH");
+  EXPECT_TRUE(document.defines("path"));
+  EXPECT_TRUE(document.at("path").is_string());
+  EXPECT_EQ(document.at("path").to_string(), "/echo");
+}
+
+TEST(e2e_HTTP_Server, echo_get_with_query) {
+  sourcemeta::hydra::http::ClientRequest request{
+      std::string{HTTPSERVER_BASE_URL()} + "/echo?foo=bar"};
+  request.method(sourcemeta::hydra::http::Method::GET);
+  request.capture();
+  sourcemeta::hydra::http::ClientResponse response{request.send().get()};
+  EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_TRUE(response.header("content-type").has_value());
+  EXPECT_EQ(response.header("content-type").value(), "application/json");
+  const sourcemeta::jsontoolkit::JSON document =
+      sourcemeta::jsontoolkit::parse(response.body());
+  EXPECT_TRUE(document.is_object());
+  EXPECT_TRUE(document.defines("method"));
+  EXPECT_TRUE(document.at("method").is_string());
+  EXPECT_EQ(document.at("method").to_string(), "GET");
+  EXPECT_TRUE(document.defines("path"));
+  EXPECT_TRUE(document.at("path").is_string());
+  EXPECT_EQ(document.at("path").to_string(), "/echo");
 }
 
 TEST(e2e_HTTP_Server, otherwise_root_get) {
