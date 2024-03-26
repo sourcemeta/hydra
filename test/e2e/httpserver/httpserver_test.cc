@@ -8,8 +8,6 @@
 
 #include "environment.h"
 
-// TODO: Test request headers
-
 TEST(e2e_HTTP_Server, echo_get) {
   sourcemeta::hydra::http::ClientRequest request{
       std::string{HTTPSERVER_BASE_URL()} + "/echo"};
@@ -190,4 +188,28 @@ TEST(e2e_HTTP_Server, throw_test) {
       std::istreambuf_iterator<std::ostringstream::char_type>(),
       std::ostreambuf_iterator<std::ostringstream::char_type>(result));
   EXPECT_EQ(result.str(), "Crash!");
+}
+
+TEST(e2e_HTTP_Server, echo_x_foo_without) {
+  sourcemeta::hydra::http::ClientRequest request{
+      std::string{HTTPSERVER_BASE_URL()} + "/echo-x-foo"};
+  request.capture();
+  request.method(sourcemeta::hydra::http::Method::GET);
+  sourcemeta::hydra::http::ClientResponse response{request.send().get()};
+  EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_FALSE(response.header("x-foo").has_value());
+  EXPECT_TRUE(response.empty());
+}
+
+TEST(e2e_HTTP_Server, echo_x_foo_with) {
+  sourcemeta::hydra::http::ClientRequest request{
+      std::string{HTTPSERVER_BASE_URL()} + "/echo-x-foo"};
+  request.capture();
+  request.method(sourcemeta::hydra::http::Method::GET);
+  request.header("x-foo", "hello");
+  sourcemeta::hydra::http::ClientResponse response{request.send().get()};
+  EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_TRUE(response.header("x-foo").has_value());
+  EXPECT_EQ(response.header("x-foo").value(), "hello");
+  EXPECT_TRUE(response.empty());
 }

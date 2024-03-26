@@ -35,6 +35,17 @@ static auto on_throw(const sourcemeta::hydra::http::ServerRequest &,
 }
 
 static auto
+on_x_foo(const sourcemeta::hydra::http::ServerRequest &request,
+         sourcemeta::hydra::http::ServerResponse &response) -> void {
+  response.status(sourcemeta::hydra::http::Status::OK);
+  if (request.header("x-foo").has_value()) {
+    response.header("x-foo", request.header("x-foo").value());
+  }
+
+  response.end();
+}
+
+static auto
 on_otherwise(const sourcemeta::hydra::http::ServerRequest &,
              sourcemeta::hydra::http::ServerResponse &response) -> void {
   response.status(sourcemeta::hydra::http::Status::NOT_IMPLEMENTED);
@@ -71,6 +82,7 @@ auto main(int argc, char *argv[]) -> int {
   server.route(sourcemeta::hydra::http::Method::TRACE, "/echo", on_echo);
   server.route(sourcemeta::hydra::http::Method::PATCH, "/echo", on_echo);
   server.route(sourcemeta::hydra::http::Method::GET, "/throw", on_throw);
+  server.route(sourcemeta::hydra::http::Method::GET, "/echo-x-foo", on_x_foo);
 
   server.otherwise(on_otherwise);
   server.error(on_error);
