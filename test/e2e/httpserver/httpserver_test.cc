@@ -213,3 +213,37 @@ TEST(e2e_HTTP_Server, echo_x_foo_with) {
   EXPECT_EQ(response.header("x-foo").value(), "hello");
   EXPECT_TRUE(response.empty());
 }
+
+TEST(e2e_HTTP_Server, echo_query_foo_without) {
+  sourcemeta::hydra::http::ClientRequest request{
+      std::string{HTTPSERVER_BASE_URL()} + "/echo-query-foo"};
+  request.capture();
+  request.method(sourcemeta::hydra::http::Method::GET);
+  sourcemeta::hydra::http::ClientResponse response{request.send().get()};
+  EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_FALSE(response.header("x-foo").has_value());
+  EXPECT_TRUE(response.empty());
+}
+
+TEST(e2e_HTTP_Server, echo_query_foo_other) {
+  sourcemeta::hydra::http::ClientRequest request{
+      std::string{HTTPSERVER_BASE_URL()} + "/echo-query-foo?bar=baz"};
+  request.capture();
+  request.method(sourcemeta::hydra::http::Method::GET);
+  sourcemeta::hydra::http::ClientResponse response{request.send().get()};
+  EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_FALSE(response.header("x-foo").has_value());
+  EXPECT_TRUE(response.empty());
+}
+
+TEST(e2e_HTTP_Server, echo_query_foo_with) {
+  sourcemeta::hydra::http::ClientRequest request{
+      std::string{HTTPSERVER_BASE_URL()} + "/echo-query-foo?foo=hello"};
+  request.capture();
+  request.method(sourcemeta::hydra::http::Method::GET);
+  sourcemeta::hydra::http::ClientResponse response{request.send().get()};
+  EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_TRUE(response.header("x-foo").has_value());
+  EXPECT_EQ(response.header("x-foo").value(), "hello");
+  EXPECT_TRUE(response.empty());
+}
