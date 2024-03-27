@@ -35,6 +35,9 @@ static auto wrap_route(
   sourcemeta::hydra::http::ServerResponse response{response_handler};
   const sourcemeta::hydra::http::ServerRequest request{request_handler};
 
+  // For easy tracking
+  response.header("X-Request-Id", logger.id());
+
   try {
     callback(logger, request, response);
   } catch (...) {
