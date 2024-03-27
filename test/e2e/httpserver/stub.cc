@@ -1,6 +1,7 @@
 #include <sourcemeta/hydra/httpserver.h>
 #include <sourcemeta/jsontoolkit/json.h>
 
+#include <cassert>   // assert
 #include <cstdlib>   // EXIT_FAILURE
 #include <iostream>  // std::cerr
 #include <sstream>   // std::ostringstream
@@ -10,9 +11,12 @@
 static auto on_echo(const sourcemeta::hydra::http::ServerLogger &logger,
                     const sourcemeta::hydra::http::ServerRequest &request,
                     sourcemeta::hydra::http::ServerResponse &response) -> void {
+  assert(response.status() == sourcemeta::hydra::http::Status::OK);
+
   if (request.method() == sourcemeta::hydra::http::Method::HEAD) {
     logger << "Omitting body...";
     response.status(sourcemeta::hydra::http::Status::OK);
+    assert(response.status() == sourcemeta::hydra::http::Status::OK);
     response.end();
     return;
   }
@@ -28,6 +32,7 @@ static auto on_echo(const sourcemeta::hydra::http::ServerLogger &logger,
   std::ostringstream result;
   sourcemeta::jsontoolkit::prettify(document, result);
   response.status(sourcemeta::hydra::http::Status::OK);
+  assert(response.status() == sourcemeta::hydra::http::Status::OK);
   response.header("Content-Type", "application/json");
   response.end(result.str());
 }
@@ -67,6 +72,7 @@ on_otherwise(const sourcemeta::hydra::http::ServerLogger &,
              const sourcemeta::hydra::http::ServerRequest &,
              sourcemeta::hydra::http::ServerResponse &response) -> void {
   response.status(sourcemeta::hydra::http::Status::NOT_IMPLEMENTED);
+  assert(response.status() == sourcemeta::hydra::http::Status::NOT_IMPLEMENTED);
   response.end();
 }
 

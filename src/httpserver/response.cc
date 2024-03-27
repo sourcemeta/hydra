@@ -19,11 +19,14 @@ ServerResponse::ServerResponse(void *const handler)
 
 ServerResponse::~ServerResponse() {}
 
-auto ServerResponse::status(const Status code) -> void {
+auto ServerResponse::status(const Status status_code) -> void {
   std::ostringstream code_string;
-  code_string << code;
+  code_string << status_code;
   this->internal->handler->writeStatus(code_string.str());
+  this->code = status_code;
 }
+
+auto ServerResponse::status() const -> Status { return this->code; }
 
 auto ServerResponse::header(std::string_view key,
                             std::string_view value) -> void {
