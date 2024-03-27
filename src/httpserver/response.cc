@@ -20,9 +20,6 @@ ServerResponse::ServerResponse(void *const handler)
 ServerResponse::~ServerResponse() {}
 
 auto ServerResponse::status(const Status status_code) -> void {
-  std::ostringstream code_string;
-  code_string << status_code;
-  this->internal->handler->writeStatus(code_string.str());
   this->code = status_code;
 }
 
@@ -30,13 +27,31 @@ auto ServerResponse::status() const -> Status { return this->code; }
 
 auto ServerResponse::header(std::string_view key,
                             std::string_view value) -> void {
-  this->internal->handler->writeHeader(key, value);
+  this->headers.emplace(key, value);
 }
 
 auto ServerResponse::end(const std::string_view message) -> void {
+  std::ostringstream code_string;
+  code_string << this->code;
+  this->internal->handler->writeStatus(code_string.str());
+
+  for (const auto &[key, value] : this->headers) {
+    this->internal->handler->writeHeader(key, value);
+  }
+
   this->internal->handler->end(message);
 }
 
-auto ServerResponse::end() -> void { this->internal->handler->end(); }
+auto ServerResponse::end() -> void {
+  std::ostringstream code_string;
+  code_string << this->code;
+  this->internal->handler->writeStatus(code_string.str());
+
+  for (const auto &[key, value] : this->headers) {
+    this->internal->handler->writeHeader(key, value);
+  }
+
+  this->internal->handler->end();
+}
 
 } // namespace sourcemeta::hydra::http
