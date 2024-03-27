@@ -9,7 +9,9 @@
 
 #include <sourcemeta/hydra/http.h>
 
+#include <map>         // std::map
 #include <memory>      // std::unique_ptr
+#include <string>      // std::string
 #include <string_view> // std::string_view
 
 namespace sourcemeta::hydra::http {
@@ -125,6 +127,7 @@ public:
 
 private:
   Status code{Status::OK};
+  std::map<std::string, std::string> headers;
   // PIMPL idiom to hide uWebSockets
   struct Internal;
   std::unique_ptr<Internal> internal;
