@@ -35,7 +35,7 @@ auto ClientResponse::header_gmt(const std::string &key) const
     return std::nullopt;
   }
 
-  return from_gmt(header_string.value());
+  return sourcemeta::hydra::http::header_gmt(header_string.value());
 }
 
 auto ClientResponse::headers() const
