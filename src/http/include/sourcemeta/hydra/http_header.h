@@ -9,6 +9,7 @@
 
 #include <chrono> // std::chrono::system_clock::time_point
 #include <string> // std::string
+#include <vector> // std::vector
 
 namespace sourcemeta::hydra::http {
 
@@ -24,6 +25,23 @@ namespace sourcemeta::hydra::http {
 /// ```
 auto SOURCEMETA_HYDRA_HTTP_EXPORT header_gmt(const std::string &value)
     -> std::chrono::system_clock::time_point;
+
+/// @ingroup http
+/// Parse a header that consists of comma-separated ordered lists of elements.
+/// For example:
+///
+/// ```cpp
+/// #include <sourcemeta/hydra/http.h>
+/// #include <cassert>
+///
+/// const auto elements{
+///   sourcemeta::hydra::http::header_list("gzip, brotli")};
+/// assert(elements.size() == 2);
+/// assert(elements.at(0) == "gzip");
+/// assert(elements.at(0) == "brotli");
+/// ```
+auto SOURCEMETA_HYDRA_HTTP_EXPORT header_list(const std::string &value)
+    -> std::vector<std::string>;
 
 } // namespace sourcemeta::hydra::http
 

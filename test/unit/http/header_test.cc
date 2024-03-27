@@ -28,3 +28,39 @@ TEST(HTTP_Header, gmt) {
 
   EXPECT_EQ(point, expected);
 }
+
+TEST(HTTP_Header, list_one) {
+  const auto result{sourcemeta::hydra::http::header_list("foo")};
+  EXPECT_EQ(result.size(), 1);
+  EXPECT_EQ(result.at(0), "foo");
+}
+
+TEST(HTTP_Header, list_many) {
+  const auto result{sourcemeta::hydra::http::header_list("foo, bar, baz")};
+  EXPECT_EQ(result.size(), 3);
+  EXPECT_EQ(result.at(0), "foo");
+  EXPECT_EQ(result.at(1), "bar");
+  EXPECT_EQ(result.at(2), "baz");
+}
+
+TEST(HTTP_Header, list_many_compact) {
+  const auto result{sourcemeta::hydra::http::header_list("foo,bar,baz")};
+  EXPECT_EQ(result.size(), 3);
+  EXPECT_EQ(result.at(0), "foo");
+  EXPECT_EQ(result.at(1), "bar");
+  EXPECT_EQ(result.at(2), "baz");
+}
+
+TEST(HTTP_Header, list_many_sparse) {
+  const auto result{sourcemeta::hydra::http::header_list("foo,,baz")};
+  EXPECT_EQ(result.size(), 2);
+  EXPECT_EQ(result.at(0), "foo");
+  EXPECT_EQ(result.at(1), "baz");
+}
+
+TEST(HTTP_Header, list_trailing_comma) {
+  const auto result{sourcemeta::hydra::http::header_list("foo, bar,")};
+  EXPECT_EQ(result.size(), 2);
+  EXPECT_EQ(result.at(0), "foo");
+  EXPECT_EQ(result.at(1), "bar");
+}
