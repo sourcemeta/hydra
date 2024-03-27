@@ -38,6 +38,16 @@ auto ClientResponse::header_gmt(const std::string &key) const
   return sourcemeta::hydra::http::header_gmt(header_string.value());
 }
 
+auto ClientResponse::header_list(const std::string &key) const
+    -> std::optional<std::vector<std::string>> {
+  const auto header_string{this->header(key)};
+  if (!header_string.has_value()) {
+    return std::nullopt;
+  }
+
+  return sourcemeta::hydra::http::header_list(header_string.value());
+}
+
 auto ClientResponse::headers() const
     -> const std::map<std::string, std::string> & {
   return this->headers_;

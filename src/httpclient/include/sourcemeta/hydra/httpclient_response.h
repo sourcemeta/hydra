@@ -14,6 +14,7 @@
 #include <optional> // std::optional
 #include <sstream>  // std::ostringstream, std::istringstream
 #include <string>   // std::string
+#include <vector>   // std::vector
 
 namespace sourcemeta::hydra::http {
 
@@ -74,13 +75,34 @@ public:
   ///
   /// sourcemeta::hydra::http::ClientRequest request{"https://www.example.com"};
   /// request.method(sourcemeta::hydra::http::Method::GET);
-  /// request.capture("last-modified");
+  /// request.capture("content-type");
   /// sourcemeta::hydra::http::ClientResponse response{request.send().get()};
-  /// const auto time_poimt{response.header_gmt("content-type")};
+  /// const auto time_point{response.header_gmt("content-type")};
   /// assert(time_point.has_value());
   /// ```
   auto header_gmt(const std::string &key) const
       -> std::optional<std::chrono::system_clock::time_point>;
+
+  /// Get the value of a given response header, if any, assuming it is a list of
+  /// comma-separated elements. Remember that you must express your desire of
+  /// capturing the response headers you are interest in when performing the
+  /// request, using sourcemeta::hydra::http::ClientRequest::capture.
+  ///
+  /// ```cpp
+  /// #include <sourcemeta/hydra/httpclient.h>
+  /// #include <iostream>
+  ///
+  /// sourcemeta::hydra::http::ClientRequest request{"https://www.example.com"};
+  /// request.method(sourcemeta::hydra::http::Method::GET);
+  /// request.capture("vary");
+  /// sourcemeta::hydra::http::ClientResponse response{request.send().get()};
+  /// const auto parts{response.header_list("vary")};
+  /// for (const auto &part : parts) {
+  ///   std::cout << part << "\n";
+  /// }
+  /// ```
+  auto header_list(const std::string &key) const
+      -> std::optional<std::vector<std::string>>;
 
   /// Get a container for all the captured response headers. For example:
   ///
