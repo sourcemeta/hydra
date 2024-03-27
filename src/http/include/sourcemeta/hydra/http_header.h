@@ -7,9 +7,10 @@
 #include "http_export.h"
 #endif
 
-#include <chrono> // std::chrono::system_clock::time_point
-#include <string> // std::string
-#include <vector> // std::vector
+#include <chrono>  // std::chrono::system_clock::time_point
+#include <string>  // std::string
+#include <utility> // std::pair
+#include <vector>  // std::vector
 
 namespace sourcemeta::hydra::http {
 
@@ -26,6 +27,10 @@ namespace sourcemeta::hydra::http {
 auto SOURCEMETA_HYDRA_HTTP_EXPORT header_gmt(const std::string &value)
     -> std::chrono::system_clock::time_point;
 
+/// A header list element consists of the element value and its quality value
+/// See https://developer.mozilla.org/en-US/docs/Glossary/Quality_values
+using HeaderListElement = std::pair<std::string, float>;
+
 /// @ingroup http
 /// Parse a header that consists of comma-separated ordered lists of elements.
 /// For example:
@@ -37,11 +42,11 @@ auto SOURCEMETA_HYDRA_HTTP_EXPORT header_gmt(const std::string &value)
 /// const auto elements{
 ///   sourcemeta::hydra::http::header_list("gzip, brotli")};
 /// assert(elements.size() == 2);
-/// assert(elements.at(0) == "gzip");
-/// assert(elements.at(0) == "brotli");
+/// assert(elements.at(0).first == "gzip");
+/// assert(elements.at(1).first == "brotli");
 /// ```
 auto SOURCEMETA_HYDRA_HTTP_EXPORT header_list(const std::string &value)
-    -> std::vector<std::string>;
+    -> std::vector<HeaderListElement>;
 
 } // namespace sourcemeta::hydra::http
 

@@ -98,11 +98,11 @@ public:
   /// sourcemeta::hydra::http::ClientResponse response{request.send().get()};
   /// const auto parts{response.header_list("vary")};
   /// for (const auto &part : parts) {
-  ///   std::cout << part << "\n";
+  ///   std::cout << part.first << "\n";
   /// }
   /// ```
   auto header_list(const std::string &key) const
-      -> std::optional<std::vector<std::string>>;
+      -> std::optional<std::vector<HeaderListElement>>;
 
   /// Get a container for all the captured response headers. For example:
   ///

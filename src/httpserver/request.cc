@@ -33,7 +33,7 @@ auto ServerRequest::header(std::string_view key) const
 }
 
 auto ServerRequest::header_list(std::string_view key) const
-    -> std::optional<std::vector<std::string>> {
+    -> std::optional<std::vector<HeaderListElement>> {
   const auto header_string{this->header(key)};
   if (!header_string.has_value()) {
     return std::nullopt;
