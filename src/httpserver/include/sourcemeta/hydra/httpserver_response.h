@@ -17,6 +17,10 @@
 namespace sourcemeta::hydra::http {
 
 /// @ingroup httpserver
+/// The content encodings supported by this implementation
+enum class ServerContentEncoding { Identity, GZIP };
+
+/// @ingroup httpserver
 /// This class encapsulates the HTTP response the server responds with
 class SOURCEMETA_HYDRA_HTTPSERVER_EXPORT ServerResponse {
 public:
@@ -87,6 +91,30 @@ public:
   /// ```
   auto header(std::string_view key, std::string_view value) -> void;
 
+  /// Set a specific content encoding for the response. The server will attempt
+  /// to automatically perform content negotiation, so you typically only need
+  /// to call this method to override the default choice if needed. For example:
+  ///
+  /// ```cpp
+  /// #include <sourcemeta/hydra/httpserver.h>
+  ///
+  /// sourcemeta::hydra::http::Server server;
+  ///
+  /// static auto
+  /// on_root(const sourcemeta::hydra::http::ServerLogger &,
+  ///         const sourcemeta::hydra::http::ServerRequest &,
+  ///         sourcemeta::hydra::http::ServerResponse &response) -> void {
+  ///   response.status(sourcemeta::hydra::http::Status::OK);
+  ///   // Force GZIP encoding, even if the client didn't express its
+  ///   // intention using the Accept-Encoding HTTP header.
+  ///   response.encoding(sourcemeta::hydra::http::ServerContentEncoding::GZIP);
+  ///   response.end("Hello!");
+  /// }
+  ///
+  /// server.route(sourcemeta::hydra::http::Method::GET, "/", on_root);
+  /// ```
+  auto encoding(const ServerContentEncoding encoding) -> void;
+
   /// Respond with a string. For example:
   ///
   /// ```cpp
@@ -128,6 +156,7 @@ public:
 private:
   Status code{Status::OK};
   std::map<std::string, std::string> headers;
+  ServerContentEncoding content_encoding = ServerContentEncoding::Identity;
   // PIMPL idiom to hide uWebSockets
   struct Internal;
   std::unique_ptr<Internal> internal;

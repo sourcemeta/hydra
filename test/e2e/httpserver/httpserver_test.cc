@@ -343,3 +343,40 @@ TEST(e2e_HTTP_Server, encodings_gzip_brotli) {
   EXPECT_EQ(document.at(0).to_string(), "gzip");
   EXPECT_EQ(document.at(1).to_string(), "brotli");
 }
+
+TEST(e2e_HTTP_Server, force_gzip_default) {
+  sourcemeta::hydra::http::ClientRequest request{
+      std::string{HTTPSERVER_BASE_URL()} + "/force-gzip"};
+  request.capture();
+  request.method(sourcemeta::hydra::http::Method::GET);
+  sourcemeta::hydra::http::ClientResponse response{request.send().get()};
+  EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_TRUE(response.header("content-encoding").has_value());
+  EXPECT_EQ(response.header("content-encoding").value(), "gzip");
+  EXPECT_FALSE(response.empty());
+  std::ostringstream result;
+  std::copy(
+      std::istreambuf_iterator<std::ostringstream::char_type>(response.body()),
+      std::istreambuf_iterator<std::ostringstream::char_type>(),
+      std::ostreambuf_iterator<std::ostringstream::char_type>(result));
+  EXPECT_EQ(result.str(), "I am compressed");
+}
+
+TEST(e2e_HTTP_Server, force_gzip_non_matching_accept_encoding) {
+  sourcemeta::hydra::http::ClientRequest request{
+      std::string{HTTPSERVER_BASE_URL()} + "/force-gzip"};
+  request.capture();
+  request.method(sourcemeta::hydra::http::Method::GET);
+  request.header("Accept-Encoding", "brotli");
+  sourcemeta::hydra::http::ClientResponse response{request.send().get()};
+  EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_TRUE(response.header("content-encoding").has_value());
+  EXPECT_EQ(response.header("content-encoding").value(), "gzip");
+  EXPECT_FALSE(response.empty());
+  std::ostringstream result;
+  std::copy(
+      std::istreambuf_iterator<std::ostringstream::char_type>(response.body()),
+      std::istreambuf_iterator<std::ostringstream::char_type>(),
+      std::ostreambuf_iterator<std::ostringstream::char_type>(result));
+  EXPECT_EQ(result.str(), "I am compressed");
+}
