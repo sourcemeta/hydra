@@ -91,6 +91,26 @@ on_parameters(const sourcemeta::hydra::http::ServerLogger &,
 }
 
 static auto
+on_encodings(const sourcemeta::hydra::http::ServerLogger &,
+             const sourcemeta::hydra::http::ServerRequest &request,
+             sourcemeta::hydra::http::ServerResponse &response) -> void {
+  sourcemeta::jsontoolkit::JSON document{
+      sourcemeta::jsontoolkit::JSON::make_array()};
+  const auto accept_encoding{request.header_list("accept-encoding")};
+  if (accept_encoding.has_value()) {
+    for (const auto &encoding : accept_encoding.value()) {
+      document.push_back(sourcemeta::jsontoolkit::JSON{encoding});
+    }
+  }
+
+  std::ostringstream result;
+  sourcemeta::jsontoolkit::prettify(document, result);
+  response.status(sourcemeta::hydra::http::Status::OK);
+  response.header("Content-Type", "application/json");
+  response.end(result.str());
+}
+
+static auto
 on_error(std::exception_ptr error,
          const sourcemeta::hydra::http::ServerLogger &,
          const sourcemeta::hydra::http::ServerRequest &,
@@ -126,6 +146,8 @@ auto main(int argc, char *argv[]) -> int {
                on_query_foo);
   server.route(sourcemeta::hydra::http::Method::GET,
                "/parameters/:foo/:bar/:baz", on_parameters);
+  server.route(sourcemeta::hydra::http::Method::GET, "/encodings",
+               on_encodings);
 
   server.otherwise(on_otherwise);
   server.error(on_error);

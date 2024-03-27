@@ -32,6 +32,16 @@ auto ServerRequest::header(std::string_view key) const
   }
 }
 
+auto ServerRequest::header_list(std::string_view key) const
+    -> std::optional<std::vector<std::string>> {
+  const auto header_string{this->header(key)};
+  if (!header_string.has_value()) {
+    return std::nullopt;
+  }
+
+  return sourcemeta::hydra::http::header_list(header_string.value());
+}
+
 auto ServerRequest::query(std::string_view key) const
     -> std::optional<std::string> {
   const std::string_view value{this->internal->handler->getQuery(key)};

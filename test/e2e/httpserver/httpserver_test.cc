@@ -323,3 +323,23 @@ TEST(e2e_HTTP_Server, parameters_one_two_three) {
       std::ostreambuf_iterator<std::ostringstream::char_type>(result));
   EXPECT_EQ(result.str(), "one two three");
 }
+
+TEST(e2e_HTTP_Server, encodings_gzip_brotli) {
+  sourcemeta::hydra::http::ClientRequest request{
+      std::string{HTTPSERVER_BASE_URL()} + "/encodings"};
+  request.capture();
+  request.method(sourcemeta::hydra::http::Method::GET);
+  request.header("Accept-Encoding", "gzip, brotli");
+  sourcemeta::hydra::http::ClientResponse response{request.send().get()};
+  EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_TRUE(response.header("content-type").has_value());
+  EXPECT_EQ(response.header("content-type").value(), "application/json");
+  const sourcemeta::jsontoolkit::JSON document =
+      sourcemeta::jsontoolkit::parse(response.body());
+  EXPECT_TRUE(document.is_array());
+  EXPECT_EQ(document.size(), 2);
+  EXPECT_TRUE(document.at(0).is_string());
+  EXPECT_TRUE(document.at(1).is_string());
+  EXPECT_EQ(document.at(0).to_string(), "gzip");
+  EXPECT_EQ(document.at(1).to_string(), "brotli");
+}
