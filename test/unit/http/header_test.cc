@@ -124,3 +124,17 @@ TEST(HTTP_Header, list_mdn_example_2) {
   EXPECT_EQ(result.at(2).first, "*/*");
   EXPECT_NEAR(result.at(2).second, 0.8, 0.01);
 }
+
+TEST(HTTP_Header, list_quality_0_integer) {
+  const auto result{sourcemeta::hydra::http::header_list("foo;q=0")};
+  EXPECT_EQ(result.size(), 1);
+  EXPECT_EQ(result.at(0).first, "foo");
+  EXPECT_NEAR(result.at(0).second, 0.0, 0.01);
+}
+
+TEST(HTTP_Header, list_quality_0_real) {
+  const auto result{sourcemeta::hydra::http::header_list("foo;q=0.0")};
+  EXPECT_EQ(result.size(), 1);
+  EXPECT_EQ(result.at(0).first, "foo");
+  EXPECT_NEAR(result.at(0).second, 0.0, 0.01);
+}
