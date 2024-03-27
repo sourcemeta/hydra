@@ -19,6 +19,53 @@
 #include <sstream>  // std::ostringstream
 #include <utility>  // std::move
 
+static auto negotiate_content_encoding(
+    const sourcemeta::hydra::http::ServerRequest &request,
+    sourcemeta::hydra::http::ServerResponse &response) -> bool {
+  const auto accept_encoding{request.header_list("accept-encoding")};
+  if (!accept_encoding.has_value()) {
+    response.encoding(sourcemeta::hydra::http::ServerContentEncoding::Identity);
+    return true;
+  }
+
+  for (const auto &encoding : accept_encoding.value()) {
+    if (encoding.second == 0.0f) {
+      // The client explicitly prohibited the default encoding
+      if (encoding.first == "*" || encoding.first == "identity") {
+        return false;
+      }
+
+      continue;
+    }
+
+    assert(encoding.second > 0.0f);
+
+    if (encoding.first == "identity") {
+      response.encoding(
+          sourcemeta::hydra::http::ServerContentEncoding::Identity);
+      return true;
+    } else if (encoding.first == "*" || encoding.first == "gzip") {
+      response.encoding(sourcemeta::hydra::http::ServerContentEncoding::GZIP);
+      return true;
+    }
+
+    // For compatibility with previous implementations of HTTP, applications
+    // SHOULD consider "x-gzip" [...] to be equivalent to "gzip".
+    // See https://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.5
+    if (encoding.first == "x-gzip") {
+      response.encoding(sourcemeta::hydra::http::ServerContentEncoding::GZIP);
+      return true;
+    }
+  }
+
+  // As long as the identity;q=0 or *;q=0 directives do not explicitly forbid
+  // the identity value that means no encoding, the server must never return a
+  // 406 Not Acceptable error. See
+  // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept-Encoding
+  response.encoding(sourcemeta::hydra::http::ServerContentEncoding::Identity);
+  return true;
+}
+
 static auto wrap_route(
     uWS::HttpResponse<true> *const response_handler,
     uWS::HttpRequest *const request_handler,
@@ -39,7 +86,16 @@ static auto wrap_route(
   response.header("X-Request-Id", logger.id());
 
   try {
-    callback(logger, request, response);
+    // Attempt automatic content encoding negotiation, which the user can always
+    // manually override later on in their request callback
+    const bool can_satisfy_requested_content_encoding{
+        negotiate_content_encoding(request, response)};
+    if (can_satisfy_requested_content_encoding) {
+      callback(logger, request, response);
+    } else {
+      response.status(sourcemeta::hydra::http::Status::NOT_ACCEPTABLE);
+      response.end();
+    }
   } catch (...) {
     error(std::current_exception(), logger, request, response);
   }
