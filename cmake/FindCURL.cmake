@@ -346,7 +346,17 @@ if(NOT CURL_FOUND)
     "${CURL_DIR}/lib/curl_gssapi.c"
     "${CURL_DIR}/lib/curl_fnmatch.c"
     "${CURL_DIR}/lib/select.h"
-    "${CURL_DIR}/lib/nonblock.h")
+    "${CURL_DIR}/lib/nonblock.h"
+    "${CURL_DIR}/lib/curl_sha512_256.c"
+    "${CURL_DIR}/lib/curl_sha512_256.h"
+    "${CURL_DIR}/lib/cw-out.c"
+    "${CURL_DIR}/lib/cw-out.h"
+    "${CURL_DIR}/lib/request.c"
+    "${CURL_DIR}/lib/request.h"
+    "${CURL_DIR}/lib/vquic/curl_osslq.c"
+    "${CURL_DIR}/lib/vquic/curl_osslq.h"
+    "${CURL_DIR}/lib/vquic/vquic-tls.c"
+    "${CURL_DIR}/lib/vquic/vquic-tls.h")
 
   # General options
   target_compile_definitions(curl PRIVATE BUILDING_LIBCURL)
@@ -382,6 +392,7 @@ if(NOT CURL_FOUND)
     target_compile_definitions(curl PRIVATE HAVE_POLL)
     target_compile_definitions(curl PRIVATE HAVE_FCNTL_O_NONBLOCK)
     target_compile_definitions(curl PRIVATE HAVE_STRUCT_TIMEVAL)
+    target_compile_definitions(curl PRIVATE HAVE_GETSOCKNAME)
     # POSIX.1-2008
     target_compile_definitions(curl PRIVATE _POSIX_C_SOURCE=200809L)
   elseif(APPLE)
@@ -400,6 +411,7 @@ if(NOT CURL_FOUND)
     target_compile_definitions(curl PRIVATE HAVE_POLL)
     target_compile_definitions(curl PRIVATE HAVE_FCNTL_O_NONBLOCK)
     target_compile_definitions(curl PRIVATE HAVE_STRUCT_TIMEVAL)
+    target_compile_definitions(curl PRIVATE HAVE_GETSOCKNAME)
   elseif(WIN32)
     target_compile_definitions(curl PRIVATE OS="Windows")
   endif()

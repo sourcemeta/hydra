@@ -12,6 +12,8 @@ winbuild
 src
 scripts
 LICENSES
+GIT-INFO.md
+appveyor.sh
 .azure-pipelines.yml
 .cirrus.yml
 .dcignore
