@@ -46,8 +46,8 @@ auto ServerLogger::operator<<(std::string_view message) const -> void {
   static std::mutex log_mutex;
   std::lock_guard<std::mutex> guard{log_mutex};
   std::cerr << "[" << to_gmt(std::chrono::system_clock::now()) << "] "
-            << "Thread #" << std::this_thread::get_id() << " (" << this->id()
-            << ") " << message << "\n";
+            << std::this_thread::get_id() << " (" << this->id() << ") "
+            << message << "\n";
 }
 
 } // namespace sourcemeta::hydra::http

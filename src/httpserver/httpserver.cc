@@ -16,6 +16,7 @@
 #include <cstdlib>  // EXIT_FAILURE
 #include <iostream> // std::cerr
 #include <ostream>  // std::ostream
+#include <sstream>  // std::ostringstream
 #include <utility>  // std::move
 
 static auto wrap_route(
@@ -39,6 +40,10 @@ static auto wrap_route(
   } catch (...) {
     error(std::current_exception(), logger, request, response);
   }
+
+  std::ostringstream line;
+  line << response.status() << ' ' << request.method() << ' ' << request.path();
+  logger << line.str();
 }
 
 static auto
