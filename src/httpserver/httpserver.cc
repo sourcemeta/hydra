@@ -32,8 +32,8 @@ static auto wrap_route(
 
   // These should never throw, otherwise we cannot even react to errors
   sourcemeta::hydra::http::ServerLogger logger;
-  sourcemeta::hydra::http::ServerResponse response{response_handler};
   const sourcemeta::hydra::http::ServerRequest request{request_handler};
+  sourcemeta::hydra::http::ServerResponse response{response_handler};
 
   // For easy tracking
   response.header("X-Request-Id", logger.id());
