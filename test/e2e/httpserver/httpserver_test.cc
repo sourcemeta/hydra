@@ -4,6 +4,7 @@
 #include <sourcemeta/jsontoolkit/json.h>
 
 #include <algorithm>
+#include <chrono>
 #include <sstream>
 
 #include "environment.h"
@@ -569,4 +570,128 @@ TEST(e2e_HTTP_Server, accept_encoding_deny_unknown) {
       std::istreambuf_iterator<std::ostringstream::char_type>(),
       std::ostreambuf_iterator<std::ostringstream::char_type>(result));
   EXPECT_EQ(result.str(), "foo bar baz");
+}
+
+TEST(e2e_HTTP_Server, cache_me_if_modified_since_equal) {
+  sourcemeta::hydra::http::ClientRequest request_1{
+      std::string{HTTPSERVER_BASE_URL()} + "/cache-me"};
+  request_1.capture();
+  request_1.method(sourcemeta::hydra::http::Method::GET);
+  sourcemeta::hydra::http::ClientResponse response_1{request_1.send().get()};
+  EXPECT_EQ(response_1.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_TRUE(response_1.header("last-modified").has_value());
+  EXPECT_FALSE(response_1.empty());
+  std::ostringstream result_1;
+  std::copy(std::istreambuf_iterator<std::ostringstream::char_type>(
+                response_1.body()),
+            std::istreambuf_iterator<std::ostringstream::char_type>(),
+            std::ostreambuf_iterator<std::ostringstream::char_type>(result_1));
+  EXPECT_EQ(result_1.str(), "Cache me!");
+
+  sourcemeta::hydra::http::ClientRequest request_2{
+      std::string{HTTPSERVER_BASE_URL()} + "/cache-me"};
+  request_2.capture();
+  request_2.method(sourcemeta::hydra::http::Method::GET);
+  request_2.header("If-Modified-Since",
+                   response_1.header("last-modified").value());
+  sourcemeta::hydra::http::ClientResponse response_2{request_2.send().get()};
+  EXPECT_EQ(response_2.status(), sourcemeta::hydra::http::Status::NOT_MODIFIED);
+  EXPECT_FALSE(response_2.header("last-modified").has_value());
+  EXPECT_TRUE(response_2.empty());
+}
+
+TEST(e2e_HTTP_Server, cache_me_if_modified_since_greater) {
+  sourcemeta::hydra::http::ClientRequest request_1{
+      std::string{HTTPSERVER_BASE_URL()} + "/cache-me"};
+  request_1.capture();
+  request_1.method(sourcemeta::hydra::http::Method::GET);
+  sourcemeta::hydra::http::ClientResponse response_1{request_1.send().get()};
+  EXPECT_EQ(response_1.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_TRUE(response_1.header("last-modified").has_value());
+  EXPECT_FALSE(response_1.empty());
+  std::ostringstream result_1;
+  std::copy(std::istreambuf_iterator<std::ostringstream::char_type>(
+                response_1.body()),
+            std::istreambuf_iterator<std::ostringstream::char_type>(),
+            std::ostreambuf_iterator<std::ostringstream::char_type>(result_1));
+  EXPECT_EQ(result_1.str(), "Cache me!");
+
+  auto timestamp{sourcemeta::hydra::http::from_gmt(
+      response_1.header("last-modified").value())};
+  timestamp += std::chrono::hours{1};
+
+  sourcemeta::hydra::http::ClientRequest request_2{
+      std::string{HTTPSERVER_BASE_URL()} + "/cache-me"};
+  request_2.capture();
+  request_2.method(sourcemeta::hydra::http::Method::GET);
+  request_2.header("If-Modified-Since",
+                   sourcemeta::hydra::http::to_gmt(timestamp));
+  sourcemeta::hydra::http::ClientResponse response_2{request_2.send().get()};
+  EXPECT_EQ(response_2.status(), sourcemeta::hydra::http::Status::NOT_MODIFIED);
+  EXPECT_FALSE(response_2.header("last-modified").has_value());
+  EXPECT_TRUE(response_2.empty());
+}
+
+TEST(e2e_HTTP_Server, cache_me_if_modified_since_less) {
+  sourcemeta::hydra::http::ClientRequest request_1{
+      std::string{HTTPSERVER_BASE_URL()} + "/cache-me"};
+  request_1.capture();
+  request_1.method(sourcemeta::hydra::http::Method::GET);
+  sourcemeta::hydra::http::ClientResponse response_1{request_1.send().get()};
+  EXPECT_EQ(response_1.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_TRUE(response_1.header("last-modified").has_value());
+  EXPECT_FALSE(response_1.empty());
+  std::ostringstream result_1;
+  std::copy(std::istreambuf_iterator<std::ostringstream::char_type>(
+                response_1.body()),
+            std::istreambuf_iterator<std::ostringstream::char_type>(),
+            std::ostreambuf_iterator<std::ostringstream::char_type>(result_1));
+  EXPECT_EQ(result_1.str(), "Cache me!");
+
+  auto timestamp{sourcemeta::hydra::http::from_gmt(
+      response_1.header("last-modified").value())};
+  timestamp -= std::chrono::hours{1};
+
+  sourcemeta::hydra::http::ClientRequest request_2{
+      std::string{HTTPSERVER_BASE_URL()} + "/cache-me"};
+  request_2.capture();
+  request_2.method(sourcemeta::hydra::http::Method::GET);
+  request_2.header("If-Modified-Since",
+                   sourcemeta::hydra::http::to_gmt(timestamp));
+  sourcemeta::hydra::http::ClientResponse response_2{request_2.send().get()};
+  EXPECT_EQ(response_2.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_TRUE(response_2.header("last-modified").has_value());
+  EXPECT_FALSE(response_2.empty());
+  std::ostringstream result_2;
+  std::copy(std::istreambuf_iterator<std::ostringstream::char_type>(
+                response_2.body()),
+            std::istreambuf_iterator<std::ostringstream::char_type>(),
+            std::ostreambuf_iterator<std::ostringstream::char_type>(result_2));
+  EXPECT_EQ(result_2.str(), "Cache me!");
+}
+
+TEST(e2e_HTTP_Server, cache_me_if_modified_since_equal_post) {
+  sourcemeta::hydra::http::ClientRequest request_1{
+      std::string{HTTPSERVER_BASE_URL()} + "/cache-me"};
+  request_1.capture();
+  request_1.method(sourcemeta::hydra::http::Method::POST);
+  sourcemeta::hydra::http::ClientResponse response_1{request_1.send().get()};
+  EXPECT_EQ(response_1.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_TRUE(response_1.header("last-modified").has_value());
+  EXPECT_FALSE(response_1.empty());
+  std::ostringstream result_1;
+  std::copy(std::istreambuf_iterator<std::ostringstream::char_type>(
+                response_1.body()),
+            std::istreambuf_iterator<std::ostringstream::char_type>(),
+            std::ostreambuf_iterator<std::ostringstream::char_type>(result_1));
+  EXPECT_EQ(result_1.str(), "Cache me!");
+
+  sourcemeta::hydra::http::ClientRequest request_2{
+      std::string{HTTPSERVER_BASE_URL()} + "/cache-me"};
+  request_2.capture();
+  request_2.method(sourcemeta::hydra::http::Method::POST);
+  request_2.header("If-Modified-Since",
+                   response_1.header("last-modified").value());
+  sourcemeta::hydra::http::ClientResponse response_2{request_2.send().get()};
+  EXPECT_EQ(response_2.status(), sourcemeta::hydra::http::Status::OK);
 }

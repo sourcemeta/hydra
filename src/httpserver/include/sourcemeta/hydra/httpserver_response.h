@@ -9,6 +9,7 @@
 
 #include <sourcemeta/hydra/http.h>
 
+#include <chrono>      // std::chrono::system_clock::time_point
 #include <map>         // std::map
 #include <memory>      // std::unique_ptr
 #include <string>      // std::string
@@ -90,6 +91,29 @@ public:
   /// server.route(sourcemeta::hydra::http::Method::GET, "/", on_root);
   /// ```
   auto header(std::string_view key, std::string_view value) -> void;
+
+  /// Set the `Last-Modified` HTTP header in the response. For example:
+  ///
+  /// ```cpp
+  /// #include <sourcemeta/hydra/httpserver.h>
+  ///
+  /// sourcemeta::hydra::http::Server server;
+  ///
+  /// static auto
+  /// on_root(const sourcemeta::hydra::http::ServerLogger &,
+  ///         const sourcemeta::hydra::http::ServerRequest &,
+  ///         sourcemeta::hydra::http::ServerResponse &response) -> void {
+  ///   response.status(sourcemeta::hydra::http::Status::OK);
+  ///   const auto timestamp{
+  ///     sourcemeta::hydra::http::from_gmt("Wed, 21 Oct 2015 11:28:00 GMT")};
+  ///   response.header_last_modified(timestamp);
+  ///   response.end();
+  /// }
+  ///
+  /// server.route(sourcemeta::hydra::http::Method::GET, "/", on_root);
+  /// ```
+  auto header_last_modified(const std::chrono::system_clock::time_point time)
+      -> void;
 
   /// Set a specific content encoding for the response. The server will attempt
   /// to automatically perform content negotiation, so you typically only need

@@ -9,6 +9,7 @@
 
 #include <sourcemeta/hydra/http.h>
 
+#include <chrono>      // std::chrono::system_clock::time_point
 #include <cstdint>     // std::uint8_t
 #include <memory>      // std::unique_ptr
 #include <optional>    // std::optional
@@ -105,6 +106,68 @@ public:
   /// ```
   auto header_list(std::string_view key) const
       -> std::optional<std::vector<HeaderListElement>>;
+
+  /// Get the value of a header of the incoming request assuming it consists of
+  /// a GMT timestamp. The header name is expected to be lowercase. For
+  /// example:
+  ///
+  /// ```cpp
+  /// #include <sourcemeta/hydra/httpserver.h>
+  /// #include <sstream>
+  /// #include <cassert>
+  ///
+  /// sourcemeta::hydra::http::Server server;
+  ///
+  /// static auto
+  /// on_root(const sourcemeta::hydra::http::ServerLogger &logger,
+  ///         const sourcemeta::hydra::http::ServerRequest &request,
+  ///         sourcemeta::hydra::http::ServerResponse &response) -> void {
+  ///   response.status(sourcemeta::hydra::http::Status::OK);
+  ///   const auto if_modified_since{request.header_list("if-modified-since")};
+  ///   if (if_modified_since.has_value()) {
+  ///     logger <<
+  ///       sourcemeta::hydra::http::from_gmt(if_modified_since.value());
+  ///   }
+  ///
+  ///   response.end();
+  /// }
+  ///
+  /// server.route(sourcemeta::hydra::http::Method::GET, "/", on_root);
+  /// ```
+  auto header_gmt(std::string_view key) const
+      -> std::optional<std::chrono::system_clock::time_point>;
+
+  /// Evaluate the timestamp passed using `If-Modified-Since` by the client, if
+  /// any, against the resource last modification timestamp. If so, you should
+  /// respond with `304 Not Modified`. For example:
+  ///
+  /// ```cpp
+  /// #include <sourcemeta/hydra/httpserver.h>
+  ///
+  /// sourcemeta::hydra::http::Server server;
+  ///
+  /// static auto
+  /// on_root(const sourcemeta::hydra::http::ServerLogger &,
+  ///         const sourcemeta::hydra::http::ServerRequest &request,
+  ///         sourcemeta::hydra::http::ServerResponse &response) -> void {
+  ///   const auto timestamp{
+  ///     sourcemeta::hydra::http::from_gmt("Wed, 21 Oct 2015 11:28:00 GMT")};
+  ///
+  ///   if (!request.header_if_modified_since(timestamp)) {
+  ///     response.status(sourcemeta::hydra::http::Status::NOT_MODIFIED);
+  ///     response.end();
+  ///     return;
+  ///   }
+  ///
+  ///   response.status(sourcemeta::hydra::http::Status::OK);
+  ///   response.header_last_modified(timestamp);
+  ///   response.end();
+  /// }
+  ///
+  /// server.route(sourcemeta::hydra::http::Method::GET, "/", on_root);
+  /// ```
+  auto header_if_modified_since(
+      const std::chrono::system_clock::time_point last_modified) const -> bool;
 
   /// Get the value of a query string in the incoming request URL. For example:
   ///
