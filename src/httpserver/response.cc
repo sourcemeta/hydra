@@ -2,8 +2,48 @@
 
 #include "uwebsockets.h"
 
-#include <cassert> // assert
-#include <sstream> // std::ostringstream
+#include <zlib.h>
+
+#include <cassert>     // assert
+#include <cstring>     // memset
+#include <sstream>     // std::ostringstream
+#include <stdexcept>   // std::runtime_error
+#include <string>      // std::string
+#include <string_view> // std::string_view
+
+static auto zlib_compress_gzip(std::string_view input) -> std::string {
+  z_stream stream;
+  memset(&stream, 0, sizeof(stream));
+  int code = deflateInit2(&stream, Z_DEFAULT_COMPRESSION, Z_DEFLATED,
+                          16 + MAX_WBITS, 8, Z_DEFAULT_STRATEGY);
+  if (code != Z_OK) {
+    throw std::runtime_error("deflateInit2 failed while compressing");
+  }
+
+  stream.next_in = reinterpret_cast<Bytef *>(const_cast<char *>(input.data()));
+  stream.avail_in = static_cast<uInt>(input.size());
+
+  char buffer[4096];
+  std::ostringstream compressed;
+
+  do {
+    stream.next_out = reinterpret_cast<Bytef *>(buffer);
+    stream.avail_out = sizeof(buffer);
+    code = deflate(&stream, Z_FINISH);
+    compressed.write(buffer, sizeof(buffer) - stream.avail_out);
+  } while (code == Z_OK);
+
+  if (code != Z_STREAM_END) {
+    throw std::runtime_error("Compression failure");
+  }
+
+  code = deflateEnd(&stream);
+  if (code != Z_OK) {
+    throw std::runtime_error("Compression failure");
+  }
+
+  return compressed.str();
+}
 
 namespace sourcemeta::hydra::http {
 
@@ -30,6 +70,18 @@ auto ServerResponse::header(std::string_view key,
   this->headers.emplace(key, value);
 }
 
+auto ServerResponse::encoding(const ServerContentEncoding encoding) -> void {
+  switch (encoding) {
+    case ServerContentEncoding::GZIP:
+      this->header("Content-Encoding", "gzip");
+      break;
+    case ServerContentEncoding::Identity:
+      break;
+  }
+
+  this->content_encoding = encoding;
+}
+
 auto ServerResponse::end(const std::string_view message) -> void {
   std::ostringstream code_string;
   code_string << this->code;
@@ -39,7 +91,14 @@ auto ServerResponse::end(const std::string_view message) -> void {
     this->internal->handler->writeHeader(key, value);
   }
 
-  this->internal->handler->end(message);
+  switch (this->content_encoding) {
+    case ServerContentEncoding::GZIP:
+      this->internal->handler->end(zlib_compress_gzip(message));
+      break;
+    case ServerContentEncoding::Identity:
+      this->internal->handler->end(message);
+      break;
+  }
 }
 
 auto ServerResponse::end() -> void {

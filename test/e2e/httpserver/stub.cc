@@ -111,6 +111,15 @@ on_encodings(const sourcemeta::hydra::http::ServerLogger &,
 }
 
 static auto
+on_force_gzip(const sourcemeta::hydra::http::ServerLogger &,
+              const sourcemeta::hydra::http::ServerRequest &,
+              sourcemeta::hydra::http::ServerResponse &response) -> void {
+  response.status(sourcemeta::hydra::http::Status::OK);
+  response.encoding(sourcemeta::hydra::http::ServerContentEncoding::GZIP);
+  response.end("I am compressed");
+}
+
+static auto
 on_error(std::exception_ptr error,
          const sourcemeta::hydra::http::ServerLogger &,
          const sourcemeta::hydra::http::ServerRequest &,
@@ -148,6 +157,8 @@ auto main(int argc, char *argv[]) -> int {
                "/parameters/:foo/:bar/:baz", on_parameters);
   server.route(sourcemeta::hydra::http::Method::GET, "/encodings",
                on_encodings);
+  server.route(sourcemeta::hydra::http::Method::GET, "/force-gzip",
+               on_force_gzip);
 
   server.otherwise(on_otherwise);
   server.error(on_error);
