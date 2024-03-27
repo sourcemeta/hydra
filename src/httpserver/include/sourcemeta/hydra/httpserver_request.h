@@ -75,6 +75,37 @@ public:
   /// ```
   auto header(std::string_view key) const -> std::optional<std::string>;
 
+  /// Get the value of a header of the incoming request assuming it consists of
+  /// comma-separated elements. The header name is expected to be lowercase. For
+  /// example:
+  ///
+  /// ```cpp
+  /// #include <sourcemeta/hydra/httpserver.h>
+  /// #include <sstream>
+  /// #include <cassert>
+  ///
+  /// sourcemeta::hydra::http::Server server;
+  ///
+  /// static auto
+  /// on_root(const sourcemeta::hydra::http::ServerLogger &logger,
+  ///         const sourcemeta::hydra::http::ServerRequest &request,
+  ///         sourcemeta::hydra::http::ServerResponse &response) -> void {
+  ///   response.status(sourcemeta::hydra::http::Status::OK);
+  ///   const auto encodings{request.header_list("accept-encoding")};
+  ///   if (encodings.has_value()) {
+  ///     for (const auto &encoding : encodings.value()) {
+  ///       logger << encoding;
+  ///     }
+  ///   }
+  ///
+  ///   response.end();
+  /// }
+  ///
+  /// server.route(sourcemeta::hydra::http::Method::GET, "/", on_root);
+  /// ```
+  auto header_list(std::string_view key) const
+      -> std::optional<std::vector<std::string>>;
+
   /// Get the value of a query string in the incoming request URL. For example:
   ///
   /// ```cpp
