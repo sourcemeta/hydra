@@ -380,3 +380,193 @@ TEST(e2e_HTTP_Server, force_gzip_non_matching_accept_encoding) {
       std::ostreambuf_iterator<std::ostringstream::char_type>(result));
   EXPECT_EQ(result.str(), "I am compressed");
 }
+
+TEST(e2e_HTTP_Server, gzip_by_default) {
+  sourcemeta::hydra::http::ClientRequest request{
+      std::string{HTTPSERVER_BASE_URL()} + "/parameters/foo/bar/baz"};
+  request.capture();
+  request.method(sourcemeta::hydra::http::Method::GET);
+  sourcemeta::hydra::http::ClientResponse response{request.send().get()};
+  EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_TRUE(response.header("content-encoding").has_value());
+  EXPECT_EQ(response.header("content-encoding").value(), "gzip");
+  EXPECT_FALSE(response.empty());
+  std::ostringstream result;
+  std::copy(
+      std::istreambuf_iterator<std::ostringstream::char_type>(response.body()),
+      std::istreambuf_iterator<std::ostringstream::char_type>(),
+      std::ostreambuf_iterator<std::ostringstream::char_type>(result));
+  EXPECT_EQ(result.str(), "foo bar baz");
+}
+
+TEST(e2e_HTTP_Server, accept_encoding_gzip) {
+  sourcemeta::hydra::http::ClientRequest request{
+      std::string{HTTPSERVER_BASE_URL()} + "/parameters/foo/bar/baz"};
+  request.capture();
+  request.method(sourcemeta::hydra::http::Method::GET);
+  request.header("Accept-Encoding", "gzip");
+  sourcemeta::hydra::http::ClientResponse response{request.send().get()};
+  EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_TRUE(response.header("content-encoding").has_value());
+  EXPECT_EQ(response.header("content-encoding").value(), "gzip");
+  EXPECT_FALSE(response.empty());
+  std::ostringstream result;
+  std::copy(
+      std::istreambuf_iterator<std::ostringstream::char_type>(response.body()),
+      std::istreambuf_iterator<std::ostringstream::char_type>(),
+      std::ostreambuf_iterator<std::ostringstream::char_type>(result));
+  EXPECT_EQ(result.str(), "foo bar baz");
+}
+
+TEST(e2e_HTTP_Server, accept_encoding_as_fallback) {
+  sourcemeta::hydra::http::ClientRequest request{
+      std::string{HTTPSERVER_BASE_URL()} + "/parameters/foo/bar/baz"};
+  request.capture();
+  request.method(sourcemeta::hydra::http::Method::GET);
+  request.header("Accept-Encoding", "xxx, yyy, gzip");
+  sourcemeta::hydra::http::ClientResponse response{request.send().get()};
+  EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_TRUE(response.header("content-encoding").has_value());
+  EXPECT_EQ(response.header("content-encoding").value(), "gzip");
+  EXPECT_FALSE(response.empty());
+  std::ostringstream result;
+  std::copy(
+      std::istreambuf_iterator<std::ostringstream::char_type>(response.body()),
+      std::istreambuf_iterator<std::ostringstream::char_type>(),
+      std::ostreambuf_iterator<std::ostringstream::char_type>(result));
+  EXPECT_EQ(result.str(), "foo bar baz");
+}
+
+TEST(e2e_HTTP_Server, accept_encoding_as_fallback_with_quality_values) {
+  sourcemeta::hydra::http::ClientRequest request{
+      std::string{HTTPSERVER_BASE_URL()} + "/parameters/foo/bar/baz"};
+  request.capture();
+  request.method(sourcemeta::hydra::http::Method::GET);
+  request.header("Accept-Encoding", "xxx;q=1.0, gzip;q=0.5, yyy;0.8");
+  sourcemeta::hydra::http::ClientResponse response{request.send().get()};
+  EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_TRUE(response.header("content-encoding").has_value());
+  EXPECT_EQ(response.header("content-encoding").value(), "gzip");
+  EXPECT_FALSE(response.empty());
+  std::ostringstream result;
+  std::copy(
+      std::istreambuf_iterator<std::ostringstream::char_type>(response.body()),
+      std::istreambuf_iterator<std::ostringstream::char_type>(),
+      std::ostreambuf_iterator<std::ostringstream::char_type>(result));
+  EXPECT_EQ(result.str(), "foo bar baz");
+}
+
+TEST(e2e_HTTP_Server, accept_encoding_identity) {
+  sourcemeta::hydra::http::ClientRequest request{
+      std::string{HTTPSERVER_BASE_URL()} + "/parameters/foo/bar/baz"};
+  request.capture();
+  request.method(sourcemeta::hydra::http::Method::GET);
+  request.header("Accept-Encoding", "identity");
+  sourcemeta::hydra::http::ClientResponse response{request.send().get()};
+  EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_FALSE(response.header("content-encoding").has_value());
+  EXPECT_FALSE(response.empty());
+  std::ostringstream result;
+  std::copy(
+      std::istreambuf_iterator<std::ostringstream::char_type>(response.body()),
+      std::istreambuf_iterator<std::ostringstream::char_type>(),
+      std::ostreambuf_iterator<std::ostringstream::char_type>(result));
+  EXPECT_EQ(result.str(), "foo bar baz");
+}
+
+TEST(e2e_HTTP_Server, accept_encoding_gzip_identity) {
+  sourcemeta::hydra::http::ClientRequest request{
+      std::string{HTTPSERVER_BASE_URL()} + "/parameters/foo/bar/baz"};
+  request.capture();
+  request.method(sourcemeta::hydra::http::Method::GET);
+  request.header("Accept-Encoding", "gzip, identity");
+  sourcemeta::hydra::http::ClientResponse response{request.send().get()};
+  EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_TRUE(response.header("content-encoding").has_value());
+  EXPECT_EQ(response.header("content-encoding").value(), "gzip");
+  EXPECT_FALSE(response.empty());
+  std::ostringstream result;
+  std::copy(
+      std::istreambuf_iterator<std::ostringstream::char_type>(response.body()),
+      std::istreambuf_iterator<std::ostringstream::char_type>(),
+      std::ostreambuf_iterator<std::ostringstream::char_type>(result));
+  EXPECT_EQ(result.str(), "foo bar baz");
+}
+
+TEST(e2e_HTTP_Server, accept_encoding_gzip_identity_with_quality_values) {
+  sourcemeta::hydra::http::ClientRequest request{
+      std::string{HTTPSERVER_BASE_URL()} + "/parameters/foo/bar/baz"};
+  request.capture();
+  request.method(sourcemeta::hydra::http::Method::GET);
+  request.header("Accept-Encoding", "gzip;q=0.1, identity;q=0.8");
+  sourcemeta::hydra::http::ClientResponse response{request.send().get()};
+  EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_FALSE(response.header("content-encoding").has_value());
+  EXPECT_FALSE(response.empty());
+  std::ostringstream result;
+  std::copy(
+      std::istreambuf_iterator<std::ostringstream::char_type>(response.body()),
+      std::istreambuf_iterator<std::ostringstream::char_type>(),
+      std::ostreambuf_iterator<std::ostringstream::char_type>(result));
+  EXPECT_EQ(result.str(), "foo bar baz");
+}
+
+TEST(e2e_HTTP_Server, accept_encoding_prohibit_gzip) {
+  sourcemeta::hydra::http::ClientRequest request{
+      std::string{HTTPSERVER_BASE_URL()} + "/parameters/foo/bar/baz"};
+  request.capture();
+  request.method(sourcemeta::hydra::http::Method::GET);
+  request.header("Accept-Encoding", "gzip;q=0");
+  sourcemeta::hydra::http::ClientResponse response{request.send().get()};
+  EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_FALSE(response.header("content-encoding").has_value());
+  EXPECT_FALSE(response.empty());
+  std::ostringstream result;
+  std::copy(
+      std::istreambuf_iterator<std::ostringstream::char_type>(response.body()),
+      std::istreambuf_iterator<std::ostringstream::char_type>(),
+      std::ostreambuf_iterator<std::ostringstream::char_type>(result));
+  EXPECT_EQ(result.str(), "foo bar baz");
+}
+
+TEST(e2e_HTTP_Server, accept_encoding_deny_everything) {
+  sourcemeta::hydra::http::ClientRequest request{
+      std::string{HTTPSERVER_BASE_URL()} + "/parameters/foo/bar/baz"};
+  request.capture();
+  request.method(sourcemeta::hydra::http::Method::GET);
+  request.header("Accept-Encoding", "*;q=0");
+  sourcemeta::hydra::http::ClientResponse response{request.send().get()};
+  EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::NOT_ACCEPTABLE);
+  EXPECT_FALSE(response.header("content-encoding").has_value());
+  EXPECT_TRUE(response.empty());
+}
+
+TEST(e2e_HTTP_Server, accept_encoding_deny_identity) {
+  sourcemeta::hydra::http::ClientRequest request{
+      std::string{HTTPSERVER_BASE_URL()} + "/parameters/foo/bar/baz"};
+  request.capture();
+  request.method(sourcemeta::hydra::http::Method::GET);
+  request.header("Accept-Encoding", "identity;q=0");
+  sourcemeta::hydra::http::ClientResponse response{request.send().get()};
+  EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::NOT_ACCEPTABLE);
+  EXPECT_FALSE(response.header("content-encoding").has_value());
+  EXPECT_TRUE(response.empty());
+}
+
+TEST(e2e_HTTP_Server, accept_encoding_deny_unknown) {
+  sourcemeta::hydra::http::ClientRequest request{
+      std::string{HTTPSERVER_BASE_URL()} + "/parameters/foo/bar/baz"};
+  request.capture();
+  request.method(sourcemeta::hydra::http::Method::GET);
+  request.header("Accept-Encoding", "foo;q=0");
+  sourcemeta::hydra::http::ClientResponse response{request.send().get()};
+  EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_FALSE(response.header("content-encoding").has_value());
+  EXPECT_FALSE(response.empty());
+  std::ostringstream result;
+  std::copy(
+      std::istreambuf_iterator<std::ostringstream::char_type>(response.body()),
+      std::istreambuf_iterator<std::ostringstream::char_type>(),
+      std::ostreambuf_iterator<std::ostringstream::char_type>(result));
+  EXPECT_EQ(result.str(), "foo bar baz");
+}
