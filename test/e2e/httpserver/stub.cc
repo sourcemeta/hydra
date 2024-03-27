@@ -99,7 +99,7 @@ on_encodings(const sourcemeta::hydra::http::ServerLogger &,
   const auto accept_encoding{request.header_list("accept-encoding")};
   if (accept_encoding.has_value()) {
     for (const auto &encoding : accept_encoding.value()) {
-      document.push_back(sourcemeta::jsontoolkit::JSON{encoding});
+      document.push_back(sourcemeta::jsontoolkit::JSON{encoding.first});
     }
   }
 

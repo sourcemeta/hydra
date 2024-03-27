@@ -94,7 +94,7 @@ public:
   ///   const auto encodings{request.header_list("accept-encoding")};
   ///   if (encodings.has_value()) {
   ///     for (const auto &encoding : encodings.value()) {
-  ///       logger << encoding;
+  ///       logger << encoding.first;
   ///     }
   ///   }
   ///
@@ -104,7 +104,7 @@ public:
   /// server.route(sourcemeta::hydra::http::Method::GET, "/", on_root);
   /// ```
   auto header_list(std::string_view key) const
-      -> std::optional<std::vector<std::string>>;
+      -> std::optional<std::vector<HeaderListElement>>;
 
   /// Get the value of a query string in the incoming request URL. For example:
   ///
