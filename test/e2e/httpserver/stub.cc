@@ -137,6 +137,22 @@ on_cache_me(const sourcemeta::hydra::http::ServerLogger &,
 }
 
 static auto
+on_etag_quoted(const sourcemeta::hydra::http::ServerLogger &,
+               const sourcemeta::hydra::http::ServerRequest &request,
+               sourcemeta::hydra::http::ServerResponse &response) -> void {
+  const auto checksum{"\"711d2f4adab4515e4036c48bf58eb975\""};
+  if (!request.header_if_none_match(checksum)) {
+    response.status(sourcemeta::hydra::http::Status::NOT_MODIFIED);
+    response.end();
+    return;
+  }
+
+  response.status(sourcemeta::hydra::http::Status::OK);
+  response.header_etag(checksum);
+  response.end("Cache me!");
+}
+
+static auto
 on_error(std::exception_ptr error,
          const sourcemeta::hydra::http::ServerLogger &,
          const sourcemeta::hydra::http::ServerRequest &,
@@ -178,6 +194,8 @@ auto main(int argc, char *argv[]) -> int {
                on_force_gzip);
   server.route(sourcemeta::hydra::http::Method::GET, "/cache-me", on_cache_me);
   server.route(sourcemeta::hydra::http::Method::POST, "/cache-me", on_cache_me);
+  server.route(sourcemeta::hydra::http::Method::GET, "/etag-quoted",
+               on_etag_quoted);
 
   server.otherwise(on_otherwise);
   server.error(on_error);

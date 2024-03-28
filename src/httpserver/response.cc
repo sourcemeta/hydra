@@ -77,16 +77,31 @@ auto ServerResponse::header_last_modified(
 
 auto ServerResponse::header_etag(std::string_view value) -> void {
   assert(!value.empty());
-  std::ostringstream etag;
-  etag << '"' << value << '"';
-  this->header("ETag", etag.str());
+  assert(!value.starts_with('W'));
+
+  if (value.starts_with('"') && value.ends_with('"')) {
+    this->header("ETag", value);
+  } else {
+    std::ostringstream etag;
+    etag << '"' << value << '"';
+    this->header("ETag", etag.str());
+  }
 }
 
 auto ServerResponse::header_etag_weak(std::string_view value) -> void {
   assert(!value.empty());
-  std::ostringstream etag;
-  etag << 'W' << '/' << '"' << value << '"';
-  this->header("ETag", etag.str());
+
+  if (value.starts_with('W')) {
+    this->header("ETag", value);
+  } else if (value.starts_with('"') && value.ends_with('"')) {
+    std::ostringstream etag;
+    etag << 'W' << '/' << value;
+    this->header("ETag", etag.str());
+  } else {
+    std::ostringstream etag;
+    etag << 'W' << '/' << '"' << value << '"';
+    this->header("ETag", etag.str());
+  }
 }
 
 auto ServerResponse::encoding(const ServerContentEncoding encoding) -> void {
