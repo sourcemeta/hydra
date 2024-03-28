@@ -115,6 +115,46 @@ public:
   auto header_last_modified(const std::chrono::system_clock::time_point time)
       -> void;
 
+  /// Set the `ETag` HTTP header in the response. For example:
+  ///
+  /// ```cpp
+  /// #include <sourcemeta/hydra/httpserver.h>
+  ///
+  /// sourcemeta::hydra::http::Server server;
+  ///
+  /// static auto
+  /// on_root(const sourcemeta::hydra::http::ServerLogger &,
+  ///         const sourcemeta::hydra::http::ServerRequest &,
+  ///         sourcemeta::hydra::http::ServerResponse &response) -> void {
+  ///   response.status(sourcemeta::hydra::http::Status::OK);
+  ///   response.header_etag("711d2f4adab4515e4036c48bf58eb975");
+  ///   response.end("Foo Bar");
+  /// }
+  ///
+  /// server.route(sourcemeta::hydra::http::Method::GET, "/", on_root);
+  /// ```
+  auto header_etag(std::string_view value) -> void;
+
+  /// Set a weak `ETag` HTTP header in the response. For example:
+  ///
+  /// ```cpp
+  /// #include <sourcemeta/hydra/httpserver.h>
+  ///
+  /// sourcemeta::hydra::http::Server server;
+  ///
+  /// static auto
+  /// on_root(const sourcemeta::hydra::http::ServerLogger &,
+  ///         const sourcemeta::hydra::http::ServerRequest &,
+  ///         sourcemeta::hydra::http::ServerResponse &response) -> void {
+  ///   response.status(sourcemeta::hydra::http::Status::OK);
+  ///   response.header_etag_weak("711d2f4adab4515e4036c48bf58eb975");
+  ///   response.end("Foo Bar");
+  /// }
+  ///
+  /// server.route(sourcemeta::hydra::http::Method::GET, "/", on_root);
+  /// ```
+  auto header_etag_weak(std::string_view value) -> void;
+
   /// Set a specific content encoding for the response. The server will attempt
   /// to automatically perform content negotiation, so you typically only need
   /// to call this method to override the default choice if needed. For example:
