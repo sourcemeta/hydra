@@ -90,14 +90,15 @@ auto ServerRequest::header_if_none_match(std::string_view value) const -> bool {
   }
 
   std::ostringstream etag_value;
+  std::ostringstream etag_value_weak;
+
   if (value.starts_with('"') && value.ends_with('"')) {
     etag_value << value;
+    etag_value_weak << 'W' << '/' << value;
   } else {
     etag_value << '"' << value << '"';
+    etag_value_weak << 'W' << '/' << '"' << value << '"';
   }
-
-  std::ostringstream etag_value_weak;
-  etag_value_weak << 'W' << '/' << '"' << value << '"';
 
   for (const auto &etag : if_none_match.value()) {
     if (etag.first == "*") {
