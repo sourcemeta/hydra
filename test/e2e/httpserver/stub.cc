@@ -120,6 +120,24 @@ on_force_gzip(const sourcemeta::hydra::http::ServerLogger &,
 }
 
 static auto
+on_cache_me(const sourcemeta::hydra::http::ServerLogger &,
+            const sourcemeta::hydra::http::ServerRequest &request,
+            sourcemeta::hydra::http::ServerResponse &response) -> void {
+  const auto timestamp{
+      sourcemeta::hydra::http::from_gmt("Wed, 21 Oct 2015 11:28:00 GMT")};
+
+  if (!request.header_if_modified_since(timestamp)) {
+    response.status(sourcemeta::hydra::http::Status::NOT_MODIFIED);
+    response.end();
+    return;
+  }
+
+  response.status(sourcemeta::hydra::http::Status::OK);
+  response.header_last_modified(timestamp);
+  response.end("Cache me!");
+}
+
+static auto
 on_error(std::exception_ptr error,
          const sourcemeta::hydra::http::ServerLogger &,
          const sourcemeta::hydra::http::ServerRequest &,
@@ -159,6 +177,8 @@ auto main(int argc, char *argv[]) -> int {
                on_encodings);
   server.route(sourcemeta::hydra::http::Method::GET, "/force-gzip",
                on_force_gzip);
+  server.route(sourcemeta::hydra::http::Method::GET, "/cache-me", on_cache_me);
+  server.route(sourcemeta::hydra::http::Method::POST, "/cache-me", on_cache_me);
 
   server.otherwise(on_otherwise);
   server.error(on_error);

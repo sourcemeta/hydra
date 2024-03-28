@@ -70,6 +70,11 @@ auto ServerResponse::header(std::string_view key,
   this->headers.emplace(key, value);
 }
 
+auto ServerResponse::header_last_modified(
+    const std::chrono::system_clock::time_point time) -> void {
+  this->header("Last-Modified", to_gmt(time));
+}
+
 auto ServerResponse::encoding(const ServerContentEncoding encoding) -> void {
   switch (encoding) {
     case ServerContentEncoding::GZIP:
