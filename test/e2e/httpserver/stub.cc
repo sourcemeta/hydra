@@ -29,12 +29,10 @@ static auto on_echo(const sourcemeta::hydra::http::ServerLogger &logger,
   document.assign("method", sourcemeta::jsontoolkit::JSON{method.str()});
   document.assign("path", sourcemeta::jsontoolkit::JSON{request.path()});
 
-  std::ostringstream result;
-  sourcemeta::jsontoolkit::prettify(document, result);
   response.status(sourcemeta::hydra::http::Status::OK);
   assert(response.status() == sourcemeta::hydra::http::Status::OK);
   response.header("Content-Type", "application/json");
-  response.end(result.str());
+  response.end(document);
 }
 
 static auto on_throw(const sourcemeta::hydra::http::ServerLogger &,
@@ -103,11 +101,9 @@ on_encodings(const sourcemeta::hydra::http::ServerLogger &,
     }
   }
 
-  std::ostringstream result;
-  sourcemeta::jsontoolkit::prettify(document, result);
   response.status(sourcemeta::hydra::http::Status::OK);
   response.header("Content-Type", "application/json");
-  response.end(result.str());
+  response.end(document);
 }
 
 static auto

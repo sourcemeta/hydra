@@ -8,6 +8,7 @@
 #endif
 
 #include <sourcemeta/hydra/http.h>
+#include <sourcemeta/jsontoolkit/json.h>
 
 #include <chrono>      // std::chrono::system_clock::time_point
 #include <map>         // std::map
@@ -197,6 +198,31 @@ public:
   /// server.route(sourcemeta::hydra::http::Method::GET, "/", on_root);
   /// ```
   auto end(const std::string_view message) -> void;
+
+  /// Respond with a JSON document. Keep in mind that you still need to manually
+  /// set a corresponding `Content-Type` header. For example:
+  ///
+  /// ```cpp
+  /// #include <sourcemeta/hydra/httpserver.h>
+  /// #include <sourcemeta/jsontoolkit/json.h>
+  ///
+  /// sourcemeta::hydra::http::Server server;
+  ///
+  /// static auto
+  /// on_root(const sourcemeta::hydra::http::ServerLogger &,
+  ///         const sourcemeta::hydra::http::ServerRequest &,
+  ///         sourcemeta::hydra::http::ServerResponse &response) -> void {
+  ///   response.status(sourcemeta::hydra::http::Status::OK);
+  ///   response.header("Content-Type", "application/json");
+  ///   const sourcemeta::jsontoolkit::JSON array{
+  ///     sourcemeta::jsontoolkit::JSON{false},
+  ///     sourcemeta::jsontoolkit::JSON{true}};
+  ///   response.end(array);
+  /// }
+  ///
+  /// server.route(sourcemeta::hydra::http::Method::GET, "/", on_root);
+  /// ```
+  auto end(const sourcemeta::jsontoolkit::JSON &document) -> void;
 
   /// Respond with an empty body. For example:
   ///

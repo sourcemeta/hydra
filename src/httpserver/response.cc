@@ -120,6 +120,13 @@ auto ServerResponse::end(const std::string_view message) -> void {
   }
 }
 
+auto ServerResponse::end(const sourcemeta::jsontoolkit::JSON &document)
+    -> void {
+  std::ostringstream output;
+  sourcemeta::jsontoolkit::prettify(document, output);
+  this->end(output.str());
+}
+
 auto ServerResponse::end() -> void {
   std::ostringstream code_string;
   code_string << this->code;

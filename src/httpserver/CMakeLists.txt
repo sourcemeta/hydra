@@ -8,6 +8,7 @@ if(HYDRA_INSTALL)
 endif()
 
 target_link_libraries(sourcemeta_hydra_httpserver PUBLIC sourcemeta::hydra::http)
+target_link_libraries(sourcemeta_hydra_httpserver PUBLIC sourcemeta::jsontoolkit::json)
 target_link_libraries(sourcemeta_hydra_httpserver PRIVATE ZLIB::ZLIB)
 target_link_libraries(sourcemeta_hydra_httpserver PRIVATE uNetworking::uSockets)
 target_link_libraries(sourcemeta_hydra_httpserver PRIVATE uNetworking::uWebSockets)
