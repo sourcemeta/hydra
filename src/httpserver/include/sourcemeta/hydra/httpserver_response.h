@@ -107,7 +107,7 @@ public:
   ///   const auto timestamp{
   ///     sourcemeta::hydra::http::from_gmt("Wed, 21 Oct 2015 11:28:00 GMT")};
   ///   response.header_last_modified(timestamp);
-  ///   response.end();
+  ///   response.end("Foo Bar");
   /// }
   ///
   /// server.route(sourcemeta::hydra::http::Method::GET, "/", on_root);

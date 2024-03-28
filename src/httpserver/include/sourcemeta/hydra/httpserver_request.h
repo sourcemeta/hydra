@@ -161,7 +161,7 @@ public:
   ///
   ///   response.status(sourcemeta::hydra::http::Status::OK);
   ///   response.header_last_modified(timestamp);
-  ///   response.end();
+  ///   response.end("Foo Bar");
   /// }
   ///
   /// server.route(sourcemeta::hydra::http::Method::GET, "/", on_root);
