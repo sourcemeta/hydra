@@ -169,6 +169,37 @@ public:
   auto header_if_modified_since(
       const std::chrono::system_clock::time_point last_modified) const -> bool;
 
+  /// Evaluate the values passed using `If-None-Match` by the client, if
+  /// any, against the resource `ETag` value. If so, you should respond with
+  /// `304 Not Modified`. Keep in mind that you shouldn't pass a quoted or weak
+  /// `ETag` value to this function, but the value directly. For example:
+  ///
+  /// ```cpp
+  /// #include <sourcemeta/hydra/httpserver.h>
+  ///
+  /// sourcemeta::hydra::http::Server server;
+  ///
+  /// static auto
+  /// on_root(const sourcemeta::hydra::http::ServerLogger &,
+  ///         const sourcemeta::hydra::http::ServerRequest &request,
+  ///         sourcemeta::hydra::http::ServerResponse &response) -> void {
+  ///   const auto checksum{"711d2f4adab4515e4036c48bf58eb975"};
+  ///
+  ///   if (!request.header_if_none_match(checksum)) {
+  ///     response.status(sourcemeta::hydra::http::Status::NOT_MODIFIED);
+  ///     response.end();
+  ///     return;
+  ///   }
+  ///
+  ///   response.status(sourcemeta::hydra::http::Status::OK);
+  ///   response.header_etag(checksum);
+  ///   response.end("Foo Bar");
+  /// }
+  ///
+  /// server.route(sourcemeta::hydra::http::Method::GET, "/", on_root);
+  /// ```
+  auto header_if_none_match(std::string_view etag) const -> bool;
+
   /// Get the value of a query string in the incoming request URL. For example:
   ///
   /// ```cpp

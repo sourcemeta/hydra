@@ -125,8 +125,10 @@ on_cache_me(const sourcemeta::hydra::http::ServerLogger &,
             sourcemeta::hydra::http::ServerResponse &response) -> void {
   const auto timestamp{
       sourcemeta::hydra::http::from_gmt("Wed, 21 Oct 2015 11:28:00 GMT")};
+  const auto checksum{"711d2f4adab4515e4036c48bf58eb975"};
 
-  if (!request.header_if_modified_since(timestamp)) {
+  if (!request.header_if_modified_since(timestamp) ||
+      !request.header_if_none_match(checksum)) {
     response.status(sourcemeta::hydra::http::Status::NOT_MODIFIED);
     response.end();
     return;
@@ -134,6 +136,7 @@ on_cache_me(const sourcemeta::hydra::http::ServerLogger &,
 
   response.status(sourcemeta::hydra::http::Status::OK);
   response.header_last_modified(timestamp);
+  response.header_etag(checksum);
   response.end("Cache me!");
 }
 

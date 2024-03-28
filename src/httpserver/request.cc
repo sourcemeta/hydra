@@ -3,6 +3,7 @@
 #include "uwebsockets.h"
 
 #include <cassert>   // assert
+#include <sstream>   // std::ostringstream
 #include <stdexcept> // std::invalid_argument
 
 namespace sourcemeta::hydra::http {
@@ -77,6 +78,39 @@ auto ServerRequest::header_if_modified_since(
   } catch (const std::invalid_argument &) {
     return true;
   }
+}
+
+auto ServerRequest::header_if_none_match(std::string_view value) const -> bool {
+  assert(!value.starts_with('W'));
+  assert(!value.starts_with('"') && !value.starts_with('"'));
+
+  const auto if_none_match{this->header_list("if-none-match")};
+  if (!if_none_match.has_value()) {
+    // Serve real content
+    return true;
+  }
+
+  std::ostringstream etag_value;
+  etag_value << '"' << value << '"';
+  std::ostringstream etag_value_weak;
+  etag_value_weak << 'W' << '/' << '"' << value << '"';
+
+  for (const auto &etag : if_none_match.value()) {
+    if (etag.first == "*") {
+      // Cache hit
+      return false;
+    } else if (etag.first.starts_with('W') &&
+               etag.first == etag_value_weak.str()) {
+      // Cache hit
+      return false;
+    } else if (etag.first.starts_with('"') && etag.first == etag_value.str()) {
+      // Cache hit
+      return false;
+    }
+  }
+
+  // As a fallback, serve real content
+  return true;
 }
 
 auto ServerRequest::query(std::string_view key) const

@@ -75,6 +75,20 @@ auto ServerResponse::header_last_modified(
   this->header("Last-Modified", to_gmt(time));
 }
 
+auto ServerResponse::header_etag(std::string_view value) -> void {
+  assert(!value.empty());
+  std::ostringstream etag;
+  etag << '"' << value << '"';
+  this->header("ETag", etag.str());
+}
+
+auto ServerResponse::header_etag_weak(std::string_view value) -> void {
+  assert(!value.empty());
+  std::ostringstream etag;
+  etag << 'W' << '/' << '"' << value << '"';
+  this->header("ETag", etag.str());
+}
+
 auto ServerResponse::encoding(const ServerContentEncoding encoding) -> void {
   switch (encoding) {
     case ServerContentEncoding::GZIP:
