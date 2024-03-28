@@ -171,8 +171,9 @@ public:
 
   /// Evaluate the values passed using `If-None-Match` by the client, if
   /// any, against the resource `ETag` value. If so, you should respond with
-  /// `304 Not Modified`. Keep in mind that you shouldn't pass a quoted or weak
-  /// `ETag` value to this function, but the value directly. For example:
+  /// `304 Not Modified`. Keep in mind that you shouldn't pass a weak
+  /// `ETag` value to this function, but the value directly (with or without
+  /// quotes). For example:
   ///
   /// ```cpp
   /// #include <sourcemeta/hydra/httpserver.h>
