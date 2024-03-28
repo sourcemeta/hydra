@@ -771,3 +771,32 @@ TEST(e2e_HTTP_Server, cache_me_if_none_match_equal_weak) {
   EXPECT_FALSE(response_2.header("etag").has_value());
   EXPECT_TRUE(response_2.empty());
 }
+
+TEST(e2e_HTTP_Server, etag_quoted_if_none_match_equal) {
+  sourcemeta::hydra::http::ClientRequest request_1{
+      std::string{HTTPSERVER_BASE_URL()} + "/etag-quoted"};
+  request_1.capture();
+  request_1.method(sourcemeta::hydra::http::Method::GET);
+  sourcemeta::hydra::http::ClientResponse response_1{request_1.send().get()};
+  EXPECT_EQ(response_1.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_TRUE(response_1.header("etag").has_value());
+  EXPECT_EQ(response_1.header("etag").value().front(), '"');
+  EXPECT_NE(response_1.header("etag").value()[1], '"');
+  EXPECT_FALSE(response_1.empty());
+  std::ostringstream result_1;
+  std::copy(std::istreambuf_iterator<std::ostringstream::char_type>(
+                response_1.body()),
+            std::istreambuf_iterator<std::ostringstream::char_type>(),
+            std::ostreambuf_iterator<std::ostringstream::char_type>(result_1));
+  EXPECT_EQ(result_1.str(), "Cache me!");
+
+  sourcemeta::hydra::http::ClientRequest request_2{
+      std::string{HTTPSERVER_BASE_URL()} + "/etag-quoted"};
+  request_2.capture();
+  request_2.method(sourcemeta::hydra::http::Method::GET);
+  request_2.header("If-None-Match", response_1.header("etag").value());
+  sourcemeta::hydra::http::ClientResponse response_2{request_2.send().get()};
+  EXPECT_EQ(response_2.status(), sourcemeta::hydra::http::Status::NOT_MODIFIED);
+  EXPECT_FALSE(response_2.header("etag").has_value());
+  EXPECT_TRUE(response_2.empty());
+}
