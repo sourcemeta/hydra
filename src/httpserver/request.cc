@@ -82,7 +82,6 @@ auto ServerRequest::header_if_modified_since(
 
 auto ServerRequest::header_if_none_match(std::string_view value) const -> bool {
   assert(!value.starts_with('W'));
-  assert(!value.starts_with('"') && !value.starts_with('"'));
 
   const auto if_none_match{this->header_list("if-none-match")};
   if (!if_none_match.has_value()) {
@@ -91,7 +90,12 @@ auto ServerRequest::header_if_none_match(std::string_view value) const -> bool {
   }
 
   std::ostringstream etag_value;
-  etag_value << '"' << value << '"';
+  if (value.starts_with('"') && value.ends_with('"')) {
+    etag_value << value;
+  } else {
+    etag_value << '"' << value << '"';
+  }
+
   std::ostringstream etag_value_weak;
   etag_value_weak << 'W' << '/' << '"' << value << '"';
 
