@@ -21,20 +21,22 @@ option(HYDRA_INSTALL "Install the Hydra library" ON)
 option(HYDRA_ADDRESS_SANITIZER "Build Hydra with an address sanitizer" OFF)
 option(HYDRA_UNDEFINED_SANITIZER "Build Hydra with an undefined behavior sanitizer" OFF)
 
-include(GNUInstallDirs)
-include(CMakePackageConfigHelpers)
-configure_package_config_file(
-  config.cmake.in
-  "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config.cmake"
-  INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
-write_basic_package_version_file(
-  "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config-version.cmake"
-  COMPATIBILITY SameMajorVersion)
-install(FILES
-  "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config-version.cmake"
-  "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config.cmake"
-  DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}"
-  COMPONENT sourcemeta_hydra_dev)
+if(HYDRA_INSTALL)
+  include(GNUInstallDirs)
+  include(CMakePackageConfigHelpers)
+  configure_package_config_file(
+    config.cmake.in
+    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config.cmake"
+    INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
+  write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config-version.cmake"
+    COMPATIBILITY SameMajorVersion)
+  install(FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config-version.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config.cmake"
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}"
+    COMPONENT sourcemeta_hydra_dev)
+endif()
 
 if(HYDRA_HTTPCLIENT OR HYDRA_HTTPSERVER OR HYDRA_BUCKET)
   add_subdirectory(src/http)
