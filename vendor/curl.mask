@@ -55,3 +55,6 @@ lib/Makefile.inc
 lib/Makefile.mk
 lib/Makefile.soname
 lib/curl_config.h.cmake
+Dockerfile
+lib/dllmain.c
+renovate.json
