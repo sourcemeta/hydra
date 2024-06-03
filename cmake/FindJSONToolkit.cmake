@@ -1,4 +1,10 @@
 if(NOT JSONToolkit_FOUND)
+  if(HYDRA_INSTALL)
+    set(JSONTOOLKIT_INSTALL ON CACHE BOOL "enable JSON Toolkit installation")
+  else()
+    set(JSONTOOLKIT_INSTALL OFF CACHE BOOL "disable JSON Toolkit installation")
+  endif()
+
   set(JSONTOOLKIT_JSONL OFF CACHE BOOL "disable JSONL support")
   set(JSONTOOLKIT_JSONPOINTER OFF CACHE BOOL "disable JSON Pointer support")
   set(JSONTOOLKIT_JSONSCHEMA OFF CACHE BOOL "disable JSON Schema support")
