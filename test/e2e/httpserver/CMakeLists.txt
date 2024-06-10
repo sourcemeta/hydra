@@ -3,11 +3,11 @@ target_link_libraries(sourcemeta_hydra_httpserver_e2e_stub PRIVATE
   sourcemeta::hydra::httpserver)
 target_link_libraries(sourcemeta_hydra_httpserver_e2e_stub PRIVATE
   sourcemeta::jsontoolkit::json)
-sourcemeta_hydra_add_compile_options(sourcemeta_hydra_httpserver_e2e_stub)
+noa_add_default_options(PRIVATE sourcemeta_hydra_httpserver_e2e_stub)
 
 add_executable(sourcemeta_hydra_httpserver_e2e
   environment.h httpserver_test.cc)
-sourcemeta_hydra_add_compile_options(sourcemeta_hydra_httpserver_e2e)
+noa_add_default_options(PRIVATE sourcemeta_hydra_httpserver_e2e)
 target_link_libraries(sourcemeta_hydra_httpserver_e2e
   PRIVATE GTest::gtest GTest::gtest_main)
 target_link_libraries(sourcemeta_hydra_httpserver_e2e

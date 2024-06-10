@@ -1,6 +1,6 @@
 add_executable(sourcemeta_hydra_httpclient_e2e
   environment.h request_1_1_test.cc stream_1_1_test.cc)
-sourcemeta_hydra_add_compile_options(sourcemeta_hydra_httpclient_e2e)
+noa_add_default_options(PRIVATE sourcemeta_hydra_httpclient_e2e)
 target_link_libraries(sourcemeta_hydra_httpclient_e2e
   PRIVATE GTest::gtest GTest::gtest_main)
 target_link_libraries(sourcemeta_hydra_httpclient_e2e

@@ -6,5 +6,3 @@ noa_library(NAMESPACE sourcemeta PROJECT hydra NAME http
 if(HYDRA_INSTALL)
   noa_library_install(NAMESPACE sourcemeta PROJECT hydra NAME http)
 endif()
-
-sourcemeta_hydra_add_compile_options(sourcemeta_hydra_http)

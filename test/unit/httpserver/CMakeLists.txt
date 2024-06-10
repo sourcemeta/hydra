@@ -1,5 +1,5 @@
 add_executable(sourcemeta_hydra_httpserver_unit logger_test.cc)
-sourcemeta_hydra_add_compile_options(sourcemeta_hydra_httpserver_unit)
+noa_add_default_options(PRIVATE sourcemeta_hydra_httpserver_unit)
 target_link_libraries(sourcemeta_hydra_httpserver_unit
   PRIVATE GTest::gtest GTest::gmock GTest::gtest_main)
 target_link_libraries(sourcemeta_hydra_httpserver_unit

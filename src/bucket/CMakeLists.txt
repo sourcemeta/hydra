@@ -12,4 +12,3 @@ target_link_libraries(sourcemeta_hydra_bucket PUBLIC sourcemeta::jsontoolkit::ur
 target_link_libraries(sourcemeta_hydra_bucket PUBLIC sourcemeta::hydra::http)
 target_link_libraries(sourcemeta_hydra_bucket PRIVATE sourcemeta::hydra::httpclient)
 target_link_libraries(sourcemeta_hydra_bucket PRIVATE BearSSL::BearSSL)
-sourcemeta_hydra_add_compile_options(sourcemeta_hydra_bucket)
