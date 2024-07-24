@@ -58,3 +58,4 @@ lib/curl_config.h.cmake
 Dockerfile
 lib/dllmain.c
 renovate.json
+REUSE.toml
