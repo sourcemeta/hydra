@@ -142,6 +142,14 @@ auto ServerResponse::end(const sourcemeta::jsontoolkit::JSON &document)
   this->end(output.str());
 }
 
+auto ServerResponse::end(const sourcemeta::jsontoolkit::JSON &document,
+                         const sourcemeta::jsontoolkit::KeyComparison &compare)
+    -> void {
+  std::ostringstream output;
+  sourcemeta::jsontoolkit::prettify(document, output, compare);
+  this->end(output.str());
+}
+
 auto ServerResponse::end() -> void {
   std::ostringstream code_string;
   code_string << this->code;

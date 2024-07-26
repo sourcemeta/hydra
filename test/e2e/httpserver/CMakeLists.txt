@@ -3,6 +3,8 @@ target_link_libraries(sourcemeta_hydra_httpserver_e2e_stub PRIVATE
   sourcemeta::hydra::httpserver)
 target_link_libraries(sourcemeta_hydra_httpserver_e2e_stub PRIVATE
   sourcemeta::jsontoolkit::json)
+target_link_libraries(sourcemeta_hydra_httpserver_e2e_stub PRIVATE
+  sourcemeta::jsontoolkit::jsonschema)
 noa_add_default_options(PRIVATE sourcemeta_hydra_httpserver_e2e_stub)
 
 add_executable(sourcemeta_hydra_httpserver_e2e
