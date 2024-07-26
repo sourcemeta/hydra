@@ -224,6 +224,33 @@ public:
   /// ```
   auto end(const sourcemeta::jsontoolkit::JSON &document) -> void;
 
+  /// Respond with a JSON document, passing a key comparison for formatting
+  /// purposes. Keep in mind that you still need to manually set a corresponding
+  /// `Content-Type` header. For example:
+  ///
+  /// ```cpp
+  /// #include <sourcemeta/hydra/httpserver.h>
+  /// #include <sourcemeta/jsontoolkit/json.h>
+  ///
+  /// sourcemeta::hydra::http::Server server;
+  ///
+  /// static auto
+  /// on_root(const sourcemeta::hydra::http::ServerLogger &,
+  ///         const sourcemeta::hydra::http::ServerRequest &,
+  ///         sourcemeta::hydra::http::ServerResponse &response) -> void {
+  ///   response.status(sourcemeta::hydra::http::Status::OK);
+  ///   response.header("Content-Type", "application/json");
+  ///   auto schema{sourcemeta::jsontoolkit::JSON::make_object()};
+  ///   schema.assign("type", sourcemeta::jsontoolkit::JSON{"string"});
+  ///   schema.assign("minLength", sourcemeta::jsontoolkit::JSON{1});
+  ///   response.end(schema, sourcemeta::jsontoolkit::schema_format_compare);
+  /// }
+  ///
+  /// server.route(sourcemeta::hydra::http::Method::GET, "/", on_root);
+  /// ```
+  auto end(const sourcemeta::jsontoolkit::JSON &document,
+           const sourcemeta::jsontoolkit::KeyComparison &compare) -> void;
+
   /// Respond with an empty body. For example:
   ///
   /// ```cpp

@@ -1,5 +1,6 @@
 #include <sourcemeta/hydra/httpserver.h>
 #include <sourcemeta/jsontoolkit/json.h>
+#include <sourcemeta/jsontoolkit/jsonschema.h>
 
 #include <cassert>   // assert
 #include <cstdlib>   // EXIT_FAILURE
@@ -153,6 +154,19 @@ on_etag_quoted(const sourcemeta::hydra::http::ServerLogger &,
 }
 
 static auto
+on_schema(const sourcemeta::hydra::http::ServerLogger &,
+          const sourcemeta::hydra::http::ServerRequest &,
+          sourcemeta::hydra::http::ServerResponse &response) -> void {
+  // Purposely not very well formatted
+  const auto schema = sourcemeta::jsontoolkit::parse(R"JSON({
+    "type": "string", "$schema": "https://json-schema.org/draft/2019-09/schema"
+  })JSON");
+
+  response.status(sourcemeta::hydra::http::Status::OK);
+  response.end(schema, sourcemeta::jsontoolkit::schema_format_compare);
+}
+
+static auto
 on_error(std::exception_ptr error,
          const sourcemeta::hydra::http::ServerLogger &,
          const sourcemeta::hydra::http::ServerRequest &,
@@ -173,6 +187,7 @@ auto main(int argc, char *argv[]) -> int {
 
   sourcemeta::hydra::http::Server server;
 
+  server.route(sourcemeta::hydra::http::Method::GET, "/schema", on_schema);
   server.route(sourcemeta::hydra::http::Method::GET, "/echo", on_echo);
   server.route(sourcemeta::hydra::http::Method::HEAD, "/echo", on_echo);
   server.route(sourcemeta::hydra::http::Method::POST, "/echo", on_echo);

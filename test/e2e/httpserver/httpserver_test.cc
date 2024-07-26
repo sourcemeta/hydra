@@ -832,3 +832,23 @@ TEST(e2e_HTTP_Server, etag_quoted_if_none_match_equal_weak) {
   EXPECT_FALSE(response_2.header("etag").has_value());
   EXPECT_TRUE(response_2.empty());
 }
+
+TEST(e2e_HTTP_Server, schema_get) {
+  sourcemeta::hydra::http::ClientRequest request{
+      std::string{HTTPSERVER_BASE_URL()} + "/schema"};
+  request.method(sourcemeta::hydra::http::Method::GET);
+  request.capture();
+  sourcemeta::hydra::http::ClientResponse response{request.send().get()};
+  EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
+
+  std::ostringstream result;
+  std::copy(
+      std::istreambuf_iterator<std::ostringstream::char_type>(response.body()),
+      std::istreambuf_iterator<std::ostringstream::char_type>(),
+      std::ostreambuf_iterator<std::ostringstream::char_type>(result));
+
+  const auto schema{
+      "{\n  \"$schema\": \"https://json-schema.org/draft/2019-09/schema\",\n  "
+      "\"type\": \"string\"\n}"};
+  EXPECT_EQ(result.str(), schema);
+}
