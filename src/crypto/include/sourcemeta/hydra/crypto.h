@@ -7,7 +7,9 @@
 #include "crypto_export.h"
 #endif
 
-#include <string> // std::string
+#include <ostream>     // std::ostream
+#include <string>      // std::string
+#include <string_view> // std::string_view
 
 /// @defgroup crypto Crypto
 /// @brief This module offers a collection of cryptographic utilities for use in
@@ -31,6 +33,21 @@ namespace sourcemeta::hydra {
 /// std::cout << sourcemeta::hydra::uuid() << "\n";
 /// ```
 auto SOURCEMETA_HYDRA_CRYPTO_EXPORT uuid() -> std::string;
+
+/// @ingroup crypto
+/// Encode a string using Base64. For example:
+///
+/// ```cpp
+/// #include <sourcemeta/hydra/crypto.h>
+/// #include <sstream>
+/// #include <iostream>
+///
+/// std::ostringstream result;
+/// sourcemeta::hydra::base64_encode("foo bar", result);
+/// std::cout << result.str() << "\n";
+/// ```
+auto SOURCEMETA_HYDRA_CRYPTO_EXPORT base64_encode(std::string_view input,
+                                                  std::ostream &output) -> void;
 
 } // namespace sourcemeta::hydra
 

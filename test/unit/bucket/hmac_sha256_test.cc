@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <sourcemeta/hydra/bucket_aws_sigv4.h>
+#include <sourcemeta/hydra/crypto.h>
 
 #include <iomanip>
 #include <ios>
@@ -12,7 +13,7 @@ TEST(Bucket_aws_sigv4, hmac_sha256_foo_bar_base64) {
   std::ostringstream hmac_sha256_result;
   sourcemeta::hydra::aws_sigv4_hmac_sha256("foo", "bar", hmac_sha256_result);
   std::ostringstream base64_result;
-  sourcemeta::hydra::aws_sigv4_base64(hmac_sha256_result.str(), base64_result);
+  sourcemeta::hydra::base64_encode(hmac_sha256_result.str(), base64_result);
   EXPECT_EQ(base64_result.str(),
             "+TILrwJJFp5zhQzWFW3tAQbiu2rYyrAbe7vr5tEGUxc=");
 }
