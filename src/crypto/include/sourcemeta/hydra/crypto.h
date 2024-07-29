@@ -50,6 +50,21 @@ auto SOURCEMETA_HYDRA_CRYPTO_EXPORT base64_encode(std::string_view input,
                                                   std::ostream &output) -> void;
 
 /// @ingroup crypto
+/// Hash a string using MD5. For example:
+///
+/// ```cpp
+/// #include <sourcemeta/hydra/crypto.h>
+/// #include <sstream>
+/// #include <iostream>
+///
+/// std::ostringstream result;
+/// sourcemeta::hydra::md5("foo bar", result);
+/// std::cout << result.str() << "\n";
+/// ```
+auto SOURCEMETA_HYDRA_CRYPTO_EXPORT md5(std::string_view input,
+                                        std::ostream &output) -> void;
+
+/// @ingroup crypto
 /// Hash a string using SHA256. For example:
 ///
 /// ```cpp
