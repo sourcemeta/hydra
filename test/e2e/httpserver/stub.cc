@@ -185,6 +185,20 @@ static auto on_text(const sourcemeta::hydra::http::ServerLogger &,
 }
 
 static auto
+on_static(const sourcemeta::hydra::http::ServerLogger &,
+          const sourcemeta::hydra::http::ServerRequest &request,
+          sourcemeta::hydra::http::ServerResponse &response) -> void {
+  const std::filesystem::path file_path{STATIC_PATH + request.path().substr(7)};
+  if (!std::filesystem::exists(file_path)) {
+    response.status(sourcemeta::hydra::http::Status::NOT_FOUND);
+    response.end();
+    return;
+  }
+
+  sourcemeta::hydra::http::serve_file(file_path, request, response);
+}
+
+static auto
 on_error(std::exception_ptr error,
          const sourcemeta::hydra::http::ServerLogger &,
          const sourcemeta::hydra::http::ServerRequest &,
@@ -232,6 +246,8 @@ auto main(int argc, char *argv[]) -> int {
   server.route(sourcemeta::hydra::http::Method::POST, "/cache-me", on_cache_me);
   server.route(sourcemeta::hydra::http::Method::GET, "/etag-quoted",
                on_etag_quoted);
+  server.route(sourcemeta::hydra::http::Method::GET, "/static/*", on_static);
+  server.route(sourcemeta::hydra::http::Method::HEAD, "/static/*", on_static);
 
   server.otherwise(on_otherwise);
   server.error(on_error);
