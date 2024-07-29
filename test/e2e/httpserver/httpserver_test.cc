@@ -917,3 +917,198 @@ TEST(e2e_HTTP_Server, text_head) {
   EXPECT_EQ(response.header("content-length").value(), "27");
   EXPECT_TRUE(response.empty());
 }
+
+TEST(e2e_HTTP_Server, static_document_get) {
+  sourcemeta::hydra::http::ClientRequest request{
+      std::string{HTTPSERVER_BASE_URL()} + "/static/document.json"};
+  request.method(sourcemeta::hydra::http::Method::GET);
+  request.capture();
+  sourcemeta::hydra::http::ClientResponse response{request.send().get()};
+  EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_TRUE(response.header("content-length").has_value());
+  EXPECT_EQ(response.header("content-length").value(), "37");
+  EXPECT_TRUE(response.header("content-type").has_value());
+  EXPECT_EQ(response.header("content-type").value(), "application/json");
+  EXPECT_TRUE(response.header("last-modified").has_value());
+  EXPECT_TRUE(response.header("etag").has_value());
+  EXPECT_EQ(response.header("etag").value(),
+            "\"cef8a5c5d7fcfb9cf601bf3a146a47e7\"");
+
+  std::ostringstream result;
+  std::copy(
+      std::istreambuf_iterator<std::ostringstream::char_type>(response.body()),
+      std::istreambuf_iterator<std::ostringstream::char_type>(),
+      std::ostreambuf_iterator<std::ostringstream::char_type>(result));
+
+  EXPECT_EQ(result.str(), "{ \"foo\": \"bar\" }\n");
+}
+
+TEST(e2e_HTTP_Server, static_document_head) {
+  sourcemeta::hydra::http::ClientRequest request{
+      std::string{HTTPSERVER_BASE_URL()} + "/static/document.json"};
+  request.method(sourcemeta::hydra::http::Method::HEAD);
+  request.capture();
+  sourcemeta::hydra::http::ClientResponse response{request.send().get()};
+  EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_TRUE(response.header("content-length").has_value());
+  EXPECT_EQ(response.header("content-length").value(), "37");
+  EXPECT_TRUE(response.header("content-type").has_value());
+  EXPECT_EQ(response.header("content-type").value(), "application/json");
+  EXPECT_TRUE(response.header("last-modified").has_value());
+  EXPECT_TRUE(response.header("etag").has_value());
+  EXPECT_EQ(response.header("etag").value(),
+            "\"cef8a5c5d7fcfb9cf601bf3a146a47e7\"");
+  EXPECT_TRUE(response.empty());
+}
+
+TEST(e2e_HTTP_Server, static_document_get_if_none_match_true) {
+  sourcemeta::hydra::http::ClientRequest request_1{
+      std::string{HTTPSERVER_BASE_URL()} + "/static/document.json"};
+  request_1.method(sourcemeta::hydra::http::Method::GET);
+  request_1.capture();
+  sourcemeta::hydra::http::ClientResponse response_1{request_1.send().get()};
+  EXPECT_EQ(response_1.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_TRUE(response_1.header("etag").has_value());
+  EXPECT_EQ(response_1.header("etag").value(),
+            "\"cef8a5c5d7fcfb9cf601bf3a146a47e7\"");
+  EXPECT_FALSE(response_1.empty());
+
+  sourcemeta::hydra::http::ClientRequest request_2{
+      std::string{HTTPSERVER_BASE_URL()} + "/static/document.json"};
+  request_2.method(sourcemeta::hydra::http::Method::GET);
+  request_2.header("If-None-Match", response_1.header("etag").value());
+  request_2.capture();
+  sourcemeta::hydra::http::ClientResponse response_2{request_2.send().get()};
+  EXPECT_EQ(response_2.status(), sourcemeta::hydra::http::Status::NOT_MODIFIED);
+  EXPECT_FALSE(response_2.header("etag").has_value());
+  EXPECT_TRUE(response_2.empty());
+}
+
+TEST(e2e_HTTP_Server, static_document_get_if_none_match_false) {
+  sourcemeta::hydra::http::ClientRequest request{
+      std::string{HTTPSERVER_BASE_URL()} + "/static/document.json"};
+  request.method(sourcemeta::hydra::http::Method::GET);
+  request.header("If-None-Match", "\"foo\"");
+  request.capture();
+  sourcemeta::hydra::http::ClientResponse response{request.send().get()};
+  EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_TRUE(response.header("content-length").has_value());
+  EXPECT_EQ(response.header("content-length").value(), "37");
+  EXPECT_TRUE(response.header("content-type").has_value());
+  EXPECT_EQ(response.header("content-type").value(), "application/json");
+  EXPECT_TRUE(response.header("last-modified").has_value());
+  EXPECT_TRUE(response.header("etag").has_value());
+  EXPECT_EQ(response.header("etag").value(),
+            "\"cef8a5c5d7fcfb9cf601bf3a146a47e7\"");
+  EXPECT_FALSE(response.empty());
+}
+
+TEST(e2e_HTTP_Server, static_image_get) {
+  sourcemeta::hydra::http::ClientRequest request{
+      std::string{HTTPSERVER_BASE_URL()} + "/static/image.png"};
+  request.method(sourcemeta::hydra::http::Method::GET);
+  request.capture();
+  sourcemeta::hydra::http::ClientResponse response{request.send().get()};
+  EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_TRUE(response.header("content-length").has_value());
+  EXPECT_EQ(response.header("content-length").value(), "104593");
+  EXPECT_TRUE(response.header("content-type").has_value());
+  EXPECT_EQ(response.header("content-type").value(), "image/png");
+  EXPECT_TRUE(response.header("last-modified").has_value());
+  EXPECT_TRUE(response.header("etag").has_value());
+  EXPECT_EQ(response.header("etag").value(),
+            "\"81bd1728552ef6a378c090bd61427474\"");
+  EXPECT_FALSE(response.empty());
+}
+
+TEST(e2e_HTTP_Server, static_image_head) {
+  sourcemeta::hydra::http::ClientRequest request{
+      std::string{HTTPSERVER_BASE_URL()} + "/static/image.png"};
+  request.method(sourcemeta::hydra::http::Method::HEAD);
+  request.capture();
+  sourcemeta::hydra::http::ClientResponse response{request.send().get()};
+  EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_TRUE(response.header("content-length").has_value());
+  EXPECT_EQ(response.header("content-length").value(), "104593");
+  EXPECT_TRUE(response.header("content-type").has_value());
+  EXPECT_EQ(response.header("content-type").value(), "image/png");
+  EXPECT_TRUE(response.header("last-modified").has_value());
+  EXPECT_TRUE(response.header("etag").has_value());
+  EXPECT_EQ(response.header("etag").value(),
+            "\"81bd1728552ef6a378c090bd61427474\"");
+  EXPECT_TRUE(response.empty());
+}
+
+TEST(e2e_HTTP_Server, static_image_if_modified_since_equal) {
+  sourcemeta::hydra::http::ClientRequest request_1{
+      std::string{HTTPSERVER_BASE_URL()} + "/static/image.png"};
+  request_1.capture();
+  request_1.method(sourcemeta::hydra::http::Method::GET);
+  sourcemeta::hydra::http::ClientResponse response_1{request_1.send().get()};
+  EXPECT_EQ(response_1.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_TRUE(response_1.header("last-modified").has_value());
+  EXPECT_FALSE(response_1.empty());
+
+  sourcemeta::hydra::http::ClientRequest request_2{
+      std::string{HTTPSERVER_BASE_URL()} + "/static/image.png"};
+  request_2.capture();
+  request_2.method(sourcemeta::hydra::http::Method::GET);
+  request_2.header("If-Modified-Since",
+                   response_1.header("last-modified").value());
+  sourcemeta::hydra::http::ClientResponse response_2{request_2.send().get()};
+  EXPECT_EQ(response_2.status(), sourcemeta::hydra::http::Status::NOT_MODIFIED);
+  EXPECT_FALSE(response_2.header("last-modified").has_value());
+  EXPECT_TRUE(response_2.empty());
+}
+
+TEST(e2e_HTTP_Server, static_image_if_modified_since_greater) {
+  sourcemeta::hydra::http::ClientRequest request_1{
+      std::string{HTTPSERVER_BASE_URL()} + "/static/image.png"};
+  request_1.capture();
+  request_1.method(sourcemeta::hydra::http::Method::GET);
+  sourcemeta::hydra::http::ClientResponse response_1{request_1.send().get()};
+  EXPECT_EQ(response_1.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_TRUE(response_1.header("last-modified").has_value());
+  EXPECT_FALSE(response_1.empty());
+
+  auto timestamp{sourcemeta::hydra::http::from_gmt(
+      response_1.header("last-modified").value())};
+  timestamp += std::chrono::hours{1};
+
+  sourcemeta::hydra::http::ClientRequest request_2{
+      std::string{HTTPSERVER_BASE_URL()} + "/static/image.png"};
+  request_2.capture();
+  request_2.method(sourcemeta::hydra::http::Method::GET);
+  request_2.header("If-Modified-Since",
+                   sourcemeta::hydra::http::to_gmt(timestamp));
+  sourcemeta::hydra::http::ClientResponse response_2{request_2.send().get()};
+  EXPECT_EQ(response_2.status(), sourcemeta::hydra::http::Status::NOT_MODIFIED);
+  EXPECT_FALSE(response_2.header("last-modified").has_value());
+  EXPECT_TRUE(response_2.empty());
+}
+
+TEST(e2e_HTTP_Server, static_image_if_modified_since_less) {
+  sourcemeta::hydra::http::ClientRequest request_1{
+      std::string{HTTPSERVER_BASE_URL()} + "/static/image.png"};
+  request_1.capture();
+  request_1.method(sourcemeta::hydra::http::Method::GET);
+  sourcemeta::hydra::http::ClientResponse response_1{request_1.send().get()};
+  EXPECT_EQ(response_1.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_TRUE(response_1.header("last-modified").has_value());
+  EXPECT_FALSE(response_1.empty());
+
+  auto timestamp{sourcemeta::hydra::http::from_gmt(
+      response_1.header("last-modified").value())};
+  timestamp -= std::chrono::hours{1};
+
+  sourcemeta::hydra::http::ClientRequest request_2{
+      std::string{HTTPSERVER_BASE_URL()} + "/static/image.png"};
+  request_2.capture();
+  request_2.method(sourcemeta::hydra::http::Method::GET);
+  request_2.header("If-Modified-Since",
+                   sourcemeta::hydra::http::to_gmt(timestamp));
+  sourcemeta::hydra::http::ClientResponse response_2{request_2.send().get()};
+  EXPECT_EQ(response_2.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_TRUE(response_2.header("last-modified").has_value());
+  EXPECT_FALSE(response_2.empty());
+}
