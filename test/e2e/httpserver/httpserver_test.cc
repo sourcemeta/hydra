@@ -840,6 +840,10 @@ TEST(e2e_HTTP_Server, schema_get) {
   request.capture();
   sourcemeta::hydra::http::ClientResponse response{request.send().get()};
   EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_TRUE(response.header("content-length").has_value());
+  EXPECT_EQ(response.header("content-length").value(), "90");
+  EXPECT_TRUE(response.header("content-type").has_value());
+  EXPECT_EQ(response.header("content-type").value(), "application/json");
 
   std::ostringstream result;
   std::copy(
@@ -851,4 +855,65 @@ TEST(e2e_HTTP_Server, schema_get) {
       "{\n  \"$schema\": \"https://json-schema.org/draft/2019-09/schema\",\n  "
       "\"type\": \"string\"\n}"};
   EXPECT_EQ(result.str(), schema);
+}
+
+TEST(e2e_HTTP_Server, schema_head_gzip) {
+  sourcemeta::hydra::http::ClientRequest request{
+      std::string{HTTPSERVER_BASE_URL()} + "/schema"};
+  request.method(sourcemeta::hydra::http::Method::HEAD);
+  request.header("Accept-Encoding", "gzip");
+  request.capture();
+  sourcemeta::hydra::http::ClientResponse response{request.send().get()};
+  EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_TRUE(response.header("content-length").has_value());
+  EXPECT_EQ(response.header("content-length").value(), "90");
+  EXPECT_TRUE(response.header("content-type").has_value());
+  EXPECT_EQ(response.header("content-type").value(), "application/json");
+  EXPECT_TRUE(response.empty());
+}
+
+TEST(e2e_HTTP_Server, schema_head_identity) {
+  sourcemeta::hydra::http::ClientRequest request{
+      std::string{HTTPSERVER_BASE_URL()} + "/schema"};
+  request.method(sourcemeta::hydra::http::Method::HEAD);
+  request.header("Accept-Encoding", "identity");
+  request.capture();
+  sourcemeta::hydra::http::ClientResponse response{request.send().get()};
+  EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_TRUE(response.header("content-length").has_value());
+  EXPECT_EQ(response.header("content-length").value(), "83");
+  EXPECT_TRUE(response.header("content-type").has_value());
+  EXPECT_EQ(response.header("content-type").value(), "application/json");
+  EXPECT_TRUE(response.empty());
+}
+
+TEST(e2e_HTTP_Server, text_get) {
+  sourcemeta::hydra::http::ClientRequest request{
+      std::string{HTTPSERVER_BASE_URL()} + "/text"};
+  request.method(sourcemeta::hydra::http::Method::GET);
+  request.capture();
+  sourcemeta::hydra::http::ClientResponse response{request.send().get()};
+  EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_TRUE(response.header("content-length").has_value());
+  EXPECT_EQ(response.header("content-length").value(), "27");
+
+  std::ostringstream result;
+  std::copy(
+      std::istreambuf_iterator<std::ostringstream::char_type>(response.body()),
+      std::istreambuf_iterator<std::ostringstream::char_type>(),
+      std::ostreambuf_iterator<std::ostringstream::char_type>(result));
+
+  EXPECT_EQ(result.str(), "Foo Bar");
+}
+
+TEST(e2e_HTTP_Server, text_head) {
+  sourcemeta::hydra::http::ClientRequest request{
+      std::string{HTTPSERVER_BASE_URL()} + "/text"};
+  request.method(sourcemeta::hydra::http::Method::HEAD);
+  request.capture();
+  sourcemeta::hydra::http::ClientResponse response{request.send().get()};
+  EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_TRUE(response.header("content-length").has_value());
+  EXPECT_EQ(response.header("content-length").value(), "27");
+  EXPECT_TRUE(response.empty());
 }
