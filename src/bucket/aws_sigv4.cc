@@ -1,64 +1,15 @@
 #include <sourcemeta/hydra/bucket_aws_sigv4.h>
-
-#if defined(__clang__)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wimplicit-int-conversion"
-#elif defined(__GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wconversion"
-#elif defined(_MSC_VER)
-#pragma warning(disable : 4244 4267)
-#endif
-extern "C" {
-#include <bearssl.h>
-}
-#if defined(__clang__)
-#pragma clang diagnostic pop
-#elif defined(__GNUC__)
-#pragma GCC diagnostic pop
-#elif defined(_MSC_VER)
-#pragma warning(default : 4244 4267)
-#endif
+#include <sourcemeta/hydra/crypto.h>
 
 #include <cassert>   // assert
 #include <ctime>     // std::time_t, std::tm, std::gmtime
 #include <iomanip>   // std::setfill, std::setw, std::put_time
-#include <ios>       // std::hex, std::ios_base
+#include <ios>       // std::hex
 #include <sstream>   // std::ostringstream
 #include <stdexcept> // std::runtime_error
 #include <utility>   // std::move
 
 namespace sourcemeta::hydra {
-
-auto aws_sigv4_sha256(std::string_view input, std::ostream &output) -> void {
-  br_sha256_context context;
-  br_sha256_init(&context);
-  br_sha256_update(&context, input.data(), input.size());
-  unsigned char hash[br_sha256_SIZE];
-  br_sha256_out(&context, hash);
-  std::string_view buffer{reinterpret_cast<const char *>(hash), br_sha256_SIZE};
-  output << std::hex << std::setfill('0');
-  for (const auto character : buffer) {
-    output << std::setw(2)
-           << static_cast<unsigned int>(static_cast<unsigned char>(character));
-  }
-
-  output.unsetf(std::ios_base::hex);
-}
-
-auto aws_sigv4_hmac_sha256(std::string_view secret, std::string_view value,
-                           std::ostream &output) -> void {
-  br_hmac_key_context key_context;
-  br_hmac_key_init(&key_context, &br_sha256_vtable, secret.data(),
-                   secret.size());
-  br_hmac_context context;
-  br_hmac_init(&context, &key_context, 0);
-  br_hmac_update(&context, value.data(), value.size());
-  unsigned char hash[br_sha256_SIZE];
-  br_hmac_out(&context, hash);
-  std::string_view buffer{reinterpret_cast<const char *>(hash), br_sha256_SIZE};
-  output << buffer;
-}
 
 static inline auto
 write_date_with_format(const std::chrono::system_clock::time_point time,
@@ -103,14 +54,15 @@ auto aws_sigv4_scope(std::string_view datastamp, std::string_view region,
 auto aws_sigv4_key(std::string_view secret_key, std::string_view region,
                    std::string_view datastamp) -> std::string {
   std::ostringstream hmac_date;
-  aws_sigv4_hmac_sha256(std::string{"AWS4"} + std::string{secret_key},
-                        datastamp, hmac_date);
+  sourcemeta::hydra::hmac_sha256(std::string{"AWS4"} + std::string{secret_key},
+                                 datastamp, hmac_date);
   std::ostringstream hmac_region;
-  aws_sigv4_hmac_sha256(hmac_date.str(), region, hmac_region);
+  sourcemeta::hydra::hmac_sha256(hmac_date.str(), region, hmac_region);
   std::ostringstream hmac_service;
-  aws_sigv4_hmac_sha256(hmac_region.str(), "s3", hmac_service);
+  sourcemeta::hydra::hmac_sha256(hmac_region.str(), "s3", hmac_service);
   std::ostringstream signing_key;
-  aws_sigv4_hmac_sha256(hmac_service.str(), "aws4_request", signing_key);
+  sourcemeta::hydra::hmac_sha256(hmac_service.str(), "aws4_request",
+                                 signing_key);
   return signing_key.str();
 }
 
@@ -162,7 +114,7 @@ auto aws_sigv4(const http::Method method,
   string_to_sign << request_date_iso8601.str() << '\n';
   aws_sigv4_scope(request_date_datastamp.str(), region, string_to_sign);
   string_to_sign << '\n';
-  aws_sigv4_sha256(canonical, string_to_sign);
+  sourcemeta::hydra::sha256(canonical, string_to_sign);
 
   // Authorization
   std::ostringstream authorization;
@@ -181,7 +133,7 @@ auto aws_sigv4(const http::Method method,
   const auto signing_key{
       aws_sigv4_key(secret_key, region, request_date_datastamp.str())};
   std::ostringstream signature;
-  aws_sigv4_hmac_sha256(signing_key, string_to_sign.str(), signature);
+  sourcemeta::hydra::hmac_sha256(signing_key, string_to_sign.str(), signature);
   authorization << std::hex << std::setfill('0');
   for (const auto character : signature.str()) {
     authorization << std::setw(2)

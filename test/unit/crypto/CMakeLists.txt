@@ -1,4 +1,5 @@
-add_executable(sourcemeta_hydra_crypto_unit uuid_test.cc base64_test.cc)
+add_executable(sourcemeta_hydra_crypto_unit
+  uuid_test.cc base64_test.cc sha256_test.cc hmac_sha256_test.cc)
 noa_add_default_options(PRIVATE sourcemeta_hydra_crypto_unit)
 target_link_libraries(sourcemeta_hydra_crypto_unit
   PRIVATE GTest::gtest GTest::gmock GTest::gtest_main)

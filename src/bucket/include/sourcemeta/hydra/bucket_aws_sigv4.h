@@ -42,12 +42,6 @@ aws_sigv4_canonical(const http::Method method, std::string_view host,
                     std::string_view path, std::string_view content_checksum,
                     std::string_view timestamp) -> std::string;
 
-auto SOURCEMETA_HYDRA_BUCKET_EXPORT
-aws_sigv4_sha256(std::string_view input, std::ostream &output) -> void;
-auto SOURCEMETA_HYDRA_BUCKET_EXPORT
-aws_sigv4_hmac_sha256(std::string_view secret, std::string_view value,
-                      std::ostream &output) -> void;
-
 // A datestamp format is as follows:
 // YYYY: Four-digit year
 // MM: Two-digit month (01-12)

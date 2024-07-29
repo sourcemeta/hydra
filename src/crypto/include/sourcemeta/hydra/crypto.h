@@ -49,6 +49,37 @@ auto SOURCEMETA_HYDRA_CRYPTO_EXPORT uuid() -> std::string;
 auto SOURCEMETA_HYDRA_CRYPTO_EXPORT base64_encode(std::string_view input,
                                                   std::ostream &output) -> void;
 
+/// @ingroup crypto
+/// Hash a string using SHA256. For example:
+///
+/// ```cpp
+/// #include <sourcemeta/hydra/crypto.h>
+/// #include <sstream>
+/// #include <iostream>
+///
+/// std::ostringstream result;
+/// sourcemeta::hydra::sha256("foo bar", result);
+/// std::cout << result.str() << "\n";
+/// ```
+auto SOURCEMETA_HYDRA_CRYPTO_EXPORT sha256(std::string_view input,
+                                           std::ostream &output) -> void;
+
+/// @ingroup crypto
+/// Compute a HMAC-SHA256 key. For example:
+///
+/// ```cpp
+/// #include <sourcemeta/hydra/crypto.h>
+/// #include <sstream>
+/// #include <iostream>
+///
+/// std::ostringstream result;
+/// sourcemeta::hydra::hmac_sha256("my secret", "my value", result);
+/// std::cout << result.str() << "\n";
+/// ```
+auto SOURCEMETA_HYDRA_CRYPTO_EXPORT hmac_sha256(std::string_view secret,
+                                                std::string_view value,
+                                                std::ostream &output) -> void;
+
 } // namespace sourcemeta::hydra
 
 #endif
