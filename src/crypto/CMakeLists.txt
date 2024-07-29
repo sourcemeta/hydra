@@ -1,6 +1,6 @@
 noa_library(NAMESPACE sourcemeta PROJECT hydra NAME crypto
   FOLDER "Hydra/Crypto"
-  SOURCES uuid.cc)
+  SOURCES uuid.cc base64.cc)
 
 if(HYDRA_INSTALL)
   noa_library_install(NAMESPACE sourcemeta PROJECT hydra NAME crypto)

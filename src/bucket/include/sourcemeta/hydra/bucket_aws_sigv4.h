@@ -47,8 +47,6 @@ aws_sigv4_sha256(std::string_view input, std::ostream &output) -> void;
 auto SOURCEMETA_HYDRA_BUCKET_EXPORT
 aws_sigv4_hmac_sha256(std::string_view secret, std::string_view value,
                       std::ostream &output) -> void;
-auto SOURCEMETA_HYDRA_BUCKET_EXPORT
-aws_sigv4_base64(std::string_view input, std::ostream &output) -> void;
 
 // A datestamp format is as follows:
 // YYYY: Four-digit year
