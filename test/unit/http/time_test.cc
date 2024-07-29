@@ -60,9 +60,14 @@ TEST(HTTP_Time, gmt_invalid) {
   EXPECT_THROW(sourcemeta::hydra::http::from_gmt("FOO"), std::invalid_argument);
 }
 
-TEST(HTTP_Time, gmt_comparison_equal) {
+TEST(HTTP_Time, gmt_comparison_equal_1) {
   EXPECT_EQ(sourcemeta::hydra::http::from_gmt("Wed, 21 Oct 2015 11:28:00 GMT"),
             sourcemeta::hydra::http::from_gmt("Wed, 21 Oct 2015 11:28:00 GMT"));
+}
+
+TEST(HTTP_Time, gmt_comparison_equal_2) {
+  EXPECT_EQ(sourcemeta::hydra::http::from_gmt("Mon, 29 Jul 2024 16:30:29 GMT"),
+            sourcemeta::hydra::http::from_gmt("Mon, 29 Jul 2024 16:30:29 GMT"));
 }
 
 TEST(HTTP_Time, gmt_comparison_less_than) {
