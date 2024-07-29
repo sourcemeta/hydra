@@ -17,6 +17,7 @@ jobs:
       - run: >
           cmake -S . -B ./build
           -DCMAKE_BUILD_TYPE:STRING=Release
+          -DHYDRA_CRYPTO:BOOL=OFF
           -DHYDRA_HTTPCLIENT:BOOL=OFF
           -DHYDRA_HTTPSERVER:BOOL=OFF
           -DHYDRA_BUCKET:BOOL=OFF
