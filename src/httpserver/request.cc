@@ -71,7 +71,10 @@ auto ServerRequest::header_if_modified_since(
       return true;
     }
 
-    return if_modified_since.value() < last_modified;
+    // We have seen than on Docker, time comparison can be flaky, but adding
+    // a bit of tolerance leads to more consistent behavior.
+    return (if_modified_since.value() + std::chrono::microseconds(100)) <
+           last_modified;
     // If there is an error parsing the `If-Modified-Since` timestamp, don't
     // abort, but lean on the safe side: the requested resource has been
     // modified
