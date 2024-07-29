@@ -1,6 +1,5 @@
 #include <gtest/gtest.h>
 
-#include <sourcemeta/hydra/bucket_aws_sigv4.h>
 #include <sourcemeta/hydra/crypto.h>
 
 #include <iomanip>
@@ -9,9 +8,9 @@
 
 // See https://www.devglan.com/online-tools/hmac-sha256-online
 
-TEST(Bucket_aws_sigv4, hmac_sha256_foo_bar_base64) {
+TEST(Crypto_sha256, hmac_foo_bar_base64) {
   std::ostringstream hmac_sha256_result;
-  sourcemeta::hydra::aws_sigv4_hmac_sha256("foo", "bar", hmac_sha256_result);
+  sourcemeta::hydra::hmac_sha256("foo", "bar", hmac_sha256_result);
   std::ostringstream base64_result;
   sourcemeta::hydra::base64_encode(hmac_sha256_result.str(), base64_result);
   EXPECT_EQ(base64_result.str(),
@@ -24,13 +23,12 @@ TEST(Bucket_aws_sigv4, hmac_sha256_foo_bar_base64) {
 // const key = crypto.createHmac('sha256', 'FOO').update('BAR').digest();
 // const result = crypto.createHmac('sha256', key).update('BAZ').digest('hex')
 // console.log(result)
-TEST(Bucket_aws_sigv4, hmac_sha256_into_hmac_sha256_hex) {
+TEST(Crypto_sha256, hmac_into_hmac_sha256_hex) {
   std::ostringstream key_hmac_sha256_result;
-  sourcemeta::hydra::aws_sigv4_hmac_sha256("FOO", "BAR",
-                                           key_hmac_sha256_result);
+  sourcemeta::hydra::hmac_sha256("FOO", "BAR", key_hmac_sha256_result);
   std::ostringstream hmac_sha256_result;
-  sourcemeta::hydra::aws_sigv4_hmac_sha256(key_hmac_sha256_result.str(), "BAZ",
-                                           hmac_sha256_result);
+  sourcemeta::hydra::hmac_sha256(key_hmac_sha256_result.str(), "BAZ",
+                                 hmac_sha256_result);
 
   std::ostringstream hex;
   hex << std::hex << std::setfill('0');

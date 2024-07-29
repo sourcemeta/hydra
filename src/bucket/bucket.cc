@@ -1,5 +1,6 @@
 #include <sourcemeta/hydra/bucket.h>
 #include <sourcemeta/hydra/bucket_aws_sigv4.h>
+#include <sourcemeta/hydra/crypto.h>
 #include <sourcemeta/hydra/httpclient.h>
 
 #include <sourcemeta/jsontoolkit/uri.h>
@@ -115,7 +116,7 @@ auto Bucket::upsert_json(const std::string &key,
   std::stringstream content;
   sourcemeta::jsontoolkit::prettify(document, content);
   std::ostringstream content_checksum;
-  aws_sigv4_sha256(content.str(), content_checksum);
+  sourcemeta::hydra::sha256(content.str(), content_checksum);
   request.header("content-length", std::to_string(content.str().size()));
   request.header("transfer-encoding", "");
 
