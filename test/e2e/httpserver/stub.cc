@@ -155,7 +155,7 @@ on_etag_quoted(const sourcemeta::hydra::http::ServerLogger &,
 
 static auto
 on_schema(const sourcemeta::hydra::http::ServerLogger &,
-          const sourcemeta::hydra::http::ServerRequest &,
+          const sourcemeta::hydra::http::ServerRequest &request,
           sourcemeta::hydra::http::ServerResponse &response) -> void {
   // Purposely not very well formatted
   const auto schema = sourcemeta::jsontoolkit::parse(R"JSON({
@@ -163,7 +163,25 @@ on_schema(const sourcemeta::hydra::http::ServerLogger &,
   })JSON");
 
   response.status(sourcemeta::hydra::http::Status::OK);
-  response.end(schema, sourcemeta::jsontoolkit::schema_format_compare);
+  response.header("Content-Type", "application/json");
+  if (request.method() == sourcemeta::hydra::http::Method::HEAD) {
+    response.head(schema, sourcemeta::jsontoolkit::schema_format_compare);
+  } else {
+    response.end(schema, sourcemeta::jsontoolkit::schema_format_compare);
+  }
+}
+
+static auto on_text(const sourcemeta::hydra::http::ServerLogger &,
+                    const sourcemeta::hydra::http::ServerRequest &request,
+                    sourcemeta::hydra::http::ServerResponse &response) -> void {
+  const auto content{"Foo Bar"};
+  response.status(sourcemeta::hydra::http::Status::OK);
+  response.header("Content-Type", "application/json");
+  if (request.method() == sourcemeta::hydra::http::Method::HEAD) {
+    response.head(content);
+  } else {
+    response.end(content);
+  }
 }
 
 static auto
@@ -188,6 +206,9 @@ auto main(int argc, char *argv[]) -> int {
   sourcemeta::hydra::http::Server server;
 
   server.route(sourcemeta::hydra::http::Method::GET, "/schema", on_schema);
+  server.route(sourcemeta::hydra::http::Method::HEAD, "/schema", on_schema);
+  server.route(sourcemeta::hydra::http::Method::GET, "/text", on_text);
+  server.route(sourcemeta::hydra::http::Method::HEAD, "/text", on_text);
   server.route(sourcemeta::hydra::http::Method::GET, "/echo", on_echo);
   server.route(sourcemeta::hydra::http::Method::HEAD, "/echo", on_echo);
   server.route(sourcemeta::hydra::http::Method::POST, "/echo", on_echo);
