@@ -3,6 +3,6 @@ noa https://github.com/sourcemeta/noa 7e26abce7a4e31e86a16ef2851702a56773ca527
 jsontoolkit https://github.com/sourcemeta/jsontoolkit a3765c8038ba4271e55318a677f6366bdaa7b805
 bearssl https://www.bearssl.org/git/BearSSL 8ef7680081c61b486622f2d983c0d3d21e83caad
 zlib https://github.com/madler/zlib 51b7f2abdade71cd9bb0e7a373ef2610ec6f9daf
-uwebsockets https://github.com/uNetworking/uWebSockets v20.64.0
+uwebsockets https://github.com/uNetworking/uWebSockets v20.65.0
 googletest https://github.com/google/googletest 987e225614755fec7253aa95bf959c09e0d380d7
 curl https://github.com/curl/curl curl-8_9_1
