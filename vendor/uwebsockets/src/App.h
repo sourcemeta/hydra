@@ -571,8 +571,47 @@ public:
     }
 
     /* Register event handler for accepted FD. Can be used together with adoptSocket. */
-    BuilderPatternReturnType &&preOpen(LIBUS_SOCKET_DESCRIPTOR (*handler)(LIBUS_SOCKET_DESCRIPTOR)) {
+    BuilderPatternReturnType &&preOpen(LIBUS_SOCKET_DESCRIPTOR (*handler)(struct us_socket_context_t *, LIBUS_SOCKET_DESCRIPTOR)) {
         httpContext->onPreOpen(handler);
+        return std::move(static_cast<BuilderPatternReturnType &&>(*this));
+    }
+
+    BuilderPatternReturnType &&addChildApp(BuilderPatternReturnType *app) {
+        /* Add this app to httpContextData list over child apps and set onPreOpen */
+        httpContext->getSocketContextData()->childApps.push_back((void *) app);
+        
+        httpContext->onPreOpen([](struct us_socket_context_t *context, LIBUS_SOCKET_DESCRIPTOR fd) -> LIBUS_SOCKET_DESCRIPTOR {
+            
+            HttpContext<SSL> *httpContext = (HttpContext<SSL> *) context;
+
+            if (httpContext->getSocketContextData()->childApps.empty()) {
+                return fd;
+            }
+
+            //std::cout << "Distributing fd: " << fd << " from context: " << context << std::endl;
+
+            unsigned int *roundRobin = &httpContext->getSocketContextData()->roundRobin;
+
+            //std::cout << "Round robin is: " << *roundRobin << " and size of apps is: " << httpContext->getSocketContextData()->childApps.size() << std::endl;
+
+            BuilderPatternReturnType *receivingApp = (BuilderPatternReturnType *) httpContext->getSocketContextData()->childApps[*roundRobin];
+
+
+            //std::cout << "Loop is " << receivingApp->getLoop() << std::endl;
+
+
+            receivingApp->getLoop()->defer([fd, receivingApp]() {
+                //std::cout << "About to adopt socket " << fd << " on receivingApp " << receivingApp << std::endl;
+                receivingApp->adoptSocket(fd);
+                //std::cout << "Done " << std::endl;
+            });
+
+            if (++(*roundRobin) == httpContext->getSocketContextData()->childApps.size()) {
+                *roundRobin = 0;
+            }
+
+            return fd + 1;
+        });
         return std::move(static_cast<BuilderPatternReturnType &&>(*this));
     }
 
