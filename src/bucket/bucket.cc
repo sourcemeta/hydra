@@ -7,6 +7,7 @@
 
 #include <cassert> // assert
 #include <chrono>  // std::chrono::system_clock
+#include <format>  // std::format
 #include <sstream> // std::ostringstream
 #include <utility> // std::move
 
@@ -37,12 +38,9 @@ auto Bucket::fetch_json(const std::string &key)
     return promise.get_future();
   }
 
-  // TODO: Properly build, concat, and canonicalize the string using URI Kit
-  std::ostringstream request_url;
-  request_url << this->url;
-  request_url << key;
-
-  sourcemeta::hydra::http::ClientRequest request{request_url.str()};
+  sourcemeta::hydra::http::ClientRequest request{
+      // TODO: Properly build, concat, and canonicalize the string using URI Kit
+      std::format("{}{}", this->url, key)};
   request.method(sourcemeta::hydra::http::Method::GET);
   request.capture({"content-type", "etag", "last-modified"});
 
@@ -102,12 +100,9 @@ auto Bucket::upsert_json(const std::string &key,
   std::promise<void> promise;
   assert(key.front() == '/');
 
-  // TODO: Properly build, concat, and canonicalize the string using URI Kit
-  std::ostringstream request_url;
-  request_url << this->url;
-  request_url << key;
-
-  sourcemeta::hydra::http::ClientRequest request{request_url.str()};
+  sourcemeta::hydra::http::ClientRequest request{
+      // TODO: Properly build, concat, and canonicalize the string using URI Kit
+      std::format("{}{}", this->url, key)};
   request.method(sourcemeta::hydra::http::Method::PUT);
   request.header("content-type", "application/json");
 
@@ -140,9 +135,10 @@ auto Bucket::upsert_json(const std::string &key,
   return promise.get_future();
 }
 
-auto Bucket::fetch_or_upsert(const std::string &key,
-                             std::function<sourcemeta::jsontoolkit::JSON()>
-                                 callback) -> std::future<ResponseJSON> {
+auto Bucket::fetch_or_upsert(
+    const std::string &key,
+    std::function<sourcemeta::jsontoolkit::JSON()> callback)
+    -> std::future<ResponseJSON> {
   std::promise<ResponseJSON> promise;
   auto maybe_response{this->fetch_json(key).get()};
   if (maybe_response.has_value()) {

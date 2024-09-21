@@ -9,8 +9,8 @@
 namespace sourcemeta::hydra::http {
 
 auto serve_file(const std::filesystem::path &file_path,
-                const ServerRequest &request,
-                ServerResponse &response) -> void {
+                const ServerRequest &request, ServerResponse &response)
+    -> void {
   assert(request.method() == sourcemeta::hydra::http::Method::GET ||
          request.method() == sourcemeta::hydra::http::Method::HEAD);
 
