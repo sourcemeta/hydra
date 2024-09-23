@@ -65,8 +65,8 @@ auto ServerResponse::status(const Status status_code) -> void {
 
 auto ServerResponse::status() const -> Status { return this->code; }
 
-auto ServerResponse::header(std::string_view key,
-                            std::string_view value) -> void {
+auto ServerResponse::header(std::string_view key, std::string_view value)
+    -> void {
   this->headers.emplace(key, value);
 }
 

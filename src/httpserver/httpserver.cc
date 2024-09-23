@@ -111,10 +111,10 @@ static auto wrap_route(
   logger << line.str();
 }
 
-static auto
-default_handler(const sourcemeta::hydra::http::ServerLogger &,
-                const sourcemeta::hydra::http::ServerRequest &,
-                sourcemeta::hydra::http::ServerResponse &response) -> void {
+static auto default_handler(const sourcemeta::hydra::http::ServerLogger &,
+                            const sourcemeta::hydra::http::ServerRequest &,
+                            sourcemeta::hydra::http::ServerResponse &response)
+    -> void {
   response.status(sourcemeta::hydra::http::Status::NOT_IMPLEMENTED);
   response.end();
 }
