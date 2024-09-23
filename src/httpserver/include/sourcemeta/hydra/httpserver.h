@@ -80,8 +80,8 @@ public:
   ///
   /// server.run(3000);
   /// ```
-  auto route(const Method method, std::string &&path,
-             RouteCallback &&callback) -> void;
+  auto route(const Method method, std::string &&path, RouteCallback &&callback)
+      -> void;
 
   /// Set a handler that responds to HTTP requests that do not match any other
   /// registered routes. For example:

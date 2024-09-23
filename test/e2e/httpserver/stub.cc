@@ -42,10 +42,10 @@ static auto on_throw(const sourcemeta::hydra::http::ServerLogger &,
   throw std::runtime_error("Crash!");
 }
 
-static auto
-on_x_foo(const sourcemeta::hydra::http::ServerLogger &,
-         const sourcemeta::hydra::http::ServerRequest &request,
-         sourcemeta::hydra::http::ServerResponse &response) -> void {
+static auto on_x_foo(const sourcemeta::hydra::http::ServerLogger &,
+                     const sourcemeta::hydra::http::ServerRequest &request,
+                     sourcemeta::hydra::http::ServerResponse &response)
+    -> void {
   response.status(sourcemeta::hydra::http::Status::OK);
   if (request.header("x-foo").has_value()) {
     response.header("x-foo", request.header("x-foo").value());
@@ -54,10 +54,10 @@ on_x_foo(const sourcemeta::hydra::http::ServerLogger &,
   response.end();
 }
 
-static auto
-on_query_foo(const sourcemeta::hydra::http::ServerLogger &,
-             const sourcemeta::hydra::http::ServerRequest &request,
-             sourcemeta::hydra::http::ServerResponse &response) -> void {
+static auto on_query_foo(const sourcemeta::hydra::http::ServerLogger &,
+                         const sourcemeta::hydra::http::ServerRequest &request,
+                         sourcemeta::hydra::http::ServerResponse &response)
+    -> void {
   response.status(sourcemeta::hydra::http::Status::OK);
   if (request.query("foo").has_value()) {
     response.header("x-foo", request.query("foo").value());
@@ -66,19 +66,19 @@ on_query_foo(const sourcemeta::hydra::http::ServerLogger &,
   response.end();
 }
 
-static auto
-on_otherwise(const sourcemeta::hydra::http::ServerLogger &,
-             const sourcemeta::hydra::http::ServerRequest &,
-             sourcemeta::hydra::http::ServerResponse &response) -> void {
+static auto on_otherwise(const sourcemeta::hydra::http::ServerLogger &,
+                         const sourcemeta::hydra::http::ServerRequest &,
+                         sourcemeta::hydra::http::ServerResponse &response)
+    -> void {
   response.status(sourcemeta::hydra::http::Status::NOT_IMPLEMENTED);
   assert(response.status() == sourcemeta::hydra::http::Status::NOT_IMPLEMENTED);
   response.end();
 }
 
-static auto
-on_parameters(const sourcemeta::hydra::http::ServerLogger &,
-              const sourcemeta::hydra::http::ServerRequest &request,
-              sourcemeta::hydra::http::ServerResponse &response) -> void {
+static auto on_parameters(const sourcemeta::hydra::http::ServerLogger &,
+                          const sourcemeta::hydra::http::ServerRequest &request,
+                          sourcemeta::hydra::http::ServerResponse &response)
+    -> void {
   response.status(sourcemeta::hydra::http::Status::OK);
   std::ostringstream result;
   result << request.parameter(0);
@@ -89,10 +89,10 @@ on_parameters(const sourcemeta::hydra::http::ServerLogger &,
   response.end(result.str());
 }
 
-static auto
-on_encodings(const sourcemeta::hydra::http::ServerLogger &,
-             const sourcemeta::hydra::http::ServerRequest &request,
-             sourcemeta::hydra::http::ServerResponse &response) -> void {
+static auto on_encodings(const sourcemeta::hydra::http::ServerLogger &,
+                         const sourcemeta::hydra::http::ServerRequest &request,
+                         sourcemeta::hydra::http::ServerResponse &response)
+    -> void {
   sourcemeta::jsontoolkit::JSON document{
       sourcemeta::jsontoolkit::JSON::make_array()};
   const auto accept_encoding{request.header_list("accept-encoding")};
@@ -107,19 +107,19 @@ on_encodings(const sourcemeta::hydra::http::ServerLogger &,
   response.end(document);
 }
 
-static auto
-on_force_gzip(const sourcemeta::hydra::http::ServerLogger &,
-              const sourcemeta::hydra::http::ServerRequest &,
-              sourcemeta::hydra::http::ServerResponse &response) -> void {
+static auto on_force_gzip(const sourcemeta::hydra::http::ServerLogger &,
+                          const sourcemeta::hydra::http::ServerRequest &,
+                          sourcemeta::hydra::http::ServerResponse &response)
+    -> void {
   response.status(sourcemeta::hydra::http::Status::OK);
   response.encoding(sourcemeta::hydra::http::ServerContentEncoding::GZIP);
   response.end("I am compressed");
 }
 
-static auto
-on_cache_me(const sourcemeta::hydra::http::ServerLogger &,
-            const sourcemeta::hydra::http::ServerRequest &request,
-            sourcemeta::hydra::http::ServerResponse &response) -> void {
+static auto on_cache_me(const sourcemeta::hydra::http::ServerLogger &,
+                        const sourcemeta::hydra::http::ServerRequest &request,
+                        sourcemeta::hydra::http::ServerResponse &response)
+    -> void {
   const auto timestamp{
       sourcemeta::hydra::http::from_gmt("Wed, 21 Oct 2015 11:28:00 GMT")};
   const auto checksum{"711d2f4adab4515e4036c48bf58eb975"};
@@ -153,10 +153,10 @@ on_etag_quoted(const sourcemeta::hydra::http::ServerLogger &,
   response.end("Cache me!");
 }
 
-static auto
-on_schema(const sourcemeta::hydra::http::ServerLogger &,
-          const sourcemeta::hydra::http::ServerRequest &request,
-          sourcemeta::hydra::http::ServerResponse &response) -> void {
+static auto on_schema(const sourcemeta::hydra::http::ServerLogger &,
+                      const sourcemeta::hydra::http::ServerRequest &request,
+                      sourcemeta::hydra::http::ServerResponse &response)
+    -> void {
   // Purposely not very well formatted
   const auto schema = sourcemeta::jsontoolkit::parse(R"JSON({
     "type": "string", "$schema": "https://json-schema.org/draft/2019-09/schema"
@@ -184,10 +184,10 @@ static auto on_text(const sourcemeta::hydra::http::ServerLogger &,
   }
 }
 
-static auto
-on_static(const sourcemeta::hydra::http::ServerLogger &,
-          const sourcemeta::hydra::http::ServerRequest &request,
-          sourcemeta::hydra::http::ServerResponse &response) -> void {
+static auto on_static(const sourcemeta::hydra::http::ServerLogger &,
+                      const sourcemeta::hydra::http::ServerRequest &request,
+                      sourcemeta::hydra::http::ServerResponse &response)
+    -> void {
   const std::filesystem::path file_path{STATIC_PATH + request.path().substr(7)};
   if (!std::filesystem::exists(file_path)) {
     response.status(sourcemeta::hydra::http::Status::NOT_FOUND);
@@ -198,11 +198,11 @@ on_static(const sourcemeta::hydra::http::ServerLogger &,
   sourcemeta::hydra::http::serve_file(file_path, request, response);
 }
 
-static auto
-on_error(std::exception_ptr error,
-         const sourcemeta::hydra::http::ServerLogger &,
-         const sourcemeta::hydra::http::ServerRequest &,
-         sourcemeta::hydra::http::ServerResponse &response) noexcept -> void {
+static auto on_error(std::exception_ptr error,
+                     const sourcemeta::hydra::http::ServerLogger &,
+                     const sourcemeta::hydra::http::ServerRequest &,
+                     sourcemeta::hydra::http::ServerResponse &response) noexcept
+    -> void {
   response.status(sourcemeta::hydra::http::Status::BAD_REQUEST);
   try {
     std::rethrow_exception(error);
