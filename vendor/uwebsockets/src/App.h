@@ -189,12 +189,12 @@ public:
 
         /* Delete TopicTree */
         if (topicTree) {
-            delete topicTree;
-
             /* And unregister loop callbacks */
             /* We must unregister any loop post handler here */
             Loop::get()->removePostHandler(topicTree);
             Loop::get()->removePreHandler(topicTree);
+
+	    delete topicTree;
         }
     }
 
@@ -573,6 +573,18 @@ public:
     /* Register event handler for accepted FD. Can be used together with adoptSocket. */
     BuilderPatternReturnType &&preOpen(LIBUS_SOCKET_DESCRIPTOR (*handler)(struct us_socket_context_t *, LIBUS_SOCKET_DESCRIPTOR)) {
         httpContext->onPreOpen(handler);
+        return std::move(static_cast<BuilderPatternReturnType &&>(*this));
+    }
+
+    BuilderPatternReturnType &&removeChildApp(BuilderPatternReturnType *app) {
+        /* Remove this app from httpContextData list over child apps and reset round robin */
+        auto &childApps = httpContext->getSocketContextData()->childApps;
+        childApps.erase(
+            std::remove(childApps.begin(), childApps.end(), (void *) app),
+            childApps.end()
+        );
+        httpContext->getSocketContextData()->roundRobin = 0;
+        
         return std::move(static_cast<BuilderPatternReturnType &&>(*this));
     }
 
