@@ -125,3 +125,7 @@ if(HYDRA_TESTS)
     endif()
   endif()
 endif()
+
+add_executable(bucket_upsert_test test.cc)
+target_link_libraries(bucket_upsert_test PUBLIC sourcemeta::jsontoolkit::json)
+target_link_libraries(bucket_upsert_test PUBLIC sourcemeta::hydra::bucket)
