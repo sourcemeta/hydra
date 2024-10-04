@@ -1,11 +1,7 @@
 #ifndef SOURCEMETA_JSONTOOLKIT_JSONSCHEMA_H_
 #define SOURCEMETA_JSONTOOLKIT_JSONSCHEMA_H_
 
-#if defined(__EMSCRIPTEN__) || defined(__Unikraft__)
-#define SOURCEMETA_JSONTOOLKIT_JSONSCHEMA_EXPORT
-#else
 #include "jsonschema_export.h"
-#endif
 
 #include <sourcemeta/jsontoolkit/json.h>
 #include <sourcemeta/jsontoolkit/jsonschema_anchor.h>
@@ -14,9 +10,6 @@
 #include <sourcemeta/jsontoolkit/jsonschema_error.h>
 #include <sourcemeta/jsontoolkit/jsonschema_reference.h>
 #include <sourcemeta/jsontoolkit/jsonschema_resolver.h>
-#include <sourcemeta/jsontoolkit/jsonschema_transform_bundle.h>
-#include <sourcemeta/jsontoolkit/jsonschema_transform_rule.h>
-#include <sourcemeta/jsontoolkit/jsonschema_transformer.h>
 #include <sourcemeta/jsontoolkit/jsonschema_walker.h>
 
 #include <future>   // std::future
@@ -32,24 +25,6 @@
 /// ```cpp
 /// #include <sourcemeta/jsontoolkit/jsonschema.h>
 /// ```
-///
-/// Older JSON Schema versions might not be supported, but older JSON Schema
-/// documents can be automatically upgraded using a tool like
-/// [Alterschema](https://github.com/sourcemeta/alterschema).
-///
-/// Supported JSON Schema dialects:
-///
-/// | Dialect | Support |
-/// |---------|---------|
-/// | 2020-12 | Partial |
-/// | 2019-09 | Partial |
-/// | Draft 7 | Partial |
-/// | Draft 6 | Partial |
-/// | Draft 4 | Partial |
-/// | Draft 3 | Partial |
-/// | Draft 2 | Partial |
-/// | Draft 1 | Partial |
-/// | Draft 0 | Partial |
 
 namespace sourcemeta::jsontoolkit {
 
@@ -71,7 +46,7 @@ auto is_schema(const JSON &schema) -> bool;
 
 /// @ingroup jsonschema
 /// The strategy to follow when attempting to identify a schema
-enum class IdentificationStrategy {
+enum class IdentificationStrategy : std::uint8_t {
   /// Only proceed if we can guarantee the identifier is valid
   Strict,
 
@@ -95,7 +70,7 @@ enum class IdentificationStrategy {
 ///   "$id": "https://sourcemeta.com/example-schema"
 /// })JSON");
 ///
-/// std::optional<std::string> id{sourcemeta::jsontoolkit::id(
+/// std::optional<std::string> id{sourcemeta::jsontoolkit::identify(
 ///   document, sourcemeta::jsontoolkit::official_resolver).get()};
 /// assert(id.has_value());
 /// assert(id.value() == "https://sourcemeta.com/example-schema");
@@ -105,20 +80,88 @@ enum class IdentificationStrategy {
 /// guessing game. Often useful if you have a schema without a dialect and you
 /// want to at least try to get something.
 SOURCEMETA_JSONTOOLKIT_JSONSCHEMA_EXPORT
-auto id(const JSON &schema, const SchemaResolver &resolver,
-        const IdentificationStrategy strategy = IdentificationStrategy::Strict,
-        const std::optional<std::string> &default_dialect = std::nullopt,
-        const std::optional<std::string> &default_id = std::nullopt)
+auto identify(
+    const JSON &schema, const SchemaResolver &resolver,
+    const IdentificationStrategy strategy = IdentificationStrategy::Strict,
+    const std::optional<std::string> &default_dialect = std::nullopt,
+    const std::optional<std::string> &default_id = std::nullopt)
     -> std::future<std::optional<std::string>>;
 
 /// @ingroup jsonschema
 ///
-/// A shortcut to sourcemeta::jsontoolkit::id if you know the base dialect of
-/// the schema.
+/// A shortcut to sourcemeta::jsontoolkit::identify if you know the base dialect
+/// of the schema.
 SOURCEMETA_JSONTOOLKIT_JSONSCHEMA_EXPORT
-auto id(const JSON &schema, const std::string &base_dialect,
-        const std::optional<std::string> &default_id = std::nullopt)
+auto identify(const JSON &schema, const std::string &base_dialect,
+              const std::optional<std::string> &default_id = std::nullopt)
     -> std::optional<std::string>;
+
+/// @ingroup jsonschema
+///
+/// This function removes the top-level URI identifier of the given schema, if
+/// any, given you know its base dialect. It is the caller responsibility to
+/// ensure the schema doesn't perform relative references that might have
+/// depended on such top-level identifier. For example:
+///
+/// ```cpp
+/// #include <sourcemeta/jsontoolkit/json.h>
+/// #include <sourcemeta/jsontoolkit/jsonschema.h>
+/// #include <cassert>
+///
+/// sourcemeta::jsontoolkit::JSON document =
+///     sourcemeta::jsontoolkit::parse(R"JSON({
+///   "$schema": "https://json-schema.org/draft/2020-12/schema",
+///   "$id": "https://sourcemeta.com/example-schema"
+/// })JSON");
+///
+/// sourcemeta::jsontoolkit::anonymize(document,
+///   "https://json-schema.org/draft/2020-12/schema");
+///
+/// std::optional<std::string> id{sourcemeta::jsontoolkit::identify(
+///   document, sourcemeta::jsontoolkit::official_resolver).get()};
+/// assert(!id.has_value());
+/// ```
+SOURCEMETA_JSONTOOLKIT_JSONSCHEMA_EXPORT
+auto anonymize(JSON &schema, const std::string &base_dialect) -> void;
+
+/// @ingroup jsonschema
+///
+/// This function sets the identifier of a schema, replacing the existing one,
+/// if any. For example:
+///
+/// ```cpp
+/// #include <sourcemeta/jsontoolkit/json.h>
+/// #include <sourcemeta/jsontoolkit/jsonschema.h>
+/// #include <cassert>
+///
+/// sourcemeta::jsontoolkit::JSON document =
+///     sourcemeta::jsontoolkit::parse(R"JSON({
+///   "$schema": "https://json-schema.org/draft/2020-12/schema",
+///   "$id": "https://sourcemeta.com/example-schema"
+/// })JSON");
+///
+/// sourcemeta::jsontoolkit::reidentify(document,
+///   "https://example.com/my-new-id",
+///   sourcemeta::jsontoolkit::official_resolver);
+///
+/// std::optional<std::string> id{sourcemeta::jsontoolkit::identify(
+///   document, sourcemeta::jsontoolkit::official_resolver).get()};
+/// assert(id.has_value());
+/// assert(id.value() == "https://example.com/my-new-id");
+/// ```
+SOURCEMETA_JSONTOOLKIT_JSONSCHEMA_EXPORT
+auto reidentify(
+    JSON &schema, const std::string &new_identifier,
+    const SchemaResolver &resolver,
+    const std::optional<std::string> &default_dialect = std::nullopt) -> void;
+
+/// @ingroup jsonschema
+///
+/// A shortcut to sourcemeta::jsontoolkit::reidentify if you know the base
+/// dialect of the schema.
+SOURCEMETA_JSONTOOLKIT_JSONSCHEMA_EXPORT
+auto reidentify(JSON &schema, const std::string &new_identifier,
+                const std::string &base_dialect) -> void;
 
 /// @ingroup jsonschema
 ///
@@ -273,8 +316,8 @@ auto vocabularies(const SchemaResolver &resolver,
 /// std::cout << stream.str() << std::endl;
 /// ```
 SOURCEMETA_JSONTOOLKIT_JSONSCHEMA_EXPORT
-auto schema_format_compare(const JSON::String &left,
-                           const JSON::String &right) -> bool;
+auto schema_format_compare(const JSON::String &left, const JSON::String &right)
+    -> bool;
 
 } // namespace sourcemeta::jsontoolkit
 

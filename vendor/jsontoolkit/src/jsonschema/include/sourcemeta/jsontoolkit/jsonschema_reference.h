@@ -1,16 +1,13 @@
 #ifndef SOURCEMETA_JSONTOOLKIT_JSONSCHEMA_REFERENCE_H_
 #define SOURCEMETA_JSONTOOLKIT_JSONSCHEMA_REFERENCE_H_
 
-#if defined(__EMSCRIPTEN__) || defined(__Unikraft__)
-#define SOURCEMETA_JSONTOOLKIT_JSONSCHEMA_EXPORT
-#else
 #include "jsonschema_export.h"
-#endif
 
 #include <sourcemeta/jsontoolkit/jsonpointer.h>
 #include <sourcemeta/jsontoolkit/jsonschema_resolver.h>
 #include <sourcemeta/jsontoolkit/jsonschema_walker.h>
 
+#include <cstdint>  // std::uint8_t
 #include <future>   // std::future
 #include <map>      // std::map
 #include <optional> // std::optional
@@ -22,7 +19,7 @@ namespace sourcemeta::jsontoolkit {
 
 /// @ingroup jsonschema
 /// The reference type
-enum class ReferenceType { Static, Dynamic };
+enum class ReferenceType : std::uint8_t { Static, Dynamic };
 
 #if defined(__GNUC__)
 #pragma GCC diagnostic push
@@ -32,7 +29,7 @@ enum class ReferenceType { Static, Dynamic };
 #endif
 /// @ingroup jsonschema
 /// The reference entry type
-enum class ReferenceEntryType { Resource, Anchor, Pointer };
+enum class ReferenceEntryType : std::uint8_t { Resource, Anchor, Pointer };
 #if defined(__GNUC__)
 #pragma GCC diagnostic pop
 #endif

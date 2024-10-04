@@ -65,8 +65,8 @@ static auto uri_parse(const std::string &data, UriUriA *uri) -> void {
   uri_normalize(uri);
 }
 
-static auto
-canonicalize_path(const std::string &path) -> std::optional<std::string> {
+static auto canonicalize_path(const std::string &path, const bool is_relative)
+    -> std::optional<std::string> {
   std::vector<std::string> segments;
   std::string segment;
 
@@ -93,7 +93,7 @@ canonicalize_path(const std::string &path) -> std::optional<std::string> {
 
   // Reconstruct the canonical path
   std::string canonical_path;
-  std::string separator = "";
+  std::string separator = is_relative ? "/" : "";
   for (const auto &seg : segments) {
     canonical_path += separator + seg;
     separator = "/";
@@ -133,7 +133,7 @@ URI::URI(URI &&other)
   this->scheme_ = std::move(other.scheme_);
   this->userinfo_ = std::move(other.userinfo_);
   this->host_ = std::move(other.host_);
-  this->port_ = std::move(other.port_);
+  this->port_ = other.port_;
   this->fragment_ = std::move(other.fragment_);
   this->query_ = std::move(other.query_);
 
@@ -154,12 +154,28 @@ auto URI::parse() -> void {
     uriFreeUriMembersA(&this->internal->uri);
   }
 
+  // NOTE: we don't skip this line for fast path
+  // as the internal structure of uriparser could still
+  // be used by resolve_from and relative_to methods
   uri_parse(this->data, &this->internal->uri);
 
-  this->scheme_ = uri_text_range(&this->internal->uri.scheme);
+  // Fast path for the root path
+  if (this->data == "/") {
+    this->path_ = "/";
+    this->parsed = true;
+    return;
+  }
+
+  // Fast path for empty URI
+  if (this->data.empty()) {
+    this->parsed = true;
+    return;
+  };
+
   this->scheme_ = uri_text_range(&this->internal->uri.scheme);
   this->userinfo_ = uri_text_range(&this->internal->uri.userInfo);
   this->host_ = uri_text_range(&this->internal->uri.hostText);
+  this->is_ipv6_ = this->internal->uri.hostData.ip6 != nullptr;
   this->fragment_ = uri_text_range(&this->internal->uri.fragment);
   this->query_ = uri_text_range(&this->internal->uri.query);
   const auto port_text{uri_text_range(&this->internal->uri.portText)};
@@ -200,9 +216,13 @@ auto URI::parse() -> void {
   this->parsed = true;
 }
 
+auto URI::is_relative() const -> bool {
+  return !this->scheme().has_value() || this->data.starts_with(".");
+}
+
 auto URI::is_absolute() const noexcept -> bool {
   // An absolute URI always contains a scheme component,
-  return this->internal->uri.scheme.first != nullptr;
+  return this->scheme_.has_value();
 }
 
 auto URI::is_urn() const -> bool {
@@ -214,6 +234,13 @@ auto URI::is_tag() const -> bool {
   const auto scheme{this->scheme()};
   return scheme.has_value() && scheme.value() == "tag";
 }
+
+auto URI::is_mailto() const -> bool {
+  const auto scheme{this->scheme()};
+  return scheme.has_value() && scheme.value() == "mailto";
+}
+
+auto URI::is_ipv6() const -> bool { return this->is_ipv6_; }
 
 auto URI::is_fragment_only() const -> bool {
   return !this->scheme().has_value() && !this->host().has_value() &&
@@ -232,21 +259,56 @@ auto URI::host() const -> std::optional<std::string_view> {
 auto URI::port() const -> std::optional<std::uint32_t> { return this->port_; }
 
 auto URI::path() const -> std::optional<std::string> {
+  // NOTE: This is a workaround for the fact that `uriparser` does not
+  // parse /.. as a segment, then we store nothing in the path_ field.
+  // By that we can't add the initial slash to the URI.
   if (!this->path_.has_value()) {
+    if (this->data == "/..") {
+      return "/";
+    }
     return std::nullopt;
   }
 
-  if (!this->is_urn() && !this->is_tag() && this->scheme().has_value()) {
+  if (!this->is_urn() && !this->is_tag() && !this->is_mailto() &&
+      this->scheme().has_value()) {
     return "/" + this->path_.value();
   }
 
-  size_t path_pos = this->data.find(this->path_.value());
-  if (path_pos != std::string::npos && path_pos > 0 &&
-      this->data[path_pos - 1] == '/') {
+  if (this->port().has_value() || this->host().has_value()) {
     return "/" + this->path_.value();
   }
 
   return path_;
+}
+
+auto URI::path(const std::string &path) -> URI & {
+  if (path.empty()) {
+    this->path_ = std::nullopt;
+    return *this;
+  }
+
+  const auto is_relative_path = path.starts_with(".");
+  if (is_relative_path) {
+    throw URIError{"You cannot set a relative path"};
+  }
+
+  this->path_ = URI{path}.path_;
+  return *this;
+}
+
+auto URI::path(std::string &&path) -> URI & {
+  if (path.empty()) {
+    this->path_ = std::nullopt;
+    return *this;
+  }
+
+  const auto is_relative_path = path.starts_with(".");
+  if (is_relative_path) {
+    throw URIError{"You cannot set a relative path"};
+  }
+
+  this->path_ = URI{std::move(path)}.path_;
+  return *this;
 }
 
 auto URI::fragment() const -> std::optional<std::string_view> {
@@ -281,17 +343,31 @@ auto URI::recompose_without_fragment() const -> std::optional<std::string> {
   const auto result_scheme{this->scheme()};
   if (result_scheme.has_value()) {
     result << result_scheme.value();
-    if (this->is_urn() || this->is_tag()) {
+    if (this->is_urn() || this->is_tag() || this->is_mailto()) {
       result << ":";
     } else {
       result << "://";
     }
   }
 
+  const auto user_info{this->userinfo()};
+  if (user_info.has_value()) {
+    result << user_info.value() << "@";
+  }
+
   // Host
   const auto result_host{this->host()};
   if (result_host.has_value()) {
-    result << result_host.value();
+    if (this->is_ipv6()) {
+      // By default uriparser will parse the IPv6 address without brackets
+      // so we need to add them manually, as said in the RFC 2732:
+      // "To use a literal IPv6 address in a URL, the literal address should be
+      // enclosed in "[" and "]" characters."
+      // See https://tools.ietf.org/html/rfc2732#section-2
+      result << '[' << result_host.value() << ']';
+    } else {
+      result << result_host.value();
+    }
   }
 
   // Port
@@ -343,7 +419,8 @@ auto URI::canonicalize() -> URI & {
   // Clean Path form ".." and "."
   const auto result_path{this->path()};
   if (result_path.has_value()) {
-    const auto canonical_path{canonicalize_path(result_path.value())};
+    const auto canonical_path{
+        canonicalize_path(result_path.value(), this->is_relative())};
     if (canonical_path.has_value()) {
       this->path_ = canonical_path.value();
     }
@@ -406,6 +483,49 @@ auto URI::resolve_from(const URI &base) -> URI & {
     uriFreeUriMembersA(&absoluteDest);
     throw;
   }
+}
+
+auto URI::relative_to(const URI &base) -> URI & {
+  if (!this->is_absolute() || !base.is_absolute() ||
+      this->host() != base.host()) {
+    return *this;
+  }
+
+  UriUriA result;
+  URI copy{*this};
+
+  // According to the docs, we only need to free on success
+  // See
+  // https://uriparser.github.io/doc/api/latest/Uri_8h.html#a20cc7888b62700d6cb7e7896647b0d5d
+  switch (uriRemoveBaseUriMmA(&result, &copy.internal->uri, &base.internal->uri,
+                              URI_FALSE, nullptr)) {
+    case URI_SUCCESS:
+      break;
+    default:
+      throw URIError{"Could not resolve URI relative to the given base"};
+  }
+
+  try {
+    uri_normalize(&result);
+    copy.data = uri_to_string(&result);
+  } catch (...) {
+    uriFreeUriMembersMmA(&result, nullptr);
+    throw;
+  }
+
+  uriFreeUriMembersMmA(&result, nullptr);
+  copy.parse();
+
+  // `uriparser` has this weird thing where it will only look at scheme and
+  // authority, incorrectly thinking that a certain URI is a base of another one
+  // if the path of the former exceeds the path of the latter. This is an ugly
+  // workaround to prevent this non-sense.
+  if (!copy.recompose().empty() || base.recompose() == this->recompose()) {
+    this->data = std::move(copy.data);
+    this->parse();
+  }
+
+  return *this;
 }
 
 auto URI::from_fragment(std::string_view fragment) -> URI {
