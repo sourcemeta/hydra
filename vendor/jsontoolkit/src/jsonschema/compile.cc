@@ -1,8 +1,10 @@
 #include <sourcemeta/jsontoolkit/jsonschema.h>
 #include <sourcemeta/jsontoolkit/jsonschema_compile.h>
 
-#include <cassert> // assert
-#include <utility> // std::move
+#include <algorithm> // std::move, std::any_of
+#include <cassert>   // assert
+#include <iterator>  // std::back_inserter
+#include <utility>   // std::move
 
 #include "compile_helpers.h"
 
@@ -24,9 +26,9 @@ auto compile_subschema(
     if (schema_context.schema.to_boolean()) {
       return {};
     } else {
-      return {make<SchemaCompilerAssertionFail>(
-          schema_context, dynamic_context, SchemaCompilerValueNone{}, {},
-          SchemaCompilerTargetType::Instance)};
+      return {make<SchemaCompilerAssertionFail>(true, context, schema_context,
+                                                dynamic_context,
+                                                SchemaCompilerValueNone{})};
     }
   }
 
@@ -41,7 +43,7 @@ auto compile_subschema(
              {schema_context.relative_pointer.concat({keyword}),
               schema_context.schema, entry.vocabularies, schema_context.base,
               // TODO: This represents a copy
-              schema_context.labels},
+              schema_context.labels, schema_context.references},
              {keyword, dynamic_context.base_schema_location,
               dynamic_context.base_instance_location})) {
       // Just a sanity check to ensure every keyword location is indeed valid
@@ -68,9 +70,8 @@ auto compile(const JSON &schema, const SchemaWalker &walker,
 
   // Make sure the input schema is bundled, otherwise we won't be able to
   // resolve remote references here
-  const JSON result{
-      bundle(schema, walker, resolver, BundleOptions::Default, default_dialect)
-          .get()};
+  const JSON result{bundle(schema, walker, resolver, BundleOptions::Default,
+                           default_dialect)};
 
   // Perform framing to resolve references later on
   ReferenceFrame frame;
@@ -80,7 +81,7 @@ auto compile(const JSON &schema, const SchemaWalker &walker,
       .wait();
 
   const std::string base{
-      URI{sourcemeta::jsontoolkit::id(
+      URI{sourcemeta::jsontoolkit::identify(
               schema, resolver,
               sourcemeta::jsontoolkit::IdentificationStrategy::Strict,
               default_dialect)
@@ -92,14 +93,81 @@ auto compile(const JSON &schema, const SchemaWalker &walker,
   assert(frame.contains({ReferenceType::Static, base}));
   const auto root_frame_entry{frame.at({ReferenceType::Static, base})};
 
-  return compile_subschema(
-      {result, frame, references, walker, resolver, compiler},
-      {empty_pointer,
-       result,
-       vocabularies(schema, resolver, root_frame_entry.dialect).get(),
-       root_frame_entry.base,
-       {}},
-      relative_dynamic_context, root_frame_entry.dialect);
+  // Check whether dynamic referencing takes places in this schema. If not,
+  // we can avoid the overhead of keeping track of dynamics scopes, etc
+  bool uses_dynamic_scopes{false};
+  for (const auto &reference : references) {
+    if (reference.first.first == ReferenceType::Dynamic) {
+      uses_dynamic_scopes = true;
+      break;
+    }
+  }
+
+  const sourcemeta::jsontoolkit::SchemaCompilerContext context{
+      result,   frame,    references,         walker,
+      resolver, compiler, uses_dynamic_scopes};
+  sourcemeta::jsontoolkit::SchemaCompilerSchemaContext schema_context{
+      empty_pointer,
+      result,
+      vocabularies(schema, resolver, root_frame_entry.dialect).get(),
+      root_frame_entry.base,
+      {},
+      {}};
+  const sourcemeta::jsontoolkit::SchemaCompilerDynamicContext dynamic_context{
+      relative_dynamic_context};
+  sourcemeta::jsontoolkit::SchemaCompilerTemplate compiler_template;
+
+  if (uses_dynamic_scopes &&
+      (schema_context.vocabularies.contains(
+           "https://json-schema.org/draft/2019-09/vocab/core") ||
+       schema_context.vocabularies.contains(
+           "https://json-schema.org/draft/2020-12/vocab/core"))) {
+    for (const auto &entry : frame) {
+      // We are only trying to find dynamic anchors
+      if (entry.second.type != ReferenceEntryType::Anchor ||
+          entry.first.first != ReferenceType::Dynamic) {
+        continue;
+      }
+
+      const URI anchor_uri{entry.first.second};
+      std::ostringstream name;
+      name << anchor_uri.recompose_without_fragment().value_or("");
+      name << '#';
+      name << anchor_uri.fragment().value_or("");
+      const auto label{std::hash<std::string>{}(name.str())};
+      schema_context.labels.insert(label);
+
+      // Configure a schema context that corresponds to the
+      // schema resource that we are precompiling
+      auto subschema{get(result, entry.second.pointer)};
+      auto nested_vocabularies{
+          vocabularies(subschema, resolver, entry.second.dialect).get()};
+      const sourcemeta::jsontoolkit::SchemaCompilerSchemaContext
+          nested_schema_context{entry.second.relative_pointer,
+                                std::move(subschema),
+                                std::move(nested_vocabularies),
+                                entry.second.base,
+                                {},
+                                {}};
+
+      compiler_template.push_back(make<SchemaCompilerControlMark>(
+          true, context, nested_schema_context, dynamic_context,
+          SchemaCompilerValueUnsignedInteger{label},
+          compile(context, nested_schema_context, relative_dynamic_context,
+                  empty_pointer, empty_pointer, entry.first.second)));
+    }
+  }
+
+  auto children{compile_subschema(context, schema_context, dynamic_context,
+                                  root_frame_entry.dialect)};
+  if (compiler_template.empty()) {
+    return children;
+  } else {
+    compiler_template.reserve(compiler_template.size() + children.size());
+    std::move(children.begin(), children.end(),
+              std::back_inserter(compiler_template));
+    return compiler_template;
+  }
 }
 
 auto compile(const SchemaCompilerContext &context,
@@ -116,6 +184,22 @@ auto compile(const SchemaCompilerContext &context,
                 .canonicalize()
                 .recompose()};
 
+  // Otherwise the recursion attempt is non-sense
+  if (!context.frame.contains({ReferenceType::Static, destination})) {
+    throw SchemaReferenceError(
+        destination, schema_context.relative_pointer,
+        "The target of the reference does not exist in the schema");
+  }
+
+  const auto &entry{context.frame.at({ReferenceType::Static, destination})};
+  const auto &new_schema{get(context.root, entry.pointer)};
+
+  if (!is_schema(new_schema)) {
+    throw SchemaReferenceError(
+        destination, schema_context.relative_pointer,
+        "The target of the reference is not a valid schema");
+  }
+
   const Pointer destination_pointer{
       dynamic_context.keyword.empty()
           ? dynamic_context.base_schema_location.concat(schema_suffix)
@@ -123,26 +207,77 @@ auto compile(const SchemaCompilerContext &context,
                 .concat({dynamic_context.keyword})
                 .concat(schema_suffix)};
 
-  // Otherwise the recursion attempt is non-sense
-  if (!context.frame.contains({ReferenceType::Static, destination})) {
-    throw SchemaReferenceError(
-        destination, destination_pointer,
-        "The target of the reference does not exist in the schema");
-  }
-
-  const auto &entry{context.frame.at({ReferenceType::Static, destination})};
-
-  const auto &new_schema{get(context.root, entry.pointer)};
   return compile_subschema(
       context,
       {entry.relative_pointer, new_schema,
        vocabularies(new_schema, context.resolver, entry.dialect).get(),
        entry.base,
        // TODO: This represents a copy
-       schema_context.labels},
+       schema_context.labels, schema_context.references},
       {dynamic_context.keyword, destination_pointer,
        dynamic_context.base_instance_location.concat(instance_suffix)},
       entry.dialect);
+}
+
+SchemaCompilerErrorTraceOutput::SchemaCompilerErrorTraceOutput(
+    const JSON &instance, const WeakPointer &base)
+    : instance_{instance}, base_{base} {}
+
+auto SchemaCompilerErrorTraceOutput::begin() const -> const_iterator {
+  return this->output.begin();
+}
+
+auto SchemaCompilerErrorTraceOutput::end() const -> const_iterator {
+  return this->output.end();
+}
+
+auto SchemaCompilerErrorTraceOutput::cbegin() const -> const_iterator {
+  return this->output.cbegin();
+}
+
+auto SchemaCompilerErrorTraceOutput::cend() const -> const_iterator {
+  return this->output.cend();
+}
+
+auto SchemaCompilerErrorTraceOutput::operator()(
+    const SchemaCompilerEvaluationType type, const bool result,
+    const SchemaCompilerTemplate::value_type &step,
+    const WeakPointer &evaluate_path, const WeakPointer &instance_location,
+    const JSON &annotation) -> void {
+  assert(!evaluate_path.empty());
+  assert(evaluate_path.back().is_property());
+
+  if (type == sourcemeta::jsontoolkit::SchemaCompilerEvaluationType::Pre) {
+    assert(result);
+    const auto &keyword{evaluate_path.back().to_property()};
+    // To ease the output
+    if (keyword == "oneOf" || keyword == "not") {
+      this->mask.insert(evaluate_path);
+    }
+  } else if (type ==
+                 sourcemeta::jsontoolkit::SchemaCompilerEvaluationType::Post &&
+             this->mask.contains(evaluate_path)) {
+    this->mask.erase(evaluate_path);
+  }
+
+  // Ignore successful or masked steps
+  if (result || std::any_of(this->mask.cbegin(), this->mask.cend(),
+                            [&evaluate_path](const auto &entry) {
+                              return evaluate_path.starts_with(entry);
+                            })) {
+    return;
+  }
+
+  auto effective_evaluate_path{evaluate_path.resolve_from(this->base_)};
+  if (effective_evaluate_path.empty()) {
+    return;
+  }
+
+  this->output.push_back(
+      {sourcemeta::jsontoolkit::describe(result, step, evaluate_path,
+                                         instance_location, this->instance_,
+                                         annotation),
+       instance_location, std::move(effective_evaluate_path)});
 }
 
 } // namespace sourcemeta::jsontoolkit

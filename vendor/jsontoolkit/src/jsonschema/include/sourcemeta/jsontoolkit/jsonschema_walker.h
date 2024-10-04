@@ -1,16 +1,13 @@
 #ifndef SOURCEMETA_JSONTOOLKIT_JSONSCHEMA_WALKER_H_
 #define SOURCEMETA_JSONTOOLKIT_JSONSCHEMA_WALKER_H_
 
-#if defined(__EMSCRIPTEN__) || defined(__Unikraft__)
-#define SOURCEMETA_JSONTOOLKIT_JSONSCHEMA_EXPORT
-#else
 #include "jsonschema_export.h"
-#endif
 
 #include <sourcemeta/jsontoolkit/json.h>
 #include <sourcemeta/jsontoolkit/jsonpointer.h>
 #include <sourcemeta/jsontoolkit/jsonschema_resolver.h>
 
+#include <cstdint>     // std::uint8_t
 #include <functional>  // std::function
 #include <map>         // std::map
 #include <optional>    // std::optional
@@ -30,7 +27,7 @@ namespace sourcemeta::jsontoolkit {
 #endif
 /// @ingroup jsonschema
 /// Determines the possible states of a schema walk strategy
-enum class SchemaWalkerStrategy {
+enum class SchemaWalkerStrategy : std::uint8_t {
   /// The JSON Schema keyword is not an applicator
   None,
   /// The JSON Schema keyword is an applicator that potentially
@@ -180,6 +177,8 @@ private:
 /// according to the applicators understood by the provided walker function.
 /// This walker traverse over the first-level of subschemas of the JSON Schema
 /// definition, ignoring the top-level schema and reporting back each subschema.
+///
+/// Note that we don't promise any specific walking ordering.
 ///
 /// For example:
 ///

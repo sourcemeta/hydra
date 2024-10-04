@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 project(jsontoolkit VERSION 2.0.0 LANGUAGES CXX
-  DESCRIPTION "The swiss-army knife for JSON programming in C++"
+  DESCRIPTION "The high-performance JSON Schema evaluator and related JSON utilities for modern C++"
   HOMEPAGE_URL "https://jsontoolkit.sourcemeta.com")
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 include(vendor/noa/cmake/noa.cmake)
@@ -9,9 +9,11 @@ include(vendor/noa/cmake/noa.cmake)
 option(JSONTOOLKIT_URI "Build the JSON Toolkit URI library" ON)
 option(JSONTOOLKIT_JSON "Build the JSON Toolkit JSON library" ON)
 option(JSONTOOLKIT_JSONSCHEMA "Build the JSON Toolkit JSON Schema library" ON)
+option(JSONTOOLKIT_EVALUATOR "Build the JSON Toolkit JSON Schema evaluator library" ON)
 option(JSONTOOLKIT_JSONPOINTER "Build the JSON Toolkit JSON Pointer library" ON)
 option(JSONTOOLKIT_JSONL "Build the JSON Toolkit JSONL library" ON)
 option(JSONTOOLKIT_TESTS "Build the JSON Toolkit tests" OFF)
+option(JSONTOOLKIT_BENCHMARK "Build the JSON Toolkit benchmarks" OFF)
 option(JSONTOOLKIT_DOCS "Build the JSON Toolkit docs" OFF)
 option(JSONTOOLKIT_INSTALL "Install the JSON Toolkit library" ON)
 option(JSONTOOLKIT_ADDRESS_SANITIZER "Build JSON Toolkit with an address sanitizer" OFF)
@@ -47,7 +49,14 @@ if(JSONTOOLKIT_JSON AND JSONTOOLKIT_JSONPOINTER)
   add_subdirectory(src/jsonpointer)
 endif()
 
-if(JSONTOOLKIT_JSON AND JSONTOOLKIT_JSONSCHEMA)
+if(JSONTOOLKIT_URI AND JSONTOOLKIT_JSON AND
+   JSONTOOLKIT_JSONPOINTER AND JSONTOOLKIT_EVALUATOR)
+  add_subdirectory(src/evaluator)
+endif()
+
+if(JSONTOOLKIT_URI AND JSONTOOLKIT_JSON AND
+   JSONTOOLKIT_JSONPOINTER AND JSONTOOLKIT_EVALUATOR AND
+   JSONTOOLKIT_JSONSCHEMA)
   add_subdirectory(src/jsonschema)
 endif()
 
@@ -69,6 +78,7 @@ endif()
 if(PROJECT_IS_TOP_LEVEL)
   noa_target_clang_format(SOURCES
     src/*.h src/*.cc
+    benchmark/*.h benchmark/*.cc
     test/*.h test/*.cc)
   noa_target_clang_tidy(SOURCES
     src/*.h src/*.cc)
@@ -87,12 +97,19 @@ if(JSONTOOLKIT_TESTS)
     add_subdirectory(test/json)
   endif()
 
-  if(JSONTOOLKIT_JSON AND JSONTOOLKIT_JSONSCHEMA)
-    add_subdirectory(test/jsonschema)
-  endif()
-
   if(JSONTOOLKIT_JSON AND JSONTOOLKIT_JSONPOINTER)
     add_subdirectory(test/jsonpointer)
+  endif()
+
+  if(JSONTOOLKIT_URI AND JSONTOOLKIT_JSON AND
+     JSONTOOLKIT_JSONPOINTER AND JSONTOOLKIT_EVALUATOR)
+    add_subdirectory(test/evaluator)
+  endif()
+
+  if(JSONTOOLKIT_URI AND JSONTOOLKIT_JSON AND
+     JSONTOOLKIT_JSONPOINTER AND JSONTOOLKIT_EVALUATOR AND
+     JSONTOOLKIT_JSONSCHEMA)
+    add_subdirectory(test/jsonschema)
   endif()
 
   if(JSONTOOLKIT_JSON AND JSONTOOLKIT_JSONL)
@@ -105,5 +122,10 @@ if(JSONTOOLKIT_TESTS)
     if(NOT JSONTOOLKIT_ADDRESS_SANITIZER AND NOT JSONTOOLKIT_UNDEFINED_SANITIZER)
       add_subdirectory(test/packaging)
     endif()
+  endif()
+
+  if(JSONTOOLKIT_BENCHMARK)
+    find_package(GoogleBenchmark REQUIRED)
+    add_subdirectory(benchmark)
   endif()
 endif()
