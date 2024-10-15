@@ -79,7 +79,7 @@ jobs:
       CXX: ${{ matrix.platform.cxx }}
     steps:
       - name: Install ClangFormat
-        run: pip install clang-format==19.1.0
+        run: pipx install clang-format==19.1.0
 
       - name: Install dependencies (GNU/Linux)
         if: runner.os == 'linux'
