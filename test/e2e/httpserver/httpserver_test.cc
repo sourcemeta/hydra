@@ -943,6 +943,31 @@ TEST(e2e_HTTP_Server, static_document_get) {
   EXPECT_EQ(result.str(), "{ \"foo\": \"bar\" }\n");
 }
 
+TEST(e2e_HTTP_Server, static_document_get_with_code_override) {
+  sourcemeta::hydra::http::ClientRequest request{
+      std::string{HTTPSERVER_BASE_URL()} + "/static-404/document.json"};
+  request.method(sourcemeta::hydra::http::Method::GET);
+  request.capture();
+  sourcemeta::hydra::http::ClientResponse response{request.send().get()};
+  EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::NOT_FOUND);
+  EXPECT_TRUE(response.header("content-length").has_value());
+  EXPECT_EQ(response.header("content-length").value(), "37");
+  EXPECT_TRUE(response.header("content-type").has_value());
+  EXPECT_EQ(response.header("content-type").value(), "application/json");
+  EXPECT_TRUE(response.header("last-modified").has_value());
+  EXPECT_TRUE(response.header("etag").has_value());
+  EXPECT_EQ(response.header("etag").value(),
+            "\"cef8a5c5d7fcfb9cf601bf3a146a47e7\"");
+
+  std::ostringstream result;
+  std::copy(
+      std::istreambuf_iterator<std::ostringstream::char_type>(response.body()),
+      std::istreambuf_iterator<std::ostringstream::char_type>(),
+      std::ostreambuf_iterator<std::ostringstream::char_type>(result));
+
+  EXPECT_EQ(result.str(), "{ \"foo\": \"bar\" }\n");
+}
+
 TEST(e2e_HTTP_Server, static_document_head) {
   sourcemeta::hydra::http::ClientRequest request{
       std::string{HTTPSERVER_BASE_URL()} + "/static/document.json"};
