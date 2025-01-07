@@ -64,6 +64,11 @@ TEST(HTTP_MIME, html_lower) {
   EXPECT_EQ(sourcemeta::hydra::mime_type(file_path), "text/html");
 }
 
+TEST(HTTP_MIME, javascript_lower) {
+  const std::filesystem::path file_path{"path/to/example.js"};
+  EXPECT_EQ(sourcemeta::hydra::mime_type(file_path), "text/javascript");
+}
+
 TEST(HTTP_MIME, unknown) {
   const std::filesystem::path file_path{"path/to/example.foobar"};
   EXPECT_EQ(sourcemeta::hydra::mime_type(file_path),
