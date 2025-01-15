@@ -17,8 +17,11 @@ auto definitions_keyword(const std::map<std::string, bool> &vocabularies)
   }
 
   if (vocabularies.contains("http://json-schema.org/draft-07/schema#") ||
+      vocabularies.contains("http://json-schema.org/draft-07/hyper-schema#") ||
       vocabularies.contains("http://json-schema.org/draft-06/schema#") ||
-      vocabularies.contains("http://json-schema.org/draft-04/schema#")) {
+      vocabularies.contains("http://json-schema.org/draft-06/hyper-schema#") ||
+      vocabularies.contains("http://json-schema.org/draft-04/schema#") ||
+      vocabularies.contains("http://json-schema.org/draft-04/hyper-schema#")) {
     return "definitions";
   }
 
@@ -57,8 +60,10 @@ auto bundle_schema(sourcemeta::jsontoolkit::JSON &root,
                    const sourcemeta::jsontoolkit::SchemaResolver &resolver,
                    const std::optional<std::string> &default_dialect) -> void {
   frame.analyse(subschema, walker, resolver, default_dialect);
-
-  for (const auto &[key, reference] : frame.references()) {
+  // Otherwise, given recursion, we would be modifying the
+  // references list *while* looping on it
+  const auto references_copy = frame.references();
+  for (const auto &[key, reference] : references_copy) {
     if (frame.traverse(reference.destination).has_value() ||
 
         // We don't want to bundle official schemas, as we can expect
@@ -127,82 +132,26 @@ auto bundle_schema(sourcemeta::jsontoolkit::JSON &root,
   }
 }
 
-auto remove_identifiers(sourcemeta::jsontoolkit::JSON &schema,
-                        const sourcemeta::jsontoolkit::SchemaWalker &walker,
-                        const sourcemeta::jsontoolkit::SchemaResolver &resolver,
-                        const std::optional<std::string> &default_dialect)
-    -> void {
-  // (1) Re-frame before changing anything
-  sourcemeta::jsontoolkit::Frame frame;
-  frame.analyse(schema, walker, resolver, default_dialect);
-
-  // (2) Remove all identifiers and anchors
-  for (const auto &entry : sourcemeta::jsontoolkit::SchemaIterator{
-           schema, walker, resolver, default_dialect}) {
-    auto &subschema{sourcemeta::jsontoolkit::get(schema, entry.pointer)};
-    if (subschema.is_boolean()) {
-      continue;
-    }
-
-    assert(entry.base_dialect.has_value());
-    sourcemeta::jsontoolkit::anonymize(subschema, entry.base_dialect.value());
-
-    if (entry.vocabularies.contains(
-            "https://json-schema.org/draft/2020-12/vocab/core")) {
-      subschema.erase("$anchor");
-      subschema.erase("$dynamicAnchor");
-    }
-
-    if (entry.vocabularies.contains(
-            "https://json-schema.org/draft/2019-09/vocab/core")) {
-      subschema.erase("$anchor");
-      subschema.erase("$recursiveAnchor");
-    }
-  }
-
-  // (3) Fix-up reference based on pointers from the root
-  for (const auto &[key, reference] : frame.references()) {
-    // We don't want to bundle official schemas, as we can expect
-    // virtually all implementations to understand them out of the box
-    if (is_official_metaschema_reference(key.second, reference.destination)) {
-      continue;
-    }
-
-    const auto result{frame.traverse(reference.destination)};
-    assert(result.has_value());
-    sourcemeta::jsontoolkit::set(
-        schema, key.second,
-        sourcemeta::jsontoolkit::JSON{
-            sourcemeta::jsontoolkit::to_uri(result.value().get().pointer)
-                .recompose()});
-  }
-}
-
 } // namespace
 
 namespace sourcemeta::jsontoolkit {
 
 auto bundle(sourcemeta::jsontoolkit::JSON &schema, const SchemaWalker &walker,
-            const SchemaResolver &resolver, const BundleOptions options,
+            const SchemaResolver &resolver,
             const std::optional<std::string> &default_dialect) -> void {
   const auto vocabularies{
       sourcemeta::jsontoolkit::vocabularies(schema, resolver, default_dialect)};
   sourcemeta::jsontoolkit::Frame frame;
   bundle_schema(schema, definitions_keyword(vocabularies), schema, frame,
                 walker, resolver, default_dialect);
-
-  if (options == BundleOptions::WithoutIdentifiers) {
-    remove_identifiers(schema, walker, resolver, default_dialect);
-  }
 }
 
 auto bundle(const sourcemeta::jsontoolkit::JSON &schema,
             const SchemaWalker &walker, const SchemaResolver &resolver,
-            const BundleOptions options,
             const std::optional<std::string> &default_dialect)
     -> sourcemeta::jsontoolkit::JSON {
   sourcemeta::jsontoolkit::JSON copy = schema;
-  bundle(copy, walker, resolver, options, default_dialect);
+  bundle(copy, walker, resolver, default_dialect);
   return copy;
 }
 

@@ -1,6 +1,6 @@
 vendorpull https://github.com/sourcemeta/vendorpull 70342aaf458e6cb80baeb5b718901075fc42ede6
 noa https://github.com/sourcemeta/noa caad2e1ceedf9fd1a18686a6a6d1e2b9757ead75
-jsontoolkit https://github.com/sourcemeta/jsontoolkit 1a6da6d690f630010cdc6ef83e23aac1794deadf
+jsontoolkit https://github.com/sourcemeta/jsontoolkit 93a921d0f1e99bfdfe14bfd4d2acf5981294080b
 bearssl https://www.bearssl.org/git/BearSSL 8ef7680081c61b486622f2d983c0d3d21e83caad
 zlib https://github.com/madler/zlib 51b7f2abdade71cd9bb0e7a373ef2610ec6f9daf
 uwebsockets https://github.com/uNetworking/uWebSockets v20.71.0
