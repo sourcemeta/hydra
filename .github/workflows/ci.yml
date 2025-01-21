@@ -126,6 +126,12 @@ jobs:
       - run: cmake --build ./build --config Release --parallel 4
       - run: >
           cmake --install ./build --prefix ./build/dist --config Release --verbose
+          --component sourcemeta_noa
+      - run: >
+          cmake --install ./build --prefix ./build/dist --config Release --verbose
+          --component sourcemeta_noa_dev
+      - run: >
+          cmake --install ./build --prefix ./build/dist --config Release --verbose
           --component sourcemeta_jsontoolkit
       - run: >
           cmake --install ./build --prefix ./build/dist --config Release --verbose
@@ -171,7 +177,7 @@ jobs:
 
       - name: Tests (Windows)
         # TODO: Run Bucket MinIO tests on Windows
-        run: cd ./build && ctest --build-config Release --exclude-regex e2e_Bucket --output-on-failure --parallel
+        run: cd ./build && ctest --build-config Release --exclude-regex hydra.bucket_e2e --output-on-failure --parallel
         if: runner.os == 'windows'
         env:
           SOURCEMETA_HYDRA_TEST_HTTPCLIENT_BASE_URL: 'http://localhost:${{ env.HTTPCLIENT_STUB_PORT }}'
