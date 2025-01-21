@@ -1,11 +1,7 @@
-add_executable(sourcemeta_hydra_crypto_unit
-  uuid_test.cc base64_test.cc
-  md5_test.cc sha256_test.cc hmac_sha256_test.cc)
-noa_add_default_options(PRIVATE sourcemeta_hydra_crypto_unit)
-target_link_libraries(sourcemeta_hydra_crypto_unit
-  PRIVATE GTest::gtest GTest::gmock GTest::gtest_main)
+noa_googletest(NAMESPACE sourcemeta PROJECT hydra NAME crypto
+  FOLDER "Hydra/Crypto"
+  SOURCES uuid_test.cc base64_test.cc
+    md5_test.cc sha256_test.cc hmac_sha256_test.cc)
+
 target_link_libraries(sourcemeta_hydra_crypto_unit
   PRIVATE sourcemeta::hydra::crypto)
-set_target_properties(sourcemeta_hydra_crypto_unit
-  PROPERTIES FOLDER "Hydra/Crypto")
-gtest_discover_tests(sourcemeta_hydra_crypto_unit)
