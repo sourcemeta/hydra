@@ -2,14 +2,14 @@
 
 #include <random>
 
+#include <sourcemeta/core/json.h>
 #include <sourcemeta/hydra/bucket.h>
-#include <sourcemeta/jsontoolkit/json.h>
 
 #include "environment.h"
 
 TEST(e2e_Bucket_JSON, upsert_example_9999) {
-  const sourcemeta::jsontoolkit::JSON document =
-      sourcemeta::jsontoolkit::parse(R"JSON({ "foo": 9999 })JSON");
+  const sourcemeta::core::JSON document =
+      sourcemeta::core::parse(R"JSON({ "foo": 9999 })JSON");
 
   sourcemeta::hydra::Bucket bucket{BUCKET_BASE_URL(), BUCKET_REGION(),
                                    BUCKET_ACCESS_KEY(), BUCKET_SECRET_KEY()};

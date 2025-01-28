@@ -55,7 +55,7 @@ TEST(Bucket_aws_sigv4, complete_example_1) {
 
   const auto headers{sourcemeta::hydra::aws_sigv4(
       sourcemeta::hydra::http::Method::GET,
-      sourcemeta::jsontoolkit::URI{
+      sourcemeta::core::URI{
           "http://localhost:9000/schemas/data/foo/bar/v1.json"},
       "intelligence-api", "12345678", "us-east-1",
       "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",

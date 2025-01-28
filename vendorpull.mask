@@ -1,15 +1,11 @@
 assets
 doxygen
 test
-vendor/googletest
-vendor/googletest.mask
 vendor/bearssl.mask
 vendor/uwebsockets.mask
 vendor/vendorpull
-vendor/jsontoolkit
-vendor/noa
-cmake/FindJSONToolkit.cmake
-cmake/FindGoogleTest.cmake
+vendor/core
+cmake/FindCore.cmake
 .ackrc
 .editorconfig
 Brewfile

@@ -4,9 +4,7 @@ Getting Started
 @tableofcontents
 
 Hydra is a convenience networking library for modern C++. It targets C++20 and
-supports the Clang, GCC, and MSVC compilers on macOS, GNU/Linux, and Windows,
-and it is designed to integrate well with other Sourcemeta libraries like [JSON
-Toolkit](https://jsontoolkit.sourcemeta.com).
+supports the Clang, GCC, and MSVC compilers on macOS, GNU/Linux, and Windows.
 
 Installation
 ------------

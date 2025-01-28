@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
+#include <sourcemeta/core/json.h>
 #include <sourcemeta/hydra/bucket.h>
-#include <sourcemeta/jsontoolkit/json.h>
 
 #include "environment.h"
 
@@ -17,8 +17,8 @@ TEST(e2e_Bucket_JSON, no_cache_single) {
   sourcemeta::hydra::Bucket bucket{BUCKET_BASE_URL(), BUCKET_REGION(),
                                    BUCKET_ACCESS_KEY(), BUCKET_SECRET_KEY()};
 
-  const sourcemeta::jsontoolkit::JSON document =
-      sourcemeta::jsontoolkit::parse(R"JSON({ "foo": 1 })JSON");
+  const sourcemeta::core::JSON document =
+      sourcemeta::core::parse(R"JSON({ "foo": 1 })JSON");
   bucket.upsert_json("/data/no_cache_single.json", document).wait();
 
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response{
@@ -32,8 +32,8 @@ TEST(e2e_Bucket_JSON, no_cache_idempotent) {
   sourcemeta::hydra::Bucket bucket{BUCKET_BASE_URL(), BUCKET_REGION(),
                                    BUCKET_ACCESS_KEY(), BUCKET_SECRET_KEY()};
 
-  const sourcemeta::jsontoolkit::JSON document =
-      sourcemeta::jsontoolkit::parse(R"JSON({ "foo": 1 })JSON");
+  const sourcemeta::core::JSON document =
+      sourcemeta::core::parse(R"JSON({ "foo": 1 })JSON");
   bucket.upsert_json("/data/no_cache_idempotent.json", document).wait();
 
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_1{
@@ -65,8 +65,8 @@ TEST(e2e_Bucket_JSON, cache_none_with_policy) {
       BUCKET_BASE_URL(), BUCKET_REGION(), BUCKET_ACCESS_KEY(),
       BUCKET_SECRET_KEY(), sourcemeta::hydra::BucketCachePolicy::Indefinitely};
 
-  const sourcemeta::jsontoolkit::JSON document =
-      sourcemeta::jsontoolkit::parse(R"JSON({ "foo": 1 })JSON");
+  const sourcemeta::core::JSON document =
+      sourcemeta::core::parse(R"JSON({ "foo": 1 })JSON");
   bucket.upsert_json("/data/cache_none_with_policy.json", document).wait();
 
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_1{
@@ -102,8 +102,8 @@ TEST(e2e_Bucket_JSON, cache_indefinitely) {
       sourcemeta::hydra::BucketCachePolicy::Indefinitely,
       100000};
 
-  const sourcemeta::jsontoolkit::JSON document =
-      sourcemeta::jsontoolkit::parse(R"JSON({ "foo": 1 })JSON");
+  const sourcemeta::core::JSON document =
+      sourcemeta::core::parse(R"JSON({ "foo": 1 })JSON");
   bucket.upsert_json("/data/cache_indefinitely.json", document).wait();
 
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_1{
@@ -138,8 +138,8 @@ TEST(e2e_Bucket_JSON, cache_etag_match) {
                                    sourcemeta::hydra::BucketCachePolicy::ETag,
                                    100000};
 
-  const sourcemeta::jsontoolkit::JSON document =
-      sourcemeta::jsontoolkit::parse(R"JSON({ "foo": 1 })JSON");
+  const sourcemeta::core::JSON document =
+      sourcemeta::core::parse(R"JSON({ "foo": 1 })JSON");
   bucket.upsert_json("/data/cache_etag_match.json", document).wait();
 
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_1{
@@ -174,8 +174,8 @@ TEST(e2e_Bucket_JSON, cache_etag_mismatch) {
                                    sourcemeta::hydra::BucketCachePolicy::ETag,
                                    100000};
 
-  const sourcemeta::jsontoolkit::JSON document_1 =
-      sourcemeta::jsontoolkit::parse("{ \"value\": 1 }");
+  const sourcemeta::core::JSON document_1 =
+      sourcemeta::core::parse("{ \"value\": 1 }");
   bucket.upsert_json("/data/cache_etag_mismatch.json", document_1).wait();
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_1{
       bucket.fetch_json("/data/cache_etag_mismatch.json").get()};
@@ -186,8 +186,8 @@ TEST(e2e_Bucket_JSON, cache_etag_mismatch) {
   EXPECT_TRUE(response_1.value().data.at("value").is_integer());
   EXPECT_FALSE(response_1.value().cache_hit);
 
-  const sourcemeta::jsontoolkit::JSON document_2 =
-      sourcemeta::jsontoolkit::parse("{ \"value\": 2 }");
+  const sourcemeta::core::JSON document_2 =
+      sourcemeta::core::parse("{ \"value\": 2 }");
   bucket.upsert_json("/data/cache_etag_mismatch.json", document_2).wait();
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_2{
       bucket.fetch_json("/data/cache_etag_mismatch.json").get()};

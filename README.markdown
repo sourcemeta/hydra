@@ -1,8 +1,6 @@
 ![Hydra](./assets/banner.png)
 
-Hydra is a convenience networking library for modern C++. It is designed to
-integrate well with other Sourcemeta libraries like [JSON
-Toolkit](https://jsontoolkit.sourcemeta.com).
+Hydra is a convenience networking library for modern C++.
 
 Documentation
 -------------

@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
+#include <sourcemeta/core/json.h>
 #include <sourcemeta/hydra/bucket.h>
-#include <sourcemeta/jsontoolkit/json.h>
 
 #include "environment.h"
 
@@ -12,8 +12,8 @@ TEST(e2e_Bucket_JSON, fetch_or_upsert_simple) {
   std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_1{
       bucket
           .fetch_or_upsert("/data/fetch_or_upsert_simple.json",
-                           []() -> sourcemeta::jsontoolkit::JSON {
-                             return sourcemeta::jsontoolkit::parse(
+                           []() -> sourcemeta::core::JSON {
+                             return sourcemeta::core::parse(
                                  R"JSON({ "hello": "world" })JSON");
                            })
           .get()};
@@ -28,8 +28,8 @@ TEST(e2e_Bucket_JSON, fetch_or_upsert_simple) {
   std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_2{
       bucket
           .fetch_or_upsert("/data/fetch_or_upsert_simple.json",
-                           []() -> sourcemeta::jsontoolkit::JSON {
-                             return sourcemeta::jsontoolkit::parse(
+                           []() -> sourcemeta::core::JSON {
+                             return sourcemeta::core::parse(
                                  R"JSON({ "test": "xxxxxxxxxx" })JSON");
                            })
           .get()};
