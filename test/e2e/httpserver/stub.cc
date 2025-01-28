@@ -1,6 +1,6 @@
+#include <sourcemeta/core/json.h>
+#include <sourcemeta/core/jsonschema.h>
 #include <sourcemeta/hydra/httpserver.h>
-#include <sourcemeta/jsontoolkit/json.h>
-#include <sourcemeta/jsontoolkit/jsonschema.h>
 
 #include <cassert>   // assert
 #include <cstdlib>   // EXIT_FAILURE
@@ -22,13 +22,12 @@ static auto on_echo(const sourcemeta::hydra::http::ServerLogger &logger,
     return;
   }
 
-  sourcemeta::jsontoolkit::JSON document{
-      sourcemeta::jsontoolkit::JSON::make_object()};
+  sourcemeta::core::JSON document{sourcemeta::core::JSON::make_object()};
 
   std::ostringstream method;
   method << request.method();
-  document.assign("method", sourcemeta::jsontoolkit::JSON{method.str()});
-  document.assign("path", sourcemeta::jsontoolkit::JSON{request.path()});
+  document.assign("method", sourcemeta::core::JSON{method.str()});
+  document.assign("path", sourcemeta::core::JSON{request.path()});
 
   response.status(sourcemeta::hydra::http::Status::OK);
   assert(response.status() == sourcemeta::hydra::http::Status::OK);
@@ -93,12 +92,11 @@ static auto on_encodings(const sourcemeta::hydra::http::ServerLogger &,
                          const sourcemeta::hydra::http::ServerRequest &request,
                          sourcemeta::hydra::http::ServerResponse &response)
     -> void {
-  sourcemeta::jsontoolkit::JSON document{
-      sourcemeta::jsontoolkit::JSON::make_array()};
+  sourcemeta::core::JSON document{sourcemeta::core::JSON::make_array()};
   const auto accept_encoding{request.header_list("accept-encoding")};
   if (accept_encoding.has_value()) {
     for (const auto &encoding : accept_encoding.value()) {
-      document.push_back(sourcemeta::jsontoolkit::JSON{encoding.first});
+      document.push_back(sourcemeta::core::JSON{encoding.first});
     }
   }
 
@@ -158,16 +156,16 @@ static auto on_schema(const sourcemeta::hydra::http::ServerLogger &,
                       sourcemeta::hydra::http::ServerResponse &response)
     -> void {
   // Purposely not very well formatted
-  const auto schema = sourcemeta::jsontoolkit::parse(R"JSON({
+  const auto schema = sourcemeta::core::parse(R"JSON({
     "type": "string", "$schema": "https://json-schema.org/draft/2019-09/schema"
   })JSON");
 
   response.status(sourcemeta::hydra::http::Status::OK);
   response.header("Content-Type", "application/json");
   if (request.method() == sourcemeta::hydra::http::Method::HEAD) {
-    response.head(schema, sourcemeta::jsontoolkit::schema_format_compare);
+    response.head(schema, sourcemeta::core::schema_format_compare);
   } else {
-    response.end(schema, sourcemeta::jsontoolkit::schema_format_compare);
+    response.end(schema, sourcemeta::core::schema_format_compare);
   }
 }
 

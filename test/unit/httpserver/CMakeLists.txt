@@ -1,4 +1,4 @@
-noa_googletest(NAMESPACE sourcemeta PROJECT hydra NAME httpserver
+sourcemeta_googletest(NAMESPACE sourcemeta PROJECT hydra NAME httpserver
   FOLDER "Hydra/HTTP Server"
   SOURCES logger_test.cc)
 
