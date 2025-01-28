@@ -3,6 +3,8 @@ doxygen
 test
 vendor/bearssl.mask
 vendor/uwebsockets.mask
+vendor/curl.mask
+vendor/zlib.mask
 vendor/vendorpull
 vendor/core
 cmake/FindCore.cmake
