@@ -9,7 +9,7 @@
 
 TEST(e2e_Bucket_JSON, upsert_example_9999) {
   const sourcemeta::core::JSON document =
-      sourcemeta::core::parse(R"JSON({ "foo": 9999 })JSON");
+      sourcemeta::core::parse_json(R"JSON({ "foo": 9999 })JSON");
 
   sourcemeta::hydra::Bucket bucket{BUCKET_BASE_URL(), BUCKET_REGION(),
                                    BUCKET_ACCESS_KEY(), BUCKET_SECRET_KEY()};
