@@ -18,7 +18,7 @@ TEST(e2e_Bucket_JSON, no_cache_single) {
                                    BUCKET_ACCESS_KEY(), BUCKET_SECRET_KEY()};
 
   const sourcemeta::core::JSON document =
-      sourcemeta::core::parse(R"JSON({ "foo": 1 })JSON");
+      sourcemeta::core::parse_json(R"JSON({ "foo": 1 })JSON");
   bucket.upsert_json("/data/no_cache_single.json", document).wait();
 
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response{
@@ -33,7 +33,7 @@ TEST(e2e_Bucket_JSON, no_cache_idempotent) {
                                    BUCKET_ACCESS_KEY(), BUCKET_SECRET_KEY()};
 
   const sourcemeta::core::JSON document =
-      sourcemeta::core::parse(R"JSON({ "foo": 1 })JSON");
+      sourcemeta::core::parse_json(R"JSON({ "foo": 1 })JSON");
   bucket.upsert_json("/data/no_cache_idempotent.json", document).wait();
 
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_1{
@@ -66,7 +66,7 @@ TEST(e2e_Bucket_JSON, cache_none_with_policy) {
       BUCKET_SECRET_KEY(), sourcemeta::hydra::BucketCachePolicy::Indefinitely};
 
   const sourcemeta::core::JSON document =
-      sourcemeta::core::parse(R"JSON({ "foo": 1 })JSON");
+      sourcemeta::core::parse_json(R"JSON({ "foo": 1 })JSON");
   bucket.upsert_json("/data/cache_none_with_policy.json", document).wait();
 
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_1{
@@ -103,7 +103,7 @@ TEST(e2e_Bucket_JSON, cache_indefinitely) {
       100000};
 
   const sourcemeta::core::JSON document =
-      sourcemeta::core::parse(R"JSON({ "foo": 1 })JSON");
+      sourcemeta::core::parse_json(R"JSON({ "foo": 1 })JSON");
   bucket.upsert_json("/data/cache_indefinitely.json", document).wait();
 
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_1{
@@ -139,7 +139,7 @@ TEST(e2e_Bucket_JSON, cache_etag_match) {
                                    100000};
 
   const sourcemeta::core::JSON document =
-      sourcemeta::core::parse(R"JSON({ "foo": 1 })JSON");
+      sourcemeta::core::parse_json(R"JSON({ "foo": 1 })JSON");
   bucket.upsert_json("/data/cache_etag_match.json", document).wait();
 
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_1{
@@ -175,7 +175,7 @@ TEST(e2e_Bucket_JSON, cache_etag_mismatch) {
                                    100000};
 
   const sourcemeta::core::JSON document_1 =
-      sourcemeta::core::parse("{ \"value\": 1 }");
+      sourcemeta::core::parse_json("{ \"value\": 1 }");
   bucket.upsert_json("/data/cache_etag_mismatch.json", document_1).wait();
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_1{
       bucket.fetch_json("/data/cache_etag_mismatch.json").get()};
@@ -187,7 +187,7 @@ TEST(e2e_Bucket_JSON, cache_etag_mismatch) {
   EXPECT_FALSE(response_1.value().cache_hit);
 
   const sourcemeta::core::JSON document_2 =
-      sourcemeta::core::parse("{ \"value\": 2 }");
+      sourcemeta::core::parse_json("{ \"value\": 2 }");
   bucket.upsert_json("/data/cache_etag_mismatch.json", document_2).wait();
   const std::optional<sourcemeta::hydra::Bucket::ResponseJSON> response_2{
       bucket.fetch_json("/data/cache_etag_mismatch.json").get()};

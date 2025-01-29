@@ -13,7 +13,7 @@ TEST(e2e_Bucket_JSON, fetch_or_upsert_simple) {
       bucket
           .fetch_or_upsert("/data/fetch_or_upsert_simple.json",
                            []() -> sourcemeta::core::JSON {
-                             return sourcemeta::core::parse(
+                             return sourcemeta::core::parse_json(
                                  R"JSON({ "hello": "world" })JSON");
                            })
           .get()};
@@ -29,7 +29,7 @@ TEST(e2e_Bucket_JSON, fetch_or_upsert_simple) {
       bucket
           .fetch_or_upsert("/data/fetch_or_upsert_simple.json",
                            []() -> sourcemeta::core::JSON {
-                             return sourcemeta::core::parse(
+                             return sourcemeta::core::parse_json(
                                  R"JSON({ "test": "xxxxxxxxxx" })JSON");
                            })
           .get()};

@@ -156,7 +156,7 @@ static auto on_schema(const sourcemeta::hydra::http::ServerLogger &,
                       sourcemeta::hydra::http::ServerResponse &response)
     -> void {
   // Purposely not very well formatted
-  const auto schema = sourcemeta::core::parse(R"JSON({
+  const auto schema = sourcemeta::core::parse_json(R"JSON({
     "type": "string", "$schema": "https://json-schema.org/draft/2019-09/schema"
   })JSON");
 

@@ -19,7 +19,7 @@ TEST(e2e_HTTP_Server, echo_get) {
   EXPECT_TRUE(response.header("content-type").has_value());
   EXPECT_EQ(response.header("content-type").value(), "application/json");
   const sourcemeta::core::JSON document =
-      sourcemeta::core::parse(response.body());
+      sourcemeta::core::parse_json(response.body());
   EXPECT_TRUE(document.is_object());
   EXPECT_TRUE(document.defines("method"));
   EXPECT_TRUE(document.at("method").is_string());
@@ -48,7 +48,7 @@ TEST(e2e_HTTP_Server, echo_post) {
   EXPECT_TRUE(response.header("content-type").has_value());
   EXPECT_EQ(response.header("content-type").value(), "application/json");
   const sourcemeta::core::JSON document =
-      sourcemeta::core::parse(response.body());
+      sourcemeta::core::parse_json(response.body());
   EXPECT_TRUE(document.is_object());
   EXPECT_TRUE(document.defines("method"));
   EXPECT_TRUE(document.at("method").is_string());
@@ -68,7 +68,7 @@ TEST(e2e_HTTP_Server, echo_put) {
   EXPECT_TRUE(response.header("content-type").has_value());
   EXPECT_EQ(response.header("content-type").value(), "application/json");
   const sourcemeta::core::JSON document =
-      sourcemeta::core::parse(response.body());
+      sourcemeta::core::parse_json(response.body());
   EXPECT_TRUE(document.is_object());
   EXPECT_TRUE(document.defines("method"));
   EXPECT_TRUE(document.at("method").is_string());
@@ -88,7 +88,7 @@ TEST(e2e_HTTP_Server, echo_delete) {
   EXPECT_TRUE(response.header("content-type").has_value());
   EXPECT_EQ(response.header("content-type").value(), "application/json");
   const sourcemeta::core::JSON document =
-      sourcemeta::core::parse(response.body());
+      sourcemeta::core::parse_json(response.body());
   EXPECT_TRUE(document.is_object());
   EXPECT_TRUE(document.defines("method"));
   EXPECT_TRUE(document.at("method").is_string());
@@ -108,7 +108,7 @@ TEST(e2e_HTTP_Server, echo_connect) {
   EXPECT_TRUE(response.header("content-type").has_value());
   EXPECT_EQ(response.header("content-type").value(), "application/json");
   const sourcemeta::core::JSON document =
-      sourcemeta::core::parse(response.body());
+      sourcemeta::core::parse_json(response.body());
   EXPECT_TRUE(document.is_object());
   EXPECT_TRUE(document.defines("method"));
   EXPECT_TRUE(document.at("method").is_string());
@@ -128,7 +128,7 @@ TEST(e2e_HTTP_Server, echo_options) {
   EXPECT_TRUE(response.header("content-type").has_value());
   EXPECT_EQ(response.header("content-type").value(), "application/json");
   const sourcemeta::core::JSON document =
-      sourcemeta::core::parse(response.body());
+      sourcemeta::core::parse_json(response.body());
   EXPECT_TRUE(document.is_object());
   EXPECT_TRUE(document.defines("method"));
   EXPECT_TRUE(document.at("method").is_string());
@@ -148,7 +148,7 @@ TEST(e2e_HTTP_Server, echo_trace) {
   EXPECT_TRUE(response.header("content-type").has_value());
   EXPECT_EQ(response.header("content-type").value(), "application/json");
   const sourcemeta::core::JSON document =
-      sourcemeta::core::parse(response.body());
+      sourcemeta::core::parse_json(response.body());
   EXPECT_TRUE(document.is_object());
   EXPECT_TRUE(document.defines("method"));
   EXPECT_TRUE(document.at("method").is_string());
@@ -168,7 +168,7 @@ TEST(e2e_HTTP_Server, echo_patch) {
   EXPECT_TRUE(response.header("content-type").has_value());
   EXPECT_EQ(response.header("content-type").value(), "application/json");
   const sourcemeta::core::JSON document =
-      sourcemeta::core::parse(response.body());
+      sourcemeta::core::parse_json(response.body());
   EXPECT_TRUE(document.is_object());
   EXPECT_TRUE(document.defines("method"));
   EXPECT_TRUE(document.at("method").is_string());
@@ -188,7 +188,7 @@ TEST(e2e_HTTP_Server, echo_get_with_query) {
   EXPECT_TRUE(response.header("content-type").has_value());
   EXPECT_EQ(response.header("content-type").value(), "application/json");
   const sourcemeta::core::JSON document =
-      sourcemeta::core::parse(response.body());
+      sourcemeta::core::parse_json(response.body());
   EXPECT_TRUE(document.is_object());
   EXPECT_TRUE(document.defines("method"));
   EXPECT_TRUE(document.at("method").is_string());
@@ -336,7 +336,7 @@ TEST(e2e_HTTP_Server, encodings_gzip_brotli) {
   EXPECT_TRUE(response.header("content-type").has_value());
   EXPECT_EQ(response.header("content-type").value(), "application/json");
   const sourcemeta::core::JSON document =
-      sourcemeta::core::parse(response.body());
+      sourcemeta::core::parse_json(response.body());
   EXPECT_TRUE(document.is_array());
   EXPECT_EQ(document.size(), 2);
   EXPECT_TRUE(document.at(0).is_string());
