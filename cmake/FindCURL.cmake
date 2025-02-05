@@ -44,7 +44,6 @@ if(NOT CURL_FOUND)
     "${CURL_DIR}/lib/smtp.h"
     "${CURL_DIR}/lib/curl_threads.c"
     "${CURL_DIR}/lib/if2ip.c"
-    "${CURL_DIR}/lib/c-hyper.c"
     "${CURL_DIR}/lib/cf-socket.c"
     "${CURL_DIR}/lib/http_negotiate.c"
     "${CURL_DIR}/lib/doh.c"
@@ -163,7 +162,6 @@ if(NOT CURL_FOUND)
     "${CURL_DIR}/lib/cf-socket.h"
     "${CURL_DIR}/lib/if2ip.h"
     "${CURL_DIR}/lib/socks_sspi.c"
-    "${CURL_DIR}/lib/c-hyper.h"
     "${CURL_DIR}/lib/curl_threads.h"
     "${CURL_DIR}/lib/strtok.h"
     "${CURL_DIR}/lib/smtp.c"
@@ -183,7 +181,6 @@ if(NOT CURL_FOUND)
     "${CURL_DIR}/lib/pingpong.h"
     "${CURL_DIR}/lib/llist.h"
     "${CURL_DIR}/lib/dict.h"
-    "${CURL_DIR}/lib/config-win32ce.h"
     "${CURL_DIR}/lib/easyoptions.h"
     "${CURL_DIR}/lib/strcase.h"
     "${CURL_DIR}/lib/cf-h2-proxy.c"
@@ -219,7 +216,6 @@ if(NOT CURL_FOUND)
     "${CURL_DIR}/lib/hostip.h"
     "${CURL_DIR}/lib/content_encoding.h"
     "${CURL_DIR}/lib/http.c"
-    "${CURL_DIR}/lib/config-amigaos.h"
     "${CURL_DIR}/lib/curl_sspi.c"
     "${CURL_DIR}/lib/http_chunks.c"
     "${CURL_DIR}/lib/config-os400.h"
@@ -321,7 +317,6 @@ if(NOT CURL_FOUND)
     "${CURL_DIR}/lib/vssh/wolfssh.c"
     "${CURL_DIR}/lib/asyn-ares.c"
     "${CURL_DIR}/lib/imap.c"
-    "${CURL_DIR}/lib/config-dos.h"
     "${CURL_DIR}/lib/headers.c"
     "${CURL_DIR}/lib/macos.c"
     "${CURL_DIR}/lib/cookie.c"
@@ -356,7 +351,15 @@ if(NOT CURL_FOUND)
     "${CURL_DIR}/lib/vquic/curl_osslq.c"
     "${CURL_DIR}/lib/vquic/curl_osslq.h"
     "${CURL_DIR}/lib/vquic/vquic-tls.c"
-    "${CURL_DIR}/lib/vquic/vquic-tls.h")
+    "${CURL_DIR}/lib/vquic/vquic-tls.h"
+    "${CURL_DIR}/lib/httpsrr.c"
+    "${CURL_DIR}/lib/httpsrr.h"
+    "${CURL_DIR}/lib/strparse.c"
+    "${CURL_DIR}/lib/strparse.h"
+    "${CURL_DIR}/lib/vtls/vtls_scache.c"
+    "${CURL_DIR}/lib/vtls/vtls_scache.h"
+    "${CURL_DIR}/lib/vtls/vtls_spack.c"
+    "${CURL_DIR}/lib/vtls/vtls_spack.h")
 
   if(NOT MSVC)
     target_compile_options(curl PRIVATE -Wno-enum-conversion)
