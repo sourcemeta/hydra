@@ -364,6 +364,7 @@ if(NOT CURL_FOUND)
   if(NOT MSVC)
     target_compile_options(curl PRIVATE -Wno-enum-conversion)
     target_compile_options(curl PRIVATE -Wno-implicit-function-declaration)
+    target_compile_options(curl PRIVATE -Wno-int-conversion)
   endif()
 
   # General options
