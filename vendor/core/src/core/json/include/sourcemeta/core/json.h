@@ -5,9 +5,10 @@
 #include <sourcemeta/core/json_export.h>
 #endif
 
+// NOLINTBEGIN(misc-include-cleaner)
 #include <sourcemeta/core/json_error.h>
-#include <sourcemeta/core/json_hash.h>
 #include <sourcemeta/core/json_value.h>
+// NOLINTEND(misc-include-cleaner)
 
 #include <cstdint>    // std::uint64_t
 #include <filesystem> // std::filesystem
@@ -127,7 +128,8 @@ auto parse_json(const std::basic_string<JSON::Char, JSON::CharTraits> &input,
 ///
 /// If parsing fails, sourcemeta::core::JSONParseError will be thrown.
 SOURCEMETA_CORE_JSON_EXPORT
-auto read_json(const std::filesystem::path &path) -> JSON;
+auto read_json(const std::filesystem::path &path,
+               const JSON::ParseCallback &callback = nullptr) -> JSON;
 
 // TODO: Move this function to a system integration component, as it
 // is not JSON specific

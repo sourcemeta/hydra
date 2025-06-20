@@ -27,7 +27,7 @@
 #include <variant>  // std::variant
 
 /// @defgroup regex Regex
-/// @brief A regex ECMA implementation for JSON Schema
+/// @brief An opinionated regex ECMA 262 implementation for JSON Schema
 ///
 /// This functionality is included as follows:
 ///
@@ -44,7 +44,9 @@ template <typename T> using RegexTypeBoost = boost::basic_regex<T>;
 template <typename T> using RegexTypePrefix = T;
 
 /// @ingroup regex
-struct RegexTypeNonEmpty {};
+struct RegexTypeNonEmpty {
+  auto operator==(const RegexTypeNonEmpty &) const noexcept -> bool = default;
+};
 
 /// @ingroup regex
 using RegexTypeRange = std::pair<std::uint64_t, std::uint64_t>;
@@ -53,7 +55,9 @@ using RegexTypeRange = std::pair<std::uint64_t, std::uint64_t>;
 template <typename T> using RegexTypeStd = std::basic_regex<T>;
 
 /// @ingroup regex
-struct RegexTypeNoop {};
+struct RegexTypeNoop {
+  auto operator==(const RegexTypeNoop &) const noexcept -> bool = default;
+};
 
 /// @ingroup regex
 template <typename T>
@@ -91,6 +95,10 @@ auto to_regex(const T &pattern) -> std::optional<Regex<T>> {
   if (pattern == ".*" || pattern == "^.*$" || pattern == "^(.*)$" ||
       pattern == "(.*)" || pattern == "[\\s\\S]*" || pattern == "^[\\s\\S]*$") {
     return RegexTypeNoop{};
+
+    // Note that the JSON Schema specification does not impose the use of any
+    // regular expression flag. Given popular adoption, we assume `.` matches
+    // new line characters (as in the `DOTALL`) option
   } else if (pattern == ".+" || pattern == "^.+$" || pattern == "^(.+)$" ||
              pattern == ".") {
     return RegexTypeNonEmpty{};
@@ -120,6 +128,9 @@ auto to_regex(const T &pattern) -> std::optional<Regex<T>> {
           // When performing matches, all marked sub-expressions (expr) are
           // treated as non-marking sub-expressions (?:expr)
           boost::regex::nosubs |
+
+          // Make the `.` character class match new lines
+          boost::regex::mod_s |
 
           // Instructs the regular expression engine to make matching faster,
           // with the potential cost of making construction slower
@@ -191,6 +202,24 @@ auto matches(const Regex<T> &regex, const T &value) -> bool {
 #else
   __builtin_unreachable();
 #endif
+}
+
+/// @ingroup regex
+///
+/// Validate a string against a regular expression pattern if the pattern
+/// represents a valid regular expression, compiling it along the way. For
+/// example:
+///
+/// ```cpp
+/// #include <sourcemeta/core/regex.h>
+/// #include <cassert>
+///
+/// assert(sourcemeta::core::matches_if_valid("^foo", "foo bar"));
+/// ```
+template <typename T>
+auto matches_if_valid(const T &pattern, const T &value) -> bool {
+  const auto regex{to_regex(pattern)};
+  return regex.has_value() && matches(regex.value(), value);
 }
 
 } // namespace sourcemeta::core

@@ -5,13 +5,14 @@
 #include <sourcemeta/core/uri_export.h>
 #endif
 
+// NOLINTBEGIN(misc-include-cleaner)
 #include <sourcemeta/core/uri_error.h>
+#include <sourcemeta/core/uri_escape.h>
+// NOLINTEND(misc-include-cleaner)
 
 #include <cstdint>     // std::uint32_t
-#include <istream>     // std::istream
 #include <memory>      // std::unique_ptr
 #include <optional>    // std::optional
-#include <ostream>     // std::ostream
 #include <span>        // std::span
 #include <string>      // std::string
 #include <string_view> // std::string_view
@@ -139,6 +140,17 @@ public:
   /// ```
   auto is_ipv6() const -> bool;
 
+  /// Check if the URI corresponds to the empty URI. For example:
+  ///
+  /// ```cpp
+  /// #include <sourcemeta/core/uri.h>
+  /// #include <cassert>
+  ///
+  /// sourcemeta::core::URI uri{""};
+  /// assert(uri.empty());
+  /// ```
+  auto empty() const -> bool;
+
   /// Get the scheme part of the URI, if any. For example:
   ///
   /// ```cpp
@@ -215,6 +227,30 @@ public:
   /// assert(uri.path().value() == "/foo/bar");
   auto path(std::string &&path) -> URI &;
 
+  /// Append a path to the existing URI path or set a path if such component
+  /// does not exist in the URI. For example:
+  ///
+  /// ```cpp
+  /// #include <sourcemeta/core/uri.h>
+  /// #include <cassert>
+  ///
+  /// sourcemeta::core::URI uri{"https://www.sourcemeta.com/foo"};
+  /// uri.append_path("bar/baz");
+  /// assert(uri.recompose() == "https://www.sourcemeta.com/foo/bar/baz");
+  auto append_path(const std::string &path) -> URI &;
+
+  /// If the URI has a path, this method sets or replace the extension in the
+  /// path. For example:
+  ///
+  /// ```cpp
+  /// #include <sourcemeta/core/uri.h>
+  /// #include <cassert>
+  ///
+  /// sourcemeta::core::URI uri{"https://www.sourcemeta.com/foo"};
+  /// uri.extension("json");
+  /// assert(uri.recompose() == "https://www.sourcemeta.com/foo.json");
+  auto extension(std::string &&extension) -> URI &;
+
   /// Get the fragment part of the URI, if any. For example:
   ///
   /// ```cpp
@@ -226,6 +262,33 @@ public:
   /// assert(uri.fragment().value() == "foo");
   /// ```
   [[nodiscard]] auto fragment() const -> std::optional<std::string_view>;
+
+  /// Set the fragment part of the URI. For example:
+  ///
+  /// ```cpp
+  /// #include <sourcemeta/core/uri.h>
+  /// #include <cassert>
+  ///
+  /// sourcemeta::core::URI uri{"https://www.sourcemeta.com"};
+  /// const std::string fragment{"foo"};
+  /// uri.fragment(fragment);
+  /// assert(uri.fragment().has_value());
+  /// assert(uri.fragment().value() == "foo");
+  /// ```
+  auto fragment(const std::string &fragment) -> URI &;
+
+  /// Set the fragment part of the URI with move semantics. For example:
+  ///
+  /// ```cpp
+  /// #include <sourcemeta/core/uri.h>
+  /// #include <cassert>
+  ///
+  /// sourcemeta::core::URI uri{"https://www.sourcemeta.com"};
+  /// std::string fragment{"foo"};
+  /// uri.fragment(std::move(fragment));
+  /// assert(uri.fragment().has_value());
+  /// assert(uri.fragment().value() == "foo");
+  auto fragment(std::string &&fragment) -> URI &;
 
   /// Get the non-dissected query part of the URI, if any. For example:
   ///
@@ -269,7 +332,7 @@ public:
   [[nodiscard]] auto recompose_without_fragment() const
       -> std::optional<std::string>;
 
-  /// Recompose and canonicalize a URI. For example:
+  /// Canonicalize a URI. For example:
   ///
   /// ```cpp
   /// #include <sourcemeta/core/uri.h>
@@ -294,6 +357,10 @@ public:
   /// assert(result.recompose() == "https://sourcemeta.com/foo");
   /// ```
   auto resolve_from(const URI &base) -> URI &;
+
+  // TODO: Do we really need this `try_resolve_from` method? There shouldn't
+  // be any reason why resolution cannot happen. This is probably just an
+  // artifact of `uriparser` not supporting relative resolution
 
   /// Resolve a relative URI against a base URI as established by RFC
   /// 3986. If the resolution cannot happen, nothing happens. For example:
@@ -323,47 +390,20 @@ public:
   /// ```
   auto relative_to(const URI &base) -> URI &;
 
-  /// Escape a string as established by RFC 3986 using C++ standard stream. For
-  /// example:
-  ///
-  /// ```cpp
-  /// #include <sourcemeta/core/uri.h>
-  /// #include <sstream>
-  /// #include <cassert>
-  ///
-  /// std::istringstream input{"foo bar"};
-  /// std::ostringstream output;
-  /// sourcemeta::core::URI::escape(input, output);
-  /// assert(output.str() == "foo%20bar");
-  /// ```
-  static auto escape(std::istream &input, std::ostream &output) -> void;
-
-  /// Unescape a string that has been percentage-escaped as established by
-  /// RFC 3986 using C++ standard streams. For example:
-  ///
-  /// ```cpp
-  /// #include <sourcemeta/core/uri.h>
-  /// #include <sstream>
-  /// #include <cassert>
-  ///
-  /// std::istringstream input{"foo%20bar"};
-  /// std::ostringstream output;
-  /// sourcemeta::core::URI::unescape(input, output);
-  /// assert(output.str() == "foo bar");
-  /// ```
-  static auto unescape(std::istream &input, std::ostream &output) -> void;
-
-  /// Create a URI from a fragment. For example:
+  /// Attempt to change the base of a URI . If the URI is not
+  /// relative to the former, leave the URI intact. For example:
   ///
   /// ```cpp
   /// #include <sourcemeta/core/uri.h>
   /// #include <cassert>
   ///
-  /// const sourcemeta::core::URI uri{
-  ///   sourcemeta::core::URI::from_fragment("foo")};
-  /// assert(uri.recompose() == "#foo");
+  /// sourcemeta::core::URI uri{"https://example.com/foo/bar/baz"};
+  /// const sourcemeta::core::URI base{"https://example.com/foo"};
+  /// const sourcemeta::core::URI new_base{"/qux"};
+  /// uri.rebase(base, new_base);
+  /// assert(uri.recompose() == "/qux/bar/baz");
   /// ```
-  static auto from_fragment(std::string_view fragment) -> URI;
+  auto rebase(const URI &base, const URI &new_base) -> URI &;
 
   /// Get the user information part of the URI, if any. For example:
   ///
@@ -381,9 +421,40 @@ public:
   /// colon. See https://tools.ietf.org/html/rfc3986#section-3.2.1
   [[nodiscard]] auto userinfo() const -> std::optional<std::string_view>;
 
+  /// To support equality of URIs
+  auto operator==(const URI &other) const noexcept -> bool;
+
+  /// To support ordering of URIs
+  auto operator<(const URI &other) const noexcept -> bool;
+
+  /// Create a URI from a fragment. For example:
+  ///
+  /// ```cpp
+  /// #include <sourcemeta/core/uri.h>
+  /// #include <cassert>
+  ///
+  /// const sourcemeta::core::URI uri{
+  ///   sourcemeta::core::URI::from_fragment("foo")};
+  /// assert(uri.recompose() == "#foo");
+  /// ```
+  static auto from_fragment(std::string_view fragment) -> URI;
+
+  /// A convenient method to canonicalize and recompose a URI from a string. For
+  /// example:
+  ///
+  /// ```cpp
+  /// #include <sourcemeta/core/uri.h>
+  /// #include <cassert>
+  ///
+  /// const auto result{
+  ///   sourcemeta::core::URI::canonicalize("hTtP://exAmpLe.com:80/TEST")};
+  /// assert(result == "http://example.com/TEST");
+  /// ```
+  static auto canonicalize(const std::string &input) -> std::string;
+
 private:
   bool parsed = false;
-  auto parse_json() -> void;
+  auto parse() -> void;
 
 // Exporting symbols that depends on the standard C++ library is considered
 // safe.
@@ -391,9 +462,6 @@ private:
 #if defined(_MSC_VER)
 #pragma warning(disable : 4251)
 #endif
-  // We need to keep the string as the URI structure just
-  // points to fragments of it.
-  // We keep this as const as this class is immutable
   std::string data;
 
   std::optional<std::string> path_;
@@ -405,7 +473,7 @@ private:
   std::optional<std::string> query_;
   bool is_ipv6_ = false;
 
-  // Use PIMPL idiom to hide `urlparser`
+  // Use PIMPL idiom to hide `uriparser`
   struct Internal;
   std::unique_ptr<Internal> internal;
 #if defined(_MSC_VER)

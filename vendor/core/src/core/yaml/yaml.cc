@@ -1,15 +1,17 @@
-#include <sourcemeta/core/yaml.h>
-
-#include <sstream>     // std::ostringstream
-#include <string_view> // std::string_view
-
 // See https://pyyaml.org/wiki/LibYAML for basic documentation
 #include <yaml.h>
 
+#include <sourcemeta/core/json_error.h>
+#include <sourcemeta/core/yaml.h>
+
+#include <sstream>     // std::ostringstream, std::istringstream
+#include <string_view> // std::string_view
+
+namespace {
+
 // TODO: Perform parsing token by token using `yaml_parser_parse`,
 // as that function also let us get line/column information on `yaml_event_t`
-static auto yaml_node_to_json(yaml_node_t *const node,
-                              yaml_document_t *const document)
+auto yaml_node_to_json(yaml_node_t *const node, yaml_document_t *const document)
     -> sourcemeta::core::JSON {
   if (!node) {
     return sourcemeta::core::JSON{nullptr};
@@ -21,9 +23,24 @@ static auto yaml_node_to_json(yaml_node_t *const node,
           reinterpret_cast<char *>(node->data.scalar.value),
           node->data.scalar.length};
 
+      if (node->data.scalar.style == YAML_SINGLE_QUOTED_SCALAR_STYLE ||
+          node->data.scalar.style == YAML_DOUBLE_QUOTED_SCALAR_STYLE) {
+        return sourcemeta::core::JSON{input};
+      }
+
+      // TODO: Avoid this std::string transformation
+      std::istringstream stream{std::string{input}};
+
       try {
-        // TODO: Avoid this std::string transformation
-        return sourcemeta::core::parse_json(std::string{input});
+        auto result{sourcemeta::core::parse_json(stream)};
+
+        // If the entire input was not consumed, then we are missing
+        // something
+        if (stream.peek() != std::char_traits<char>::eof()) {
+          return sourcemeta::core::JSON{input};
+        }
+
+        return result;
         // Looks like it is very hard in YAML, given a scalar value, to
         // determine whether it is a string or something else without attempting
         // to parsing it and potentially failing to do so
@@ -65,8 +82,7 @@ static auto yaml_node_to_json(yaml_node_t *const node,
   }
 }
 
-static auto internal_parse_json(yaml_parser_t *parser)
-    -> sourcemeta::core::JSON {
+auto internal_parse_json(yaml_parser_t *parser) -> sourcemeta::core::JSON {
   yaml_document_t document;
   if (!yaml_parser_load(parser, &document)) {
     // TODO: Ideally we would get line/column information like for `ParseError`
@@ -89,7 +105,16 @@ static auto internal_parse_json(yaml_parser_t *parser)
   }
 }
 
+} // namespace
+
 namespace sourcemeta::core {
+
+auto parse_yaml(std::basic_istream<JSON::Char, JSON::CharTraits> &stream)
+    -> JSON {
+  std::basic_ostringstream<JSON::Char, JSON::CharTraits> buffer;
+  buffer << stream.rdbuf();
+  return parse_yaml(buffer.str());
+}
 
 auto parse_yaml(const JSON::String &input) -> JSON {
   yaml_parser_t parser;

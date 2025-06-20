@@ -101,6 +101,43 @@ private:
   std::string message_;
 };
 
+/// @ingroup jsonschema
+/// An error that represents that a schema operation cannot continue
+class SOURCEMETA_CORE_JSONSCHEMA_EXPORT SchemaAbortError
+    : public std::exception {
+public:
+  SchemaAbortError(std::string message) : message_{std::move(message)} {}
+  [[nodiscard]] auto what() const noexcept -> const char * override {
+    return this->message_.c_str();
+  }
+
+private:
+  std::string message_;
+};
+
+/// @ingroup jsonschema
+/// An error that represents that the dialect of the schema could not determined
+class SOURCEMETA_CORE_JSONSCHEMA_EXPORT SchemaUnknownDialectError
+    : public std::exception {
+public:
+  SchemaUnknownDialectError() = default;
+  [[nodiscard]] auto what() const noexcept -> const char * override {
+    return "Could not determine the dialect of the schema";
+  }
+};
+
+/// @ingroup jsonschema
+/// An error that represents that the base dialect of the schema could not
+/// determined
+class SOURCEMETA_CORE_JSONSCHEMA_EXPORT SchemaUnknownBaseDialectError
+    : public std::exception {
+public:
+  SchemaUnknownBaseDialectError() = default;
+  [[nodiscard]] auto what() const noexcept -> const char * override {
+    return "Could not determine the base dialect of the schema";
+  }
+};
+
 #if defined(_MSC_VER)
 #pragma warning(default : 4251 4275)
 #endif

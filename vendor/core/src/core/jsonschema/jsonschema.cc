@@ -1,21 +1,21 @@
-#include <sourcemeta/core/json.h>
 #include <sourcemeta/core/jsonschema.h>
 
 #include <cassert>     // assert
 #include <cstdint>     // std::uint64_t
 #include <functional>  // std::less
 #include <limits>      // std::numeric_limits
+#include <numeric>     // std::accumulate
 #include <sstream>     // std::ostringstream
 #include <type_traits> // std::remove_reference_t
 #include <utility>     // std::move
-
-#include <iostream>
 
 auto sourcemeta::core::is_schema(const sourcemeta::core::JSON &schema) -> bool {
   return schema.is_object() || schema.is_boolean();
 }
 
-static auto id_keyword_guess(const sourcemeta::core::JSON &schema)
+namespace {
+
+auto id_keyword_guess(const sourcemeta::core::JSON &schema)
     -> std::optional<std::string> {
   if (schema.defines("$id") && schema.at("$id").is_string()) {
     if (!schema.defines("id") ||
@@ -56,6 +56,8 @@ static auto id_keyword(const std::string &base_dialect) -> std::string {
   error << "Unrecognized base dialect: " << base_dialect;
   throw sourcemeta::core::SchemaError(error.str());
 }
+
+} // namespace
 
 auto sourcemeta::core::identify(
     const sourcemeta::core::JSON &schema, const SchemaResolver &resolver,
@@ -166,7 +168,7 @@ auto sourcemeta::core::reidentify(
   const auto base_dialect{
       sourcemeta::core::base_dialect(schema, resolver, default_dialect)};
   if (!base_dialect.has_value()) {
-    throw sourcemeta::core::SchemaError("Cannot determine base dialect");
+    throw sourcemeta::core::SchemaUnknownBaseDialectError();
   }
 
   reidentify(schema, new_identifier, base_dialect.value());
@@ -238,8 +240,7 @@ auto sourcemeta::core::metaschema(
     const std::optional<std::string> &default_dialect) -> JSON {
   const auto maybe_dialect{sourcemeta::core::dialect(schema, default_dialect)};
   if (!maybe_dialect.has_value()) {
-    throw sourcemeta::core::SchemaError(
-        "Could not determine dialect of the schema");
+    throw sourcemeta::core::SchemaUnknownDialectError();
   }
 
   const auto maybe_metaschema{resolver(maybe_dialect.value())};
@@ -336,12 +337,11 @@ auto sourcemeta::core::vocabularies(
     const sourcemeta::core::JSON &schema,
     const sourcemeta::core::SchemaResolver &resolver,
     const std::optional<std::string> &default_dialect)
-    -> std::map<std::string, bool> {
+    -> sourcemeta::core::Vocabularies {
   const std::optional<std::string> maybe_base_dialect{
       sourcemeta::core::base_dialect(schema, resolver, default_dialect)};
   if (!maybe_base_dialect.has_value()) {
-    throw sourcemeta::core::SchemaError(
-        "Could not determine base dialect for schema");
+    throw sourcemeta::core::SchemaUnknownBaseDialectError();
   }
 
   const std::optional<std::string> maybe_dialect{
@@ -350,8 +350,7 @@ auto sourcemeta::core::vocabularies(
     // If the schema has no declared metaschema and the user didn't
     // provide a explicit default, then we cannot do anything.
     // Better to abort instead of trying to guess.
-    throw sourcemeta::core::SchemaError(
-        "Cannot determine the dialect of the schema");
+    throw sourcemeta::core::SchemaUnknownDialectError();
   }
 
   return vocabularies(resolver, maybe_base_dialect.value(),
@@ -361,7 +360,7 @@ auto sourcemeta::core::vocabularies(
 auto sourcemeta::core::vocabularies(const SchemaResolver &resolver,
                                     const std::string &base_dialect,
                                     const std::string &dialect)
-    -> std::map<std::string, bool> {
+    -> sourcemeta::core::Vocabularies {
   // As a performance optimization shortcut
   if (base_dialect == dialect) {
     if (dialect == "https://json-schema.org/draft/2020-12/schema") {
@@ -426,7 +425,7 @@ auto sourcemeta::core::vocabularies(const SchemaResolver &resolver,
    * dialect
    */
 
-  std::map<std::string, bool> result;
+  Vocabularies result;
   const std::string core{core_vocabulary(base_dialect)};
   if (schema_dialect.defines("$vocabulary")) {
     const sourcemeta::core::JSON &vocabularies{
@@ -568,7 +567,8 @@ auto sourcemeta::core::reference_visit(
     const sourcemeta::core::SchemaVisitorReference &callback,
     const std::optional<std::string> &default_dialect,
     const std::optional<std::string> &default_id) -> void {
-  sourcemeta::core::SchemaFrame frame;
+  sourcemeta::core::SchemaFrame frame{
+      sourcemeta::core::SchemaFrame::Mode::Locations};
   frame.analyse(schema, walker, resolver, default_dialect, default_id);
   for (const auto &entry : frame.locations()) {
     if (entry.second.type !=
@@ -586,9 +586,8 @@ auto sourcemeta::core::reference_visit(
 
     const sourcemeta::core::URI base{entry.second.base};
     // Assume the base is canonicalized already
-    assert(
-        sourcemeta::core::URI{entry.second.base}.canonicalize().recompose() ==
-        base.recompose());
+    assert(sourcemeta::core::URI::canonicalize(entry.second.base) ==
+           base.recompose());
     for (const auto &property : subschema.as_object()) {
       const auto walker_result{
           walker(property.first, frame.vocabularies(entry.second, resolver))};
@@ -624,4 +623,134 @@ auto sourcemeta::core::reference_visitor_relativize(
   if (reference.is_relative()) {
     subschema.assign(keyword, sourcemeta::core::JSON{reference.recompose()});
   }
+}
+
+auto sourcemeta::core::schema_keyword_priority(
+    std::string_view keyword,
+    const sourcemeta::core::Vocabularies &vocabularies,
+    const sourcemeta::core::SchemaWalker &walker) -> std::uint64_t {
+  const auto result{walker(keyword, vocabularies)};
+  return std::accumulate(
+      result.dependencies.cbegin(), result.dependencies.cend(),
+      static_cast<std::uint64_t>(0),
+      [&vocabularies, &walker](const auto accumulator, const auto &dependency) {
+        return std::max(
+            accumulator,
+            schema_keyword_priority(dependency, vocabularies, walker) + 1);
+      });
+}
+
+auto sourcemeta::core::unidentify(
+    sourcemeta::core::JSON &schema,
+    const sourcemeta::core::SchemaWalker &walker,
+    const sourcemeta::core::SchemaResolver &resolver,
+    const std::optional<std::string> &default_dialect) -> void {
+  // (1) Re-frame before changing anything
+  sourcemeta::core::SchemaFrame frame{
+      sourcemeta::core::SchemaFrame::Mode::References};
+  frame.analyse(schema, walker, resolver, default_dialect);
+
+  // (2) Remove all identifiers and anchors
+  for (const auto &entry : sourcemeta::core::SchemaIterator{
+           schema, walker, resolver, default_dialect}) {
+    auto &subschema{sourcemeta::core::get(schema, entry.pointer)};
+    if (subschema.is_boolean()) {
+      continue;
+    }
+
+    assert(entry.base_dialect.has_value());
+    sourcemeta::core::anonymize(subschema, entry.base_dialect.value());
+
+    if (entry.vocabularies.contains(
+            "https://json-schema.org/draft/2020-12/vocab/core")) {
+      subschema.erase("$anchor");
+      subschema.erase("$dynamicAnchor");
+    }
+
+    if (entry.vocabularies.contains(
+            "https://json-schema.org/draft/2019-09/vocab/core")) {
+      subschema.erase("$anchor");
+      subschema.erase("$recursiveAnchor");
+    }
+  }
+
+  // (3) Fix-up reference based on pointers from the root
+  for (const auto &[key, reference] : frame.references()) {
+    const auto result{frame.traverse(reference.destination)};
+    if (result.has_value()) {
+      sourcemeta::core::set(
+          schema, key.second,
+          sourcemeta::core::JSON{
+              sourcemeta::core::to_uri(result.value().get().pointer)
+                  .recompose()});
+    } else if (!key.second.empty() && key.second.back().is_property() &&
+               key.second.back().to_property() != "$schema") {
+      sourcemeta::core::set(schema, key.second,
+                            sourcemeta::core::JSON{reference.destination});
+    }
+  }
+}
+
+auto sourcemeta::core::wrap(const sourcemeta::core::JSON::String &identifier)
+    -> sourcemeta::core::JSON {
+  auto result{JSON::make_object()};
+  // JSON Schema 2020-12 is the first dialect that truly supports cross-dialect
+  // references In practice, others do, but we can play it safe here
+  result.assign("$schema",
+                JSON{"https://json-schema.org/draft/2020-12/schema"});
+  result.assign("$ref", JSON{identifier});
+  return result;
+}
+
+auto sourcemeta::core::wrap(const sourcemeta::core::JSON &schema,
+                            const sourcemeta::core::Pointer &pointer,
+                            const sourcemeta::core::SchemaResolver &resolver,
+                            const std::optional<std::string> &default_dialect)
+    -> sourcemeta::core::JSON {
+  assert(try_get(schema, pointer));
+  if (pointer.empty()) {
+    return schema;
+  }
+
+  auto copy = schema;
+  const auto effective_dialect{dialect(copy, default_dialect)};
+  if (effective_dialect.has_value()) {
+    copy.assign("$schema", JSON{effective_dialect.value()});
+  } else {
+    throw SchemaUnknownBaseDialectError();
+  }
+
+  auto result{JSON::make_object()};
+  result.assign("$schema",
+                // JSON Schema 2020-12 is the first dialect that truly supports
+                // cross-dialect references In practice, others do, but we can
+                // play it safe here
+                JSON{"https://json-schema.org/draft/2020-12/schema"});
+  // We need to make sure the schema we are wrapping always has an identifier,
+  // at least an artificial one, otherwise a standalone instance of `$schema`
+  // outside of the root of a schema resource is not valid according to
+  // JSON Schema
+  // However, note that we use a relative URI so that references to
+  // other schemas whose top-level identifiers are relative URIs don't
+  // get affected. Otherwise, we would cause unintended base resolution.
+  constexpr auto WRAPPER_IDENTIFIER{"__sourcemeta-core-wrap__"};
+  const auto id{identify(copy, resolver, SchemaIdentificationStrategy::Strict,
+                         default_dialect)
+                    .value_or(WRAPPER_IDENTIFIER)};
+  reidentify(copy, id, resolver, default_dialect);
+  result.assign("$defs", JSON::make_object());
+  result.at("$defs").assign("schema", std::move(copy));
+
+  // Add a reference to the schema
+  URI uri{id};
+  if (!uri.fragment().has_value() || uri.fragment().value().empty()) {
+    uri.fragment(to_string(pointer));
+    result.assign("$ref", JSON{uri.recompose()});
+  } else {
+    result.assign(
+        "$ref",
+        JSON{to_uri(Pointer{"$defs", "schema"}.concat(pointer)).recompose()});
+  }
+
+  return result;
 }

@@ -1,12 +1,14 @@
 #ifndef SOURCEMETA_CORE_JSON_PARSER_H_
 #define SOURCEMETA_CORE_JSON_PARSER_H_
 
-#include "grammar.h"
+#include <sourcemeta/core/json_error.h>
+#include <sourcemeta/core/json_value.h>
 
-#include <sourcemeta/core/json.h>
+#include "grammar.h"
 
 #include <cassert>    // assert
 #include <cctype>     // std::isxdigit
+#include <cstddef>    // std::size_t
 #include <cstdint>    // std::uint64_t
 #include <functional> // std::reference_wrapper
 #include <istream>    // std::basic_istream
@@ -293,7 +295,7 @@ auto parse_number_integer(const std::uint64_t line, const std::uint64_t column,
   try {
     return std::stoll(string);
   } catch (const std::out_of_range &) {
-    throw JSONParseError(line, column);
+    throw JSONParseIntegerLimitError(line, column);
   }
 }
 

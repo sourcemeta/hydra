@@ -3,7 +3,7 @@
 
 #include <algorithm>        // std::swap
 #include <cassert>          // assert
-#include <functional>       // std::equal_to, std::less
+#include <cstddef>          // std::size_t
 #include <initializer_list> // std::initializer_list
 #include <iterator>         // std::advance
 #include <utility>          // std::pair, std::move
@@ -234,6 +234,29 @@ public:
     return this->data[index];
   }
 
+  auto rename(const key_type &key, const hash_type key_hash, key_type &&to,
+              const hash_type to_hash) -> void {
+    this->erase(to, to_hash);
+
+    if (this->hasher.is_perfect(key_hash)) {
+      for (auto &entry : this->data) {
+        if (entry.hash == key_hash) {
+          entry.first = std::move(to);
+          entry.hash = to_hash;
+          break;
+        }
+      }
+    } else {
+      for (auto &entry : this->data) {
+        if (entry.hash == key_hash && entry.first == key) {
+          entry.first = std::move(to);
+          entry.hash = to_hash;
+          break;
+        }
+      }
+    }
+  }
+
   auto erase(const key_type &key, const hash_type key_hash) -> size_type {
     const auto current_size{this->size()};
 
@@ -400,7 +423,7 @@ public:
   }
 
   // Hash an object property
-  inline auto hash(const Key &property) const -> Container::hash_type {
+  inline auto hash(const Key &property) const -> typename Container::hash_type {
     return this->data.hasher(property);
   }
 

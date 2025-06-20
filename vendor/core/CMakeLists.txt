@@ -22,6 +22,11 @@ option(SOURCEMETA_CORE_CONTRIB_GOOGLEBENCHMARK "Build the GoogleBenchmark librar
 
 include(Sourcemeta)
 
+# Don't force downstream consumers on it
+if(PROJECT_IS_TOP_LEVEL)
+  sourcemeta_enable_simd()
+endif()
+
 # TODO: Turn this into a re-usable utility CMake function
 if(SOURCEMETA_CORE_INSTALL)
   include(GNUInstallDirs)
@@ -91,8 +96,7 @@ if(PROJECT_IS_TOP_LEVEL)
     src/*.h src/*.cc
     benchmark/*.h benchmark/*.cc
     test/*.h test/*.cc)
-  sourcemeta_target_clang_tidy(SOURCES
-    src/*.h src/*.cc)
+  sourcemeta_target_clang_tidy(SOURCES src/*.cc)
 endif()
 
 # Testing
