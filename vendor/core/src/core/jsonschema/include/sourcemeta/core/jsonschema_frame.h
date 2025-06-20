@@ -5,19 +5,23 @@
 #include <sourcemeta/core/jsonschema_export.h>
 #endif
 
+#include <sourcemeta/core/json.h>
 #include <sourcemeta/core/jsonpointer.h>
-#include <sourcemeta/core/jsonschema_keywords.h>
+
 #include <sourcemeta/core/jsonschema_resolver.h>
+#include <sourcemeta/core/jsonschema_types.h>
 #include <sourcemeta/core/jsonschema_walker.h>
 
-#include <cstdint>    // std::uint8_t
-#include <functional> // std::reference_wrapper
-#include <map>        // std::map
-#include <optional>   // std::optional
-#include <string>     // std::string
-#include <tuple>      // std::tuple
-#include <utility>    // std::pair
-#include <vector>     // std::vector
+#include <cstdint>       // std::uint8_t
+#include <functional>    // std::reference_wrapper
+#include <map>           // std::map
+#include <optional>      // std::optional
+#include <ostream>       // std::ostream
+#include <set>           // std::set
+#include <tuple>         // std::tuple
+#include <unordered_set> // std::unordered_set
+#include <utility>       // std::pair
+#include <vector>        // std::vector
 
 namespace sourcemeta::core {
 
@@ -44,7 +48,9 @@ namespace sourcemeta::core {
 ///   }
 /// })JSON");
 ///
-/// sourcemeta::core::SchemaSchemaFrame frame;
+/// sourcemeta::core::SchemaFrame
+///   frame{sourcemeta::core::SchemaFrame::Mode::References};
+///
 /// frame.analyse(document,
 ///   sourcemeta::core::schema_official_walker,
 ///   sourcemeta::core::schema_official_resolver);
@@ -98,11 +104,23 @@ namespace sourcemeta::core {
 /// ```
 class SOURCEMETA_CORE_JSONSCHEMA_EXPORT SchemaFrame {
 public:
+  /// The mode of framing. More extensive analysis can be compute and memory
+  /// intensive
+  enum class Mode { Locations, References, Instances };
+
+  SchemaFrame(const Mode mode) : mode_{mode} {}
+
+  // Query the current mode that the schema frame was configured with
+  auto mode() const noexcept -> Mode { return this->mode_; }
+
   /// A single entry in a JSON Schema reference map
   struct ReferencesEntry {
-    std::string destination;
-    std::optional<std::string> base;
-    std::optional<std::string> fragment;
+    JSON::String original;
+    JSON::String destination;
+    // TODO: This string can be a `string_view` over the `destination`
+    std::optional<JSON::String> base;
+    // TODO: This string can be a `string_view` over the `destination`
+    std::optional<JSON::String> fragment;
   };
 
   /// A JSON Schema reference map is a mapping of a JSON Pointer
@@ -126,6 +144,7 @@ public:
   enum class LocationType : std::uint8_t {
     Resource,
     Anchor,
+    // TODO: Distinguish between a Pointer and a Keyword
     Pointer,
     Subschema
   };
@@ -133,31 +152,47 @@ public:
 #pragma GCC diagnostic pop
 #endif
 
-  /// A single frame in a JSON Schema reference frame
-  struct LocationsEntry {
+  /// A location entry
+  struct Location {
+    // TODO: Turn this into a weak pointer
+    std::optional<Pointer> parent;
     LocationType type;
-    std::optional<std::string> root;
-    std::string base;
+    std::optional<JSON::String> root;
+    JSON::String base;
+    // TODO: Turn this into a weak pointer
     Pointer pointer;
+    // TODO: Turn this into a weak pointer
     Pointer relative_pointer;
-    std::string dialect;
-    std::string base_dialect;
-    std::vector<std::reference_wrapper<const References::key_type>>
-        destination_of;
+    JSON::String dialect;
+    JSON::String base_dialect;
   };
 
+  // TODO: Indexing locations by reference type is wrong. We can index by just
+  // URI, and introduce a new `DynamicAnchor` location type
   /// A JSON Schema reference frame is a mapping of URIs to schema identifiers,
   /// JSON Pointers within the schema, and subschemas dialects. We call it
   /// reference frame as this mapping is essential for resolving references.
   using Locations =
-      std::map<std::pair<SchemaReferenceType, std::string>, LocationsEntry>;
+      std::map<std::pair<SchemaReferenceType, JSON::String>, Location>;
 
-  /// Analyse a given schema
-  auto analyse(const JSON &schema, const SchemaWalker &walker,
-               const SchemaResolver &resolver,
-               const std::optional<std::string> &default_dialect = std::nullopt,
-               const std::optional<std::string> &default_id = std::nullopt)
-      -> void;
+  // TODO: Turn the mapped value into a proper set
+  /// A set of unresolved instance locations
+  using Instances = std::map<Pointer, std::vector<PointerTemplate>>;
+
+  /// A set of paths to frame within a schema wrapper
+  using Paths = std::set<Pointer>;
+
+  /// Export the frame entries as JSON
+  auto to_json() const -> JSON;
+
+  /// Analyse a schema or set of schemas from a given root. Passing
+  /// multiple paths that have any overlap is undefined behaviour
+  auto
+  analyse(const JSON &root, const SchemaWalker &walker,
+          const SchemaResolver &resolver,
+          const std::optional<JSON::String> &default_dialect = std::nullopt,
+          const std::optional<JSON::String> &default_id = std::nullopt,
+          const Paths &paths = {empty_pointer}) -> void;
 
   /// Access the analysed schema locations
   auto locations() const noexcept -> const Locations &;
@@ -165,33 +200,44 @@ public:
   /// Access the analysed schema references
   auto references() const noexcept -> const References &;
 
+  /// Check whether the analysed schema has no external references
+  auto standalone() const -> bool;
+
   /// Get the vocabularies associated with a location entry
-  auto vocabularies(const LocationsEntry &location,
-                    const SchemaResolver &resolver) const
-      -> std::map<std::string, bool>;
+  auto vocabularies(const Location &location,
+                    const SchemaResolver &resolver) const -> Vocabularies;
 
   /// Get the URI associated with a location entry
-  auto uri(const LocationsEntry &location,
+  auto uri(const Location &location,
            const Pointer &relative_schema_location = empty_pointer) const
-      -> std::string;
+      -> JSON::String;
 
   /// Get the location associated by traversing a pointer from another location
-  auto traverse(const LocationsEntry &location,
+  auto traverse(const Location &location,
                 const Pointer &relative_schema_location) const
-      -> const LocationsEntry &;
+      -> const Location &;
 
   /// Get the location associated with a given URI
-  auto traverse(const std::string &uri) const
-      -> std::optional<std::reference_wrapper<const LocationsEntry>>;
+  auto traverse(const JSON::String &uri) const
+      -> std::optional<std::reference_wrapper<const Location>>;
 
   /// Try to dereference a reference location into its destination location
   auto
-  dereference(const LocationsEntry &location,
+  dereference(const Location &location,
               const Pointer &relative_schema_location = empty_pointer) const
       -> std::pair<SchemaReferenceType,
-                   std::optional<std::reference_wrapper<const LocationsEntry>>>;
+                   std::optional<std::reference_wrapper<const Location>>>;
+
+  /// Get the unresolved instance locations associated with a location entry
+  auto instance_locations(const Location &location) const -> const
+      typename Instances::mapped_type &;
+
+  /// Find all references to a given location pointer
+  auto references_to(const Pointer &pointer) const -> std::vector<
+      std::reference_wrapper<const typename References::value_type>>;
 
 private:
+  Mode mode_;
 // Exporting symbols that depends on the standard C++ library is considered
 // safe.
 // https://learn.microsoft.com/en-us/cpp/error-messages/compiler-warnings/compiler-warning-level-2-c4275?view=msvc-170&redirectedfrom=MSDN
@@ -200,10 +246,17 @@ private:
 #endif
   Locations locations_;
   References references_;
+  Instances instances_;
 #if defined(_MSC_VER)
 #pragma warning(default : 4251 4275)
 #endif
 };
+
+/// @ingroup jsonschema
+/// Pretty print the contents of a schema frame
+SOURCEMETA_CORE_JSONSCHEMA_EXPORT
+auto operator<<(std::ostream &stream, const SchemaFrame &frame)
+    -> std::ostream &;
 
 } // namespace sourcemeta::core
 

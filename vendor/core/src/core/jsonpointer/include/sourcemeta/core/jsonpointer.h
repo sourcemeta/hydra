@@ -8,13 +8,14 @@
 #include <sourcemeta/core/json.h>
 #include <sourcemeta/core/uri.h>
 
-#include <sourcemeta/core/jsonpointer.h>
+// NOLINTBEGIN(misc-include-cleaner)
 #include <sourcemeta/core/jsonpointer_error.h>
 #include <sourcemeta/core/jsonpointer_pointer.h>
 #include <sourcemeta/core/jsonpointer_position.h>
-#include <sourcemeta/core/jsonpointer_proxy.h>
 #include <sourcemeta/core/jsonpointer_subpointer_walker.h>
+#include <sourcemeta/core/jsonpointer_template.h>
 #include <sourcemeta/core/jsonpointer_walker.h>
+// NOLINTEND(misc-include-cleaner)
 
 #include <functional> // std::reference_wrapper
 #include <memory>     // std::allocator
@@ -48,7 +49,8 @@ const Pointer empty_pointer;
 const WeakPointer empty_weak_pointer;
 
 /// @ingroup jsonpointer
-using PointerProxy = GenericPointerProxy<Pointer>;
+/// A JSON Pointer with unresolved wildcards
+using PointerTemplate = GenericPointerTemplate<Pointer>;
 
 /// @ingroup jsonpointer
 /// Get a value from a JSON document using a JSON Pointer (`const` overload).
@@ -71,6 +73,15 @@ using PointerProxy = GenericPointerProxy<Pointer>;
 /// ```
 SOURCEMETA_CORE_JSONPOINTER_EXPORT
 auto get(const JSON &document, const Pointer &pointer) -> const JSON &;
+
+// Constant reference parameters can accept xvalues which will be destructed
+// after the call. When the function returns such a parameter also as constant
+// reference, then the returned reference can be used after the object it refers
+// to has been destroyed.
+// https://clang.llvm.org/extra/clang-tidy/checks/bugprone/return-const-ref-from-parameter.html
+// This overload avoids mis-uses of retuning const reference parameter as
+// constant reference.
+auto get(JSON &&document, const Pointer &pointer) -> const JSON & = delete;
 
 /// @ingroup jsonpointer
 /// Get a value from a JSON document using a JSON WeakPointer (`const`
@@ -95,6 +106,15 @@ auto get(const JSON &document, const Pointer &pointer) -> const JSON &;
 /// ```
 SOURCEMETA_CORE_JSONPOINTER_EXPORT
 auto get(const JSON &document, const WeakPointer &pointer) -> const JSON &;
+
+// Constant reference parameters can accept xvalues which will be destructed
+// after the call. When the function returns such a parameter also as constant
+// reference, then the returned reference can be used after the object it refers
+// to has been destroyed.
+// https://clang.llvm.org/extra/clang-tidy/checks/bugprone/return-const-ref-from-parameter.html
+// This overload avoids mis-uses of retuning const reference parameter as
+// constant reference.
+auto get(JSON &&document, const WeakPointer &pointer) -> const JSON & = delete;
 
 /// @ingroup jsonpointer
 /// Get a value from a JSON document using a Pointer, returning an optional that
@@ -325,12 +345,32 @@ auto to_pointer(const std::basic_string<JSON::Char, JSON::CharTraits,
 /// const sourcemeta::core::WeakPointer pointer{std::cref(foo)};
 /// const sourcemeta::core::Pointer result{
 ///   sourcemeta::core::to_pointer(pointer)}:
-/// assert(pointer.size() == 1);
-/// assert(pointer.at(0).is_property());
-/// assert(pointer.at(0).to_property() == "foo");
+/// assert(result.size() == 1);
+/// assert(result.at(0).is_property());
+/// assert(result.at(0).to_property() == "foo");
 /// ```
 SOURCEMETA_CORE_JSONPOINTER_EXPORT
 auto to_pointer(const WeakPointer &pointer) -> Pointer;
+
+/// @ingroup jsonpointer
+/// Convert a JSON Pointer into a JSON WeakPointer. For example:
+///
+/// ```cpp
+/// #include <sourcemeta/core/jsonpointer.h>
+/// #include <cassert>
+///
+/// const sourcemeta::core::Pointer pointer{"foo", "bar", "baz"};
+/// const auto result{sourcemeta::core::to_weak_pointer(pointer)};
+/// assert(result.size() == 3);
+/// assert(result.at(0).is_property());
+/// assert(result.at(0).to_property() == "foo");
+/// assert(result.at(1).is_property());
+/// assert(result.at(1).to_property() == "bar");
+/// assert(result.at(2).is_property());
+/// assert(result.at(2).to_property() == "baz");
+/// ```
+SOURCEMETA_CORE_JSONPOINTER_EXPORT
+auto to_weak_pointer(const Pointer &pointer) -> WeakPointer;
 
 /// @ingroup jsonpointer
 ///
@@ -370,6 +410,27 @@ auto stringify(const Pointer &pointer,
 /// ```
 SOURCEMETA_CORE_JSONPOINTER_EXPORT
 auto stringify(const WeakPointer &pointer,
+               std::basic_ostream<JSON::Char, JSON::CharTraits> &stream)
+    -> void;
+
+/// @ingroup jsonpointer
+///
+/// Stringify the input JSON Pointer template into a given C++ standard output
+/// stream. For example:
+///
+/// ```cpp
+/// #include <sourcemeta/core/jsonpointer.h>
+/// #include <iostream>
+/// #include <sstream>
+///
+/// const sourcemeta::core::Pointer base{"foo", "bar"};
+/// const sourcemeta::core::PointerTemplate pointer{base};
+/// std::ostringstream stream;
+/// sourcemeta::core::stringify(pointer, stream);
+/// std::cout << stream.str() << std::endl;
+/// ```
+SOURCEMETA_CORE_JSONPOINTER_EXPORT
+auto stringify(const PointerTemplate &pointer,
                std::basic_ostream<JSON::Char, JSON::CharTraits> &stream)
     -> void;
 
