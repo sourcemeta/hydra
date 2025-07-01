@@ -22,17 +22,6 @@
 namespace sourcemeta::hydra {
 
 /// @ingroup crypto
-/// Generate a random UUID v4 string. For example:
-///
-/// ```cpp
-/// #include <sourcemeta/hydra/crypto.h>
-/// #include <iostream>
-///
-/// std::cout << sourcemeta::hydra::uuid() << "\n";
-/// ```
-auto SOURCEMETA_HYDRA_CRYPTO_EXPORT uuid() -> std::string;
-
-/// @ingroup crypto
 /// Encode a string using Base64. For example:
 ///
 /// ```cpp

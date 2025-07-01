@@ -1,3 +1,5 @@
+#include <sourcemeta/core/uuid.h>
+
 #include <sourcemeta/hydra/crypto.h>
 #include <sourcemeta/hydra/http.h>
 #include <sourcemeta/hydra/httpserver_logger.h>
@@ -11,7 +13,7 @@
 
 namespace sourcemeta::hydra::http {
 
-ServerLogger::ServerLogger() : ServerLogger{sourcemeta::hydra::uuid()} {}
+ServerLogger::ServerLogger() : ServerLogger{sourcemeta::core::uuidv4()} {}
 
 ServerLogger::ServerLogger(std::string &&id) : identifier{std::move(id)} {}
 
