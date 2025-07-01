@@ -19,8 +19,7 @@ $ git submodule add https://github.com/sourcemeta/hydra.git deps/hydra
 add_subdirectory("${PROJECT_SOURCE_DIR}/deps/hydra")
 
 # Link your targets accordingly
-target_link_libraries(my_executable_or_library PUBLIC sourcemeta::hydra::httpclient)
-target_link_libraries(my_executable_or_library PUBLIC sourcemeta::hydra::bucket)
+target_link_libraries(my_executable_or_library PUBLIC sourcemeta::hydra::http)
 ```
 
 ### Using FetchContent
@@ -38,8 +37,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(hydra)
 
 add_executable(my_example ...)
-target_link_libraries(my_example PUBLIC sourcemeta::hydra::httpclient)
-target_link_libraries(my_example PUBLIC sourcemeta::hydra::bucket)
+target_link_libraries(my_example PUBLIC sourcemeta::hydra::http)
 ```
 
 ### Using find_package
@@ -51,11 +49,10 @@ package config file:
 find_package(Hydra REQUIRED)
 
 # This package also supports component-based inclusion
-find_package(Hydra REQUIRED COMPONENTS httpclient bucket)
+find_package(Hydra REQUIRED COMPONENTS http)
 
 # Link your targets accordingly
-target_link_libraries(my_executable_or_library PUBLIC sourcemeta::hydra::httpclient)
-target_link_libraries(my_executable_or_library PUBLIC sourcemeta::hydra::bucket)
+target_link_libraries(my_executable_or_library PUBLIC sourcemeta::hydra::http)
 ```
 
 CMake
@@ -65,8 +62,7 @@ CMake
 
 | Option                      | Type    | Default | Description                             |
 |-----------------------------|---------|---------|-----------------------------------------|
-| `HYDRA_HTTPCLIENT`          | Boolean | `ON`    | Build the Hydra HTTP client library     |
-| `HYDRA_BUCKET`              | Boolean | `ON`    | Build the Hydra bucket library          |
+| `HYDRA_HTTP`                | Boolean | `ON`    | Build the Hydra HTTP client library     |
 | `HYDRA_TESTS`               | Boolean | `OFF`   | Build the Hydra tests                   |
 | `HYDRA_DOCS`                | Boolean | `OFF`   | Build the Hydra docs                    |
 | `HYDRA_INSTALL`             | Boolean | `ON`    | Install the Hydra library               |

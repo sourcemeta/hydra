@@ -61,18 +61,7 @@ jobs:
     runs-on: ${{ matrix.platform.os }}
 
     env:
-      MINIO_ROOT_USER: sourcemeta
-      MINIO_ROOT_PASSWORD: sourcemeta
-      MINIO_PORT: 9000
-      MINIO_PROTOCOL: http
-      MINIO_ADDRESS: 127.0.0.1
-      MINIO_REGION: us-east-1
-      MINIO_ALIAS: sourcemeta
-      MINIO_ACCESS_KEY: sourcemeta-test
-      MINIO_SECRET_KEY: 12345678
-      MINIO_BUCKET: test
-
-      HTTPCLIENT_STUB_PORT: 9999
+      HTTP_STUB_PORT: 9999
 
       CC: ${{ matrix.platform.cc }}
       CXX: ${{ matrix.platform.cxx }}
@@ -82,11 +71,6 @@ jobs:
         run: |
           sudo apt-get update --yes
           sudo apt-get install --yes nodejs
-          wget https://dl.min.io/server/minio/release/linux-amd64/archive/minio_20240307004348.0.0_amd64.deb -O minio.deb
-          sudo dpkg -i minio.deb
-          rm minio.deb
-          curl https://dl.min.io/client/mc/release/linux-amd64/mc --output /usr/local/bin/mc
-          chmod +x /usr/local/bin/mc
 
       - uses: actions/checkout@v3
       - name: Install dependencies (macOS)
@@ -101,7 +85,6 @@ jobs:
         run: >
           cmake -S . -B ./build
           -DCMAKE_BUILD_TYPE:STRING=Release
-          -DHYDRA_CRYPTO:BOOL=ON
           -DHYDRA_TESTS:BOOL=ON
           -DHYDRA_DOCS:BOOL=OFF
           -DBUILD_SHARED_LIBS:BOOL=OFF
@@ -112,7 +95,6 @@ jobs:
         run: >
           cmake -S . -B ./build
           -DCMAKE_BUILD_TYPE:STRING=Release
-          -DHYDRA_CRYPTO:BOOL=ON
           -DHYDRA_TESTS:BOOL=ON
           -DHYDRA_DOCS:BOOL=OFF
           -DBUILD_SHARED_LIBS:BOOL=ON
@@ -134,36 +116,20 @@ jobs:
           --component sourcemeta_hydra_dev
 
       # Run stubs
-      - name: Run MinIO stub (*nix)
-        run: (minio server --address :${{ env.MINIO_PORT }} build/minio &) && sleep 10 && make configure-minio
-        if: runner.os != 'windows'
       - name: Run HTTP client stub (Windows)
-        run: cmd /c "start /b node test\e2e\httpclient\stub.js ${{ env.HTTPCLIENT_STUB_PORT }}" && Start-Sleep -Seconds 10
+        run: cmd /c "start /b node test\e2e\http\stub.js ${{ env.HTTP_STUB_PORT }}" && Start-Sleep -Seconds 10
         if: runner.os == 'windows'
       - name: Run HTTP client stub (*nix)
-        run: (node test/e2e/httpclient/stub.js ${{ env.HTTPCLIENT_STUB_PORT }} &) && sleep 10
+        run: (node test/e2e/http/stub.js ${{ env.HTTP_STUB_PORT }} &) && sleep 10
         if: runner.os != 'windows'
 
       # Not every CTest version supports the --test-dir option. If such option
       # is not recognized, `ctest` will successfully exit finding no tests.
       # Better to be sure and `cd` all the time here.
 
-      - name: Tests (*nix)
+      - name: Tests
         run: cd ./build && ctest --build-config Release --output-on-failure --parallel
-        if: runner.os != 'windows'
         env:
-          SOURCEMETA_HYDRA_TEST_HTTPCLIENT_BASE_URL: 'http://localhost:${{ env.HTTPCLIENT_STUB_PORT }}'
-          SOURCEMETA_HYDRA_TEST_BUCKET_BASE_URL: ${{ env.MINIO_PROTOCOL }}://${{ env.MINIO_ADDRESS }}:${{ env.MINIO_PORT }}/${{ env.MINIO_BUCKET }}
-          SOURCEMETA_HYDRA_TEST_BUCKET_REGION: ${{ env.MINIO_REGION }}
-          SOURCEMETA_HYDRA_TEST_BUCKET_ACCESS_KEY: ${{ env.MINIO_ACCESS_KEY }}
-          SOURCEMETA_HYDRA_TEST_BUCKET_SECRET_KEY: ${{ env.MINIO_SECRET_KEY }}
-
+          SOURCEMETA_HYDRA_TEST_HTTP_BASE_URL: 'http://localhost:${{ env.HTTP_STUB_PORT }}'
           # See https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html
           UBSAN_OPTIONS: print_stacktrace=1
-
-      - name: Tests (Windows)
-        # TODO: Run Bucket MinIO tests on Windows
-        run: cd ./build && ctest --build-config Release --exclude-regex hydra.bucket_e2e --output-on-failure --parallel
-        if: runner.os == 'windows'
-        env:
-          SOURCEMETA_HYDRA_TEST_HTTPCLIENT_BASE_URL: 'http://localhost:${{ env.HTTPCLIENT_STUB_PORT }}'

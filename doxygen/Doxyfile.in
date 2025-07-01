@@ -2312,8 +2312,6 @@ INCLUDE_FILE_PATTERNS  =
 PREDEFINED             += DOXYGEN
 PREDEFINED             += SOURCEMETA_HYDRA_HTTP_EXPORT=
 PREDEFINED             += SOURCEMETA_HYDRA_HTTPCLIENT_EXPORT=
-PREDEFINED             += SOURCEMETA_HYDRA_HTTPSERVER_EXPORT=
-PREDEFINED             += SOURCEMETA_HYDRA_BUCKET_EXPORT=
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then this
 # tag can be used to specify a list of macro names that should be expanded. The
@@ -2324,8 +2322,6 @@ PREDEFINED             += SOURCEMETA_HYDRA_BUCKET_EXPORT=
 
 EXPAND_AS_DEFINED      += SOURCEMETA_HYDRA_HTTP_EXPORT
 EXPAND_AS_DEFINED      += SOURCEMETA_HYDRA_HTTPCLIENT_EXPORT
-EXPAND_AS_DEFINED      += SOURCEMETA_HYDRA_HTTPSERVER_EXPORT
-EXPAND_AS_DEFINED      += SOURCEMETA_HYDRA_BUCKET_EXPORT
 
 # If the SKIP_FUNCTION_MACROS tag is set to YES then doxygen's preprocessor will
 # remove all references to function-like macros that are alone on a line, have

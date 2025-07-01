@@ -17,9 +17,7 @@ jobs:
       - run: >
           cmake -S . -B ./build
           -DCMAKE_BUILD_TYPE:STRING=Release
-          -DHYDRA_CRYPTO:BOOL=OFF
-          -DHYDRA_HTTPCLIENT:BOOL=OFF
-          -DHYDRA_BUCKET:BOOL=OFF
+          -DHYDRA_HTTP:BOOL=OFF
           -DHYDRA_TESTS:BOOL=OFF
           -DHYDRA_DOCS:BOOL=ON
       - run: cmake --build ./build --config Release --target doxygen

@@ -1,6 +1,3 @@
 brew "cmake"
 brew "doxygen"
 brew "node"
-tap "minio/stable"
-brew "minio/stable/minio"
-brew "minio/stable/mc"
