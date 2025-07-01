@@ -11,6 +11,8 @@
 // NOLINTEND(misc-include-cleaner)
 
 #include <cstdint>     // std::uint32_t
+#include <filesystem>  // std::filesystem
+#include <istream>     // std::istream
 #include <memory>      // std::unique_ptr
 #include <optional>    // std::optional
 #include <span>        // std::span
@@ -61,7 +63,7 @@ public:
   URI(const URI &other);
 
   /// Move constructor
-  URI(URI &&other);
+  URI(URI &&other) noexcept;
 
   /// Check if the URI is absolute. For example:
   ///
@@ -439,6 +441,19 @@ public:
   /// ```
   static auto from_fragment(std::string_view fragment) -> URI;
 
+  /// Create a URI from a file system path. For example:
+  ///
+  /// ```cpp
+  /// #include <sourcemeta/core/uri.h>
+  /// #include <cassert>
+  /// #include <filesystem>
+  ///
+  /// const std::filesystem::path path{"/foo/bar"};
+  /// const sourcemeta::core::URI uri{sourcemeta::core::URI::from_path(path)};
+  /// assert(uri.recompose() == "file:///foo/bar");
+  /// ```
+  static auto from_path(const std::filesystem::path &path) -> URI;
+
   /// A convenient method to canonicalize and recompose a URI from a string. For
   /// example:
   ///
@@ -462,20 +477,20 @@ private:
 #if defined(_MSC_VER)
 #pragma warning(disable : 4251)
 #endif
-  std::string data;
+  std::string data{};
 
-  std::optional<std::string> path_;
-  std::optional<std::string> userinfo_;
-  std::optional<std::string> host_;
-  std::optional<std::uint32_t> port_;
-  std::optional<std::string> scheme_;
-  std::optional<std::string> fragment_;
-  std::optional<std::string> query_;
+  std::optional<std::string> path_{};
+  std::optional<std::string> userinfo_{};
+  std::optional<std::string> host_{};
+  std::optional<std::uint32_t> port_{};
+  std::optional<std::string> scheme_{};
+  std::optional<std::string> fragment_{};
+  std::optional<std::string> query_{};
   bool is_ipv6_ = false;
 
   // Use PIMPL idiom to hide `uriparser`
   struct Internal;
-  std::unique_ptr<Internal> internal;
+  std::unique_ptr<Internal> internal{};
 #if defined(_MSC_VER)
 #pragma warning(default : 4251)
 #endif
