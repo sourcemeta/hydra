@@ -43,10 +43,6 @@ if(HYDRA_HTTPCLIENT OR HYDRA_HTTPSERVER OR HYDRA_BUCKET)
   add_subdirectory(src/http)
 endif()
 
-if(HYDRA_CRYPTO OR HYDRA_HTTPCLIENT OR HYDRA_BUCKET)
-  find_package(BearSSL REQUIRED)
-endif()
-
 if(HYDRA_CRYPTO OR HYDRA_HTTPSERVER OR HYDRA_BUCKET)
   add_subdirectory(src/crypto)
 endif()
