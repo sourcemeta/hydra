@@ -52,13 +52,11 @@ if(HYDRA_CRYPTO OR HYDRA_HTTPSERVER OR HYDRA_BUCKET)
 endif()
 
 if(HYDRA_HTTPCLIENT OR HYDRA_BUCKET)
-  find_package(ZLIB REQUIRED)
   find_package(CURL REQUIRED)
   add_subdirectory(src/httpclient)
 endif()
 
 if(HYDRA_HTTPSERVER)
-  find_package(ZLIB REQUIRED)
   find_package(uSockets REQUIRED)
   find_package(uWebSockets REQUIRED)
   add_subdirectory(src/httpserver)

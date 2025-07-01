@@ -1,6 +1,5 @@
 vendorpull https://github.com/sourcemeta/vendorpull 70342aaf458e6cb80baeb5b718901075fc42ede6
-core https://github.com/sourcemeta/core ef23a633e571cc24cd754c80c27efd7e85c50941
+core https://github.com/sourcemeta/core 85ae4ec6cc6b977d0085066047d6be1b8bb2445b
 bearssl https://www.bearssl.org/git/BearSSL 8ef7680081c61b486622f2d983c0d3d21e83caad
-zlib https://github.com/madler/zlib 51b7f2abdade71cd9bb0e7a373ef2610ec6f9daf
 uwebsockets https://github.com/uNetworking/uWebSockets v20.74.0
 curl https://github.com/curl/curl curl-8_14_0
