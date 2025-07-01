@@ -429,6 +429,16 @@ TEST(e2e_HTTP_Request_1_1, root_empty_istringstream) {
   EXPECT_EQ(body(response), "RECEIVED POST /");
 }
 
+TEST(e2e_HTTP_Request_1_1, GET_root_moved) {
+  sourcemeta::hydra::http::ClientRequest request{HTTPCLIENT_BASE_URL() +
+                                                 "/moved"};
+  request.method(sourcemeta::hydra::http::Method::GET);
+  sourcemeta::hydra::http::ClientResponse response{request.send().get()};
+  EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
+  EXPECT_FALSE(response.empty());
+  EXPECT_EQ(body(response), "RECEIVED GET /followed");
+}
+
 TEST(e2e_HTTP_Request_1_1, unsigned_long_header) {
   sourcemeta::hydra::http::ClientRequest request{HTTPCLIENT_BASE_URL()};
   request.method(sourcemeta::hydra::http::Method::GET);

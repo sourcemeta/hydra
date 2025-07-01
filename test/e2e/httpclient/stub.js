@@ -14,6 +14,13 @@ http.createServer((request, response) => {
     return;
   }
 
+  if (request.url === '/moved') {
+    response.statusCode = 301;
+    response.setHeader('Location', '/followed');
+    response.end();
+    return;
+  }
+
   for (const [key, value] of Object.entries(request.headers)) {
     response.setHeader(`X-${key}`, value);
   }
