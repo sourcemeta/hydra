@@ -1,6 +1,5 @@
 #include <sourcemeta/core/uuid.h>
 
-#include <sourcemeta/hydra/crypto.h>
 #include <sourcemeta/hydra/http.h>
 #include <sourcemeta/hydra/httpserver_logger.h>
 

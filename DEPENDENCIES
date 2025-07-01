@@ -1,5 +1,4 @@
 vendorpull https://github.com/sourcemeta/vendorpull 70342aaf458e6cb80baeb5b718901075fc42ede6
-core https://github.com/sourcemeta/core 85ae4ec6cc6b977d0085066047d6be1b8bb2445b
-bearssl https://www.bearssl.org/git/BearSSL 8ef7680081c61b486622f2d983c0d3d21e83caad
+core https://github.com/sourcemeta/core 0839c199a2952fac12e89321cd6ad7d3934acc7e
 uwebsockets https://github.com/uNetworking/uWebSockets v20.74.0
 curl https://github.com/curl/curl curl-8_14_0
