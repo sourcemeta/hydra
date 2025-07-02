@@ -2,6 +2,8 @@ assets
 doxygen
 test
 vendor/core
+vendor/vendorpull
+vendor/curl.mask
 cmake/FindCore.cmake
 .ackrc
 .editorconfig
