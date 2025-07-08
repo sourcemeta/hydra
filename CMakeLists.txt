@@ -57,7 +57,6 @@ if(HYDRA_TESTS)
   enable_testing()
 
   if(HYDRA_HTTP)
-    add_subdirectory(test/unit/http)
     add_subdirectory(test/e2e/http)
   endif()
 

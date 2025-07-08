@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 
+#include <sourcemeta/core/time.h>
 #include <sourcemeta/hydra/http.h>
 
 #include "environment.h"
@@ -345,7 +346,7 @@ TEST(e2e_HTTP_Request_1_1, GET_root_response_header_last_modified_gmt) {
   sourcemeta::hydra::http::ClientResponse response{request.send().get()};
   EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
 
-  const auto last_modified{response.header_gmt("last-modified")};
+  const auto last_modified{response.header("last-modified")};
   EXPECT_TRUE(last_modified.has_value());
 
   std::tm parts = {};
@@ -364,16 +365,7 @@ TEST(e2e_HTTP_Request_1_1, GET_root_response_header_last_modified_gmt) {
   const auto expected{std::chrono::system_clock::from_time_t(timegm(&parts))};
 #endif
 
-  EXPECT_EQ(last_modified.value(), expected);
-}
-
-TEST(e2e_HTTP_Request_1_1, GET_root_response_header_gmt_invalid) {
-  sourcemeta::hydra::http::ClientRequest request{HTTP_BASE_URL()};
-  request.method(sourcemeta::hydra::http::Method::GET);
-  request.capture("content-type");
-  sourcemeta::hydra::http::ClientResponse response{request.send().get()};
-  EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
-  EXPECT_THROW(response.header_gmt("content-type"), std::invalid_argument);
+  EXPECT_EQ(sourcemeta::core::from_gmt(last_modified.value()), expected);
 }
 
 TEST(e2e_HTTP_Request_1_1, GET_root_response_header_gmt_missing) {
@@ -381,7 +373,7 @@ TEST(e2e_HTTP_Request_1_1, GET_root_response_header_gmt_missing) {
   request.method(sourcemeta::hydra::http::Method::GET);
   sourcemeta::hydra::http::ClientResponse response{request.send().get()};
   EXPECT_EQ(response.status(), sourcemeta::hydra::http::Status::OK);
-  const auto last_modified{response.header_gmt("last-modified")};
+  const auto last_modified{response.header("last-modified")};
   EXPECT_FALSE(last_modified.has_value());
 }
 

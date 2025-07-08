@@ -5,11 +5,11 @@
 #include <future>           // std::future, std::promise
 #include <initializer_list> // std::initializer_list
 #include <iterator>         // std::ostream_iterator
-#include <map>              // std::map
 #include <span>             // std::span
 #include <sstream>          // std::ostringstream
 #include <string>           // std::string
 #include <string_view>      // std::string_view
+#include <unordered_map>    // std::unordered_map
 #include <utility>          // std::move
 
 namespace sourcemeta::hydra::http {
@@ -58,7 +58,7 @@ auto ClientRequest::send(std::istream &body) -> std::future<ClientResponse> {
                   std::ostream_iterator<char>(output));
       });
 
-  std::map<std::string, std::string> headers;
+  std::unordered_map<std::string, std::string> headers;
   this->stream.on_header([&headers, this](const Status, std::string_view key,
                                           std::string_view value) noexcept {
     std::string header{key};
@@ -91,7 +91,7 @@ auto ClientRequest::send() -> std::future<ClientResponse> {
                   std::ostream_iterator<char>(output));
       });
 
-  std::map<std::string, std::string> headers;
+  std::unordered_map<std::string, std::string> headers;
   this->stream.on_header([&headers, this](const Status, std::string_view key,
                                           std::string_view value) noexcept {
     std::string header{key};
