@@ -11,7 +11,6 @@
 #include <charconv>     // std::from_chars
 #include <cstddef>      // std::size_t
 #include <cstdint>      // std::uint64_t
-#include <future>       // std::future
 #include <iterator>     // std::back_inserter
 #include <memory>       // std::make_unique
 #include <optional>     // std::optional
@@ -262,7 +261,7 @@ auto ClientStream::url() const -> std::string_view {
   return this->internal->url;
 }
 
-auto ClientStream::send() -> std::future<Status> {
+auto ClientStream::send() -> Status {
   switch (this->internal->method) {
     case Method::GET:
       handle_curl(curl_easy_setopt(this->internal->handle,
@@ -362,7 +361,6 @@ auto ClientStream::send() -> std::future<Status> {
   handle_curl(curl_easy_perform(this->internal->handle));
 
   // Get status code
-  std::promise<Status> result;
   long code{0};
   handle_curl(
       curl_easy_getinfo(this->internal->handle, CURLINFO_RESPONSE_CODE, &code));
@@ -371,8 +369,7 @@ auto ClientStream::send() -> std::future<Status> {
   assert(code == static_cast<std::underlying_type_t<Status>>(
                      this->internal->status.value()) ||
          this->internal->status.value() == Status::MOVED_PERMANENTLY);
-  result.set_value(Status{static_cast<std::underlying_type_t<Status>>(code)});
-  return result.get_future();
+  return Status{static_cast<std::underlying_type_t<Status>>(code)};
 }
 
 } // namespace sourcemeta::hydra::http

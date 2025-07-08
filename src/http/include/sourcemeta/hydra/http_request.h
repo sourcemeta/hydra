@@ -8,7 +8,6 @@
 #include <sourcemeta/hydra/http_response.h>
 #include <sourcemeta/hydra/http_stream.h>
 
-#include <future>           // std::future
 #include <initializer_list> // std::initializer_list
 #include <istream>          // std::istream
 #include <set>              // std::set
@@ -158,10 +157,10 @@ public:
   ///
   /// sourcemeta::hydra::http::ClientRequest request{"https://www.example.com"};
   /// request.method(sourcemeta::hydra::http::Method::GET);
-  /// sourcemeta::hydra::http::ClientResponse response{request.send().get()};
+  /// sourcemeta::hydra::http::ClientResponse response{request.send()};
   /// assert(response.status() == sourcemeta::hydra::http::Status::OK);
   /// ```
-  auto send() -> std::future<ClientResponse>;
+  auto send() -> ClientResponse;
 
   /// Perform the HTTP request with a body. For example:
   ///
@@ -174,10 +173,10 @@ public:
   /// request.method(sourcemeta::hydra::http::Method::GET);
   /// std::istringstream body{"hello world"};
   /// sourcemeta::hydra::http::ClientResponse response{
-  ///   request.send(body).get()};
+  ///   request.send(body)};
   /// assert(response.status() == sourcemeta::hydra::http::Status::OK);
   /// ```
-  auto send(std::istream &body) -> std::future<ClientResponse>;
+  auto send(std::istream &body) -> ClientResponse;
 
 private:
   ClientStream stream;
