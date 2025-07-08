@@ -11,6 +11,7 @@ include(CMakeFindDependencyMacro)
 
 foreach(component ${HYDRA_COMPONENTS})
   if(component STREQUAL "http")
+    find_dependency(Core COMPONENTS time)
     find_dependency(BearSSL)
     find_dependency(ZLIB)
     find_dependency(CURL)

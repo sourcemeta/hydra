@@ -7,12 +7,11 @@
 
 #include <sourcemeta/hydra/http_status.h>
 
-#include <chrono>   // std::chrono::system_clock::time_point
-#include <map>      // std::map
-#include <optional> // std::optional
-#include <sstream>  // std::ostringstream, std::istringstream
-#include <string>   // std::string
-#include <vector>   // std::vector
+#include <optional>      // std::optional
+#include <sstream>       // std::ostringstream, std::istringstream
+#include <string>        // std::string
+#include <unordered_map> // std::unordered_map
+#include <vector>        // std::vector
 
 namespace sourcemeta::hydra::http {
 
@@ -23,7 +22,7 @@ public:
   // We don't want to document this internal constructor
 #if !defined(DOXYGEN)
   ClientResponse(const Status status,
-                 std::map<std::string, std::string> &&headers,
+                 std::unordered_map<std::string, std::string> &&headers,
                  std::ostringstream &&stream);
 #endif
 
@@ -62,46 +61,6 @@ public:
   /// ```
   auto header(const std::string &key) const -> std::optional<std::string>;
 
-  /// Get the value of a given response header, if any, assuming it is a GMT
-  /// timestamp. Remember that you must express your desire of capturing the
-  /// response headers you are interest in when performing the request, using
-  /// sourcemeta::hydra::http::ClientRequest::capture.
-  ///
-  /// ```cpp
-  /// #include <sourcemeta/hydra/http.h>
-  /// #include <cassert>
-  ///
-  /// sourcemeta::hydra::http::ClientRequest request{"https://www.example.com"};
-  /// request.method(sourcemeta::hydra::http::Method::GET);
-  /// request.capture("content-type");
-  /// sourcemeta::hydra::http::ClientResponse response{request.send().get()};
-  /// const auto time_point{response.header_gmt("content-type")};
-  /// assert(time_point.has_value());
-  /// ```
-  auto header_gmt(const std::string &key) const
-      -> std::optional<std::chrono::system_clock::time_point>;
-
-  /// Get the value of a given response header, if any, assuming it is a list of
-  /// comma-separated elements. Remember that you must express your desire of
-  /// capturing the response headers you are interest in when performing the
-  /// request, using sourcemeta::hydra::http::ClientRequest::capture.
-  ///
-  /// ```cpp
-  /// #include <sourcemeta/hydra/http.h>
-  /// #include <iostream>
-  ///
-  /// sourcemeta::hydra::http::ClientRequest request{"https://www.example.com"};
-  /// request.method(sourcemeta::hydra::http::Method::GET);
-  /// request.capture("vary");
-  /// sourcemeta::hydra::http::ClientResponse response{request.send().get()};
-  /// const auto parts{response.header_list("vary")};
-  /// for (const auto &part : parts) {
-  ///   std::cout << part.first << "\n";
-  /// }
-  /// ```
-  auto header_list(const std::string &key) const
-      -> std::optional<std::vector<HeaderListElement>>;
-
   /// Get a container for all the captured response headers. For example:
   ///
   /// ```cpp
@@ -119,7 +78,7 @@ public:
   ///   std::cout << key << " -> " << value << "\n";
   /// }
   /// ```
-  auto headers() const -> const std::map<std::string, std::string> &;
+  auto headers() const -> const std::unordered_map<std::string, std::string> &;
 
   /// Check whether a response has a body to consume or not. A request made
   /// with the `HEAD` HTTP method is almost always empty. Remember to always
@@ -172,7 +131,7 @@ private:
 #if defined(_MSC_VER)
 #pragma warning(disable : 4251)
 #endif
-  std::map<std::string, std::string> headers_;
+  std::unordered_map<std::string, std::string> headers_;
   std::istringstream stream_;
 #if defined(_MSC_VER)
 #pragma warning(default : 4251)

@@ -1,4 +1,7 @@
-#include <sourcemeta/hydra/http.h>
+#include <sourcemeta/hydra/http_error.h>
+#include <sourcemeta/hydra/http_method.h>
+#include <sourcemeta/hydra/http_status.h>
+#include <sourcemeta/hydra/http_stream.h>
 
 #include <curl/curl.h>
 

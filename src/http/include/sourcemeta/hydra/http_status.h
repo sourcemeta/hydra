@@ -1,12 +1,7 @@
 #ifndef SOURCEMETA_HYDRA_HTTP_STATUS_H
 #define SOURCEMETA_HYDRA_HTTP_STATUS_H
 
-#ifndef SOURCEMETA_HYDRA_HTTP_EXPORT
-#include <sourcemeta/hydra/http_export.h>
-#endif
-
 #include <cstdint> // std::uint16_t
-#include <ostream> // std::ostream
 
 namespace sourcemeta::hydra::http {
 
@@ -85,11 +80,6 @@ enum class Status : std::uint16_t {
   NOT_EXTENDED = 510,
   NETWORK_AUTHENTICATION_REQUIRED = 511
 };
-
-/// @ingroup http
-auto SOURCEMETA_HYDRA_HTTP_EXPORT operator<<(std::ostream &stream,
-                                             const Status value)
-    -> std::ostream &;
 
 } // namespace sourcemeta::hydra::http
 
