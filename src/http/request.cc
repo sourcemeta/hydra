@@ -2,7 +2,6 @@
 
 #include <algorithm>        // std::copy
 #include <cstdint>          // std::uint8_t
-#include <future>           // std::future, std::promise
 #include <initializer_list> // std::initializer_list
 #include <iterator>         // std::ostream_iterator
 #include <span>             // std::span
@@ -50,7 +49,7 @@ auto ClientRequest::url() const -> std::string_view {
   return this->stream.url();
 }
 
-auto ClientRequest::send(std::istream &body) -> std::future<ClientResponse> {
+auto ClientRequest::send(std::istream &body) -> ClientResponse {
   std::ostringstream output;
   this->stream.on_data(
       [&output](const Status, std::span<const std::uint8_t> buffer) noexcept {
@@ -77,13 +76,10 @@ auto ClientRequest::send(std::istream &body) -> std::future<ClientResponse> {
     return result;
   });
 
-  std::promise<ClientResponse> response;
-  response.set_value(
-      {this->stream.send().get(), std::move(headers), std::move(output)});
-  return response.get_future();
+  return {this->stream.send(), std::move(headers), std::move(output)};
 }
 
-auto ClientRequest::send() -> std::future<ClientResponse> {
+auto ClientRequest::send() -> ClientResponse {
   std::ostringstream output;
   this->stream.on_data(
       [&output](const Status, std::span<const std::uint8_t> buffer) noexcept {
@@ -100,10 +96,7 @@ auto ClientRequest::send() -> std::future<ClientResponse> {
     }
   });
 
-  std::promise<ClientResponse> response;
-  response.set_value(
-      {this->stream.send().get(), std::move(headers), std::move(output)});
-  return response.get_future();
+  return {this->stream.send(), std::move(headers), std::move(output)};
 }
 
 } // namespace sourcemeta::hydra::http

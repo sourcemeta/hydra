@@ -12,7 +12,7 @@
 
 TEST(e2e_HTTP_Stream_1_1, invalid_url) {
   sourcemeta::hydra::http::ClientStream request{"foobarbaz"};
-  EXPECT_THROW(request.send().wait(), sourcemeta::hydra::http::Error);
+  EXPECT_THROW(request.send(), sourcemeta::hydra::http::Error);
 }
 
 TEST(e2e_HTTP_Stream_1_1, retrieve_url) {
@@ -34,14 +34,14 @@ TEST(e2e_HTTP_Stream_1_1, method_get_by_default) {
 TEST(e2e_HTTP_Stream_1_1, no_callbacks_get) {
   sourcemeta::hydra::http::ClientStream request{HTTP_BASE_URL()};
   request.method(sourcemeta::hydra::http::Method::GET);
-  const auto status{request.send().get()};
+  const auto status{request.send()};
   EXPECT_EQ(status, sourcemeta::hydra::http::Status::OK);
 }
 
 TEST(e2e_HTTP_Stream_1_1, no_callbacks_head) {
   sourcemeta::hydra::http::ClientStream request{HTTP_BASE_URL()};
   request.method(sourcemeta::hydra::http::Method::HEAD);
-  const auto status{request.send().get()};
+  const auto status{request.send()};
   EXPECT_EQ(status, sourcemeta::hydra::http::Status::OK);
 }
 
@@ -70,7 +70,7 @@ TEST(e2e_HTTP_Stream_1_1, get_empty) {
     headers.emplace(key, value);
   });
 
-  const auto status{request.send().get()};
+  const auto status{request.send()};
 
   // Status
   EXPECT_EQ(status, sourcemeta::hydra::http::Status::OK);
@@ -100,7 +100,7 @@ TEST(e2e_HTTP_Stream_1_1, unsigned_long_header) {
     headers.emplace(key, value);
   });
 
-  const auto status{request.send().get()};
+  const auto status{request.send()};
 
   // Status
   EXPECT_EQ(status, sourcemeta::hydra::http::Status::OK);
@@ -135,7 +135,7 @@ TEST(e2e_HTTP_Stream_1_1, post_empty) {
     headers.emplace(key, value);
   });
 
-  const auto status{request.send().get()};
+  const auto status{request.send()};
 
   // Status
   EXPECT_EQ(status, sourcemeta::hydra::http::Status::OK);
@@ -178,7 +178,7 @@ TEST(e2e_HTTP_Stream_1_1, get_root_foo_bar) {
     headers.emplace(key, value);
   });
 
-  const auto status{request.send().get()};
+  const auto status{request.send()};
 
   // Status
   EXPECT_EQ(status, sourcemeta::hydra::http::Status::BAD_REQUEST);
@@ -203,7 +203,7 @@ TEST(e2e_HTTP_Stream_1_1, on_body_exception) {
     throw std::runtime_error("Error!");
   });
 
-  EXPECT_THROW(request.send().get(), sourcemeta::hydra::http::Error);
+  EXPECT_THROW(request.send(), sourcemeta::hydra::http::Error);
 }
 
 TEST(e2e_HTTP_Stream_1_1, post_root_hello_world) {
@@ -237,7 +237,7 @@ TEST(e2e_HTTP_Stream_1_1, post_root_hello_world) {
     return result;
   });
 
-  const auto status{request.send().get()};
+  const auto status{request.send()};
 
   // Status
   EXPECT_EQ(status, sourcemeta::hydra::http::Status::OK);
@@ -281,7 +281,7 @@ TEST(e2e_HTTP_Stream_1_1, put_root_hello_world) {
     return result;
   });
 
-  const auto status{request.send().get()};
+  const auto status{request.send()};
 
   // Status
   EXPECT_EQ(status, sourcemeta::hydra::http::Status::OK);
@@ -325,7 +325,7 @@ TEST(e2e_HTTP_Stream_1_1, get_root_hello_world) {
     return result;
   });
 
-  const auto status{request.send().get()};
+  const auto status{request.send()};
 
   // Status
   EXPECT_EQ(status, sourcemeta::hydra::http::Status::OK);
@@ -362,7 +362,7 @@ TEST(e2e_HTTP_Stream_1_1, post_root_empty_body) {
   request.on_body(
       [](const std::size_t) -> std::vector<std::uint8_t> { return {}; });
 
-  const auto status{request.send().get()};
+  const auto status{request.send()};
 
   // Status
   EXPECT_EQ(status, sourcemeta::hydra::http::Status::OK);
@@ -397,7 +397,7 @@ TEST(e2e_HTTP_Stream_1_1, upload_chunked_encoding_by_default) {
     return result;
   });
 
-  const auto status{request.send().get()};
+  const auto status{request.send()};
   EXPECT_EQ(status, sourcemeta::hydra::http::Status::OK);
   EXPECT_FALSE(headers.contains("x-content-length"));
   EXPECT_TRUE(headers.contains("x-transfer-encoding"));

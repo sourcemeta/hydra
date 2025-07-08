@@ -7,7 +7,6 @@
 
 #include <cstdint>     // std::uint8_t
 #include <functional>  // std::function
-#include <future>      // std::future
 #include <memory>      // std::unique_ptr
 #include <span>        // std::span
 #include <string>      // std::string
@@ -210,9 +209,9 @@ public:
   ///   std::cout << key << " -> " << value << "\n";
   /// });
   ///
-  /// auto status{request.send().get()};
+  /// auto status{request.send()};
   /// assert(status == sourcemeta::hydra::http::Status::OK);
-  auto send() -> std::future<Status>;
+  auto send() -> Status;
 
   using DataCallback =
       std::function<void(const Status, std::span<const std::uint8_t>)>;
