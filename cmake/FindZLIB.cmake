@@ -4,6 +4,7 @@ if(NOT ZLIB_FOUND)
   else()
     set(Z_HAVE_UNISTD_H OFF)
   endif()
+
   configure_file("${PROJECT_SOURCE_DIR}/vendor/zlib/zconf.h.cmakein"
     "${CMAKE_CURRENT_BINARY_DIR}/zlib/zconf.h" @ONLY)
 
@@ -42,10 +43,7 @@ if(NOT ZLIB_FOUND)
   target_compile_definitions(zlib PUBLIC _LARGEFILE64_SOURCE=1)
 
   if(HYDRA_COMPILER_MSVC)
-    target_compile_options(zlib PRIVATE
-      /W3
-      /MP
-      /wd4996)
+    target_compile_options(zlib PRIVATE /W3 /MP /wd4996)
     target_compile_definitions(zlib PRIVATE _CRT_SECURE_NO_WARNINGS)
   else()
     target_compile_options(zlib PRIVATE

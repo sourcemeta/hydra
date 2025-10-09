@@ -4,30 +4,25 @@
 #include <string>
 
 auto main() -> int {
-  // Make HTTPS request to example.com
   cpr::Response response = cpr::Get(cpr::Url{"https://example.com"});
 
-  // Check that the request succeeded
   if (response.status_code == 0) {
     std::cerr << "Error: Failed to connect to example.com\n";
     std::cerr << "Error message: " << response.error.message << "\n";
     return EXIT_FAILURE;
   }
 
-  // Check for successful HTTP status code (200 OK)
   if (response.status_code != 200) {
     std::cerr << "Error: Expected status code 200, got " << response.status_code
               << "\n";
     return EXIT_FAILURE;
   }
 
-  // Check that we received some content
   if (response.text.empty()) {
     std::cerr << "Error: Response body is empty\n";
     return EXIT_FAILURE;
   }
 
-  // Check for expected Content-Type header
   auto content_type_iterator = response.header.find("content-type");
   if (content_type_iterator == response.header.end()) {
     std::cerr << "Error: Content-Type header not found\n";
@@ -41,7 +36,6 @@ auto main() -> int {
     return EXIT_FAILURE;
   }
 
-  // Check that the response contains expected example.com content
   if (response.text.find("Example Domain") == std::string::npos) {
     std::cerr
         << "Error: Response body does not contain expected 'Example Domain'\n";

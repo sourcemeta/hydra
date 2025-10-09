@@ -374,14 +374,8 @@ if(NOT CURL_FOUND)
     "${CURL_DIR}/lib/select.h")
 
   if(HYDRA_COMPILER_MSVC)
-    target_compile_options(curl PRIVATE
-      /W3
-      /MP
-      /wd4996
-      /GS-)
+    target_compile_options(curl PRIVATE /W3 /MP /wd4996 /GS-)
     target_compile_definitions(curl PRIVATE _CRT_SECURE_NO_WARNINGS)
-    # Re-export ssize_t definitions from nghttp2 so consumers of curl also see them
-    # This is necessary because curl links nghttp2 as PRIVATE
     target_compile_definitions(curl PUBLIC _SSIZE_T_DEFINED)
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
       target_compile_definitions(curl PUBLIC "ssize_t=__int64")
@@ -428,82 +422,40 @@ if(NOT CURL_FOUND)
     endif()
   endif()
 
-  # General options
   target_compile_definitions(curl PRIVATE BUILDING_LIBCURL)
   target_compile_definitions(curl PRIVATE UNICODE)
   target_compile_definitions(curl PRIVATE _UNICODE)
   target_compile_definitions(curl PRIVATE HTTP_ONLY)
   target_compile_definitions(curl PRIVATE ENABLE_IPV6)
-  # SSL/TLS backend: Use Schannel (native) on Windows/MSVC only, mbedTLS on Unix and MSYS2.
-  # Schannel automatically uses the Windows Certificate Store for certificate validation.
-  # MSYS2 uses mbedTLS because Schannel has compatibility issues with MinGW toolchain.
-  # Note: Secure Transport was deprecated by Apple and removed from CURL 8.0+
-  if(WIN32 AND NOT CMAKE_SYSTEM_NAME STREQUAL "MSYS")
-    target_compile_definitions(curl PRIVATE USE_SCHANNEL)
-    target_compile_definitions(curl PRIVATE USE_WINDOWS_SSPI)
-  else()
-    target_compile_definitions(curl PRIVATE USE_MBEDTLS)
-  endif()
   target_compile_definitions(curl PRIVATE SIZEOF_CURL_OFF_T=8)
-
-  # To support HTTP compression
-  target_compile_definitions(curl PRIVATE HAVE_LIBZ)
-  # To support HTTP/2
-  target_compile_definitions(curl PRIVATE USE_NGHTTP2)
-  # To support async DNS resolution
-  # TODO: c-ares causes deadlocks on Windows/MSVC and has issues on MSYS2. This appears
-  # to be a known issue with c-ares async DNS resolution on Windows when built statically.
-  # For now, we only enable c-ares on Unix platforms (excluding MSYS2) and use the default
-  # threaded resolver on Windows and MSYS2.
-  # See: https://github.com/c-ares/c-ares/issues for related Windows issues
-  # Note: CURLRES_THREADED and CURLRES_ARES are automatically defined by curl_setup.h
-  # based on USE_THREADS_* or USE_ARES defines
-  if(NOT WIN32 AND NOT CMAKE_SYSTEM_NAME STREQUAL "MSYS")
-    target_compile_definitions(curl PRIVATE USE_ARES)
-  elseif(CMAKE_SYSTEM_NAME STREQUAL "MSYS")
-    # MSYS environment is POSIX-like, use POSIX threads for the threaded resolver
-    target_compile_definitions(curl PRIVATE USE_THREADS_POSIX)
-  else()
-    # Windows/MSVC uses Windows threads
-    target_compile_definitions(curl PRIVATE USE_THREADS_WIN32)
-  endif()
-  # To support PSL (Public Suffix List)
-  target_compile_definitions(curl PRIVATE USE_LIBPSL)
 
   if(NOT BUILD_SHARED_LIBS)
     target_compile_definitions(curl PUBLIC CURL_STATICLIB)
   endif()
 
-  # Platform specific options
-  if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    target_compile_definitions(curl PRIVATE CURL_OS="Linux")
-    target_compile_definitions(curl PRIVATE CURL_CA_BUNDLE="/etc/ssl/certs/ca-certificates.crt")
-    target_compile_definitions(curl PRIVATE CURL_CA_PATH="/etc/ssl/certs")
-    target_compile_definitions(curl PRIVATE HAVE_SYS_TIME_H)
-    target_compile_definitions(curl PRIVATE HAVE_LONGLONG)
-    target_compile_definitions(curl PRIVATE HAVE_RECV)
-    target_compile_definitions(curl PRIVATE HAVE_SEND)
-    target_compile_definitions(curl PRIVATE HAVE_SOCKET)
-    target_compile_definitions(curl PRIVATE HAVE_NETDB_H)
-    target_compile_definitions(curl PRIVATE HAVE_ARPA_INET_H)
-    target_compile_definitions(curl PRIVATE HAVE_SNPRINTF)
-    target_compile_definitions(curl PRIVATE HAVE_UNISTD_H)
-    target_compile_definitions(curl PRIVATE HAVE_SYS_STAT_H)
-    target_compile_definitions(curl PRIVATE HAVE_FCNTL_H)
-    target_compile_definitions(curl PRIVATE HAVE_SELECT)
-    target_compile_definitions(curl PRIVATE HAVE_POLL)
-    target_compile_definitions(curl PRIVATE HAVE_FCNTL_O_NONBLOCK)
-    target_compile_definitions(curl PRIVATE HAVE_STRUCT_TIMEVAL)
-    target_compile_definitions(curl PRIVATE HAVE_GETSOCKNAME)
-    # POSIX.1-2008
-    target_compile_definitions(curl PRIVATE _POSIX_C_SOURCE=200809L)
+  target_compile_definitions(curl PRIVATE HAVE_LIBZ)
+  target_link_libraries(curl PRIVATE ZLIB::ZLIB)
+
+  target_compile_definitions(curl PRIVATE USE_NGHTTP2)
+  target_link_libraries(curl PRIVATE Nghttp2::nghttp2)
+
+  target_compile_definitions(curl PRIVATE USE_LIBPSL)
+  target_link_libraries(curl PRIVATE PSL::psl)
+
+  if(WIN32)
+    target_compile_definitions(curl PRIVATE CURL_OS="Windows")
+    target_compile_definitions(curl PRIVATE USE_SCHANNEL)
+    target_compile_definitions(curl PRIVATE USE_WINDOWS_SSPI)
+    target_compile_definitions(curl PRIVATE USE_THREADS_WIN32)
+    target_link_libraries(curl PRIVATE ws2_32)
+    target_link_libraries(curl PRIVATE Crypt32)
+    target_link_libraries(curl PRIVATE Secur32)
   elseif(CMAKE_SYSTEM_NAME STREQUAL "MSYS")
     target_compile_definitions(curl PRIVATE CURL_OS="MSYS")
-    # Note: MSYS2 uses mbedTLS for SSL/TLS, not Schannel
-    # MSYS2 provides CA certificates via the ca-certificates package at /usr/ssl/certs/ca-bundle.crt
-    # Users need to install ca-certificates package: pacman -S ca-certificates
     target_compile_definitions(curl PRIVATE CURL_CA_BUNDLE="/usr/ssl/certs/ca-bundle.crt")
     target_compile_definitions(curl PRIVATE CURL_CA_PATH="/usr/ssl/certs")
+    target_compile_definitions(curl PRIVATE USE_MBEDTLS)
+    target_compile_definitions(curl PRIVATE USE_THREADS_POSIX)
     target_compile_definitions(curl PRIVATE HAVE_SYS_TIME_H)
     target_compile_definitions(curl PRIVATE HAVE_LONGLONG)
     target_compile_definitions(curl PRIVATE HAVE_RECV)
@@ -527,10 +479,39 @@ if(NOT CURL_FOUND)
     target_compile_definitions(curl PRIVATE HAVE_SYS_SOCKET_H)
     target_compile_definitions(curl PRIVATE HAVE_NETINET_IN_H)
     target_compile_definitions(curl PRIVATE HAVE_PTHREAD_H)
+    target_link_libraries(curl PRIVATE MbedTLS::mbedtls)
+    target_link_libraries(curl PRIVATE pthread)
+  elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    target_compile_definitions(curl PRIVATE CURL_OS="Linux")
+    target_compile_definitions(curl PRIVATE CURL_CA_BUNDLE="/etc/ssl/certs/ca-certificates.crt")
+    target_compile_definitions(curl PRIVATE CURL_CA_PATH="/etc/ssl/certs")
+    target_compile_definitions(curl PRIVATE USE_MBEDTLS)
+    target_compile_definitions(curl PRIVATE USE_ARES)
+    target_compile_definitions(curl PRIVATE HAVE_SYS_TIME_H)
+    target_compile_definitions(curl PRIVATE HAVE_LONGLONG)
+    target_compile_definitions(curl PRIVATE HAVE_RECV)
+    target_compile_definitions(curl PRIVATE HAVE_SEND)
+    target_compile_definitions(curl PRIVATE HAVE_SOCKET)
+    target_compile_definitions(curl PRIVATE HAVE_NETDB_H)
+    target_compile_definitions(curl PRIVATE HAVE_ARPA_INET_H)
+    target_compile_definitions(curl PRIVATE HAVE_SNPRINTF)
+    target_compile_definitions(curl PRIVATE HAVE_UNISTD_H)
+    target_compile_definitions(curl PRIVATE HAVE_SYS_STAT_H)
+    target_compile_definitions(curl PRIVATE HAVE_FCNTL_H)
+    target_compile_definitions(curl PRIVATE HAVE_SELECT)
+    target_compile_definitions(curl PRIVATE HAVE_POLL)
+    target_compile_definitions(curl PRIVATE HAVE_FCNTL_O_NONBLOCK)
+    target_compile_definitions(curl PRIVATE HAVE_STRUCT_TIMEVAL)
+    target_compile_definitions(curl PRIVATE HAVE_GETSOCKNAME)
+    target_compile_definitions(curl PRIVATE _POSIX_C_SOURCE=200809L)
+    target_link_libraries(curl PRIVATE MbedTLS::mbedtls)
+    target_link_libraries(curl PRIVATE c-ares::cares)
   elseif(APPLE)
     target_compile_definitions(curl PRIVATE CURL_OS="Darwin")
     target_compile_definitions(curl PRIVATE CURL_CA_BUNDLE="/etc/ssl/cert.pem")
     target_compile_definitions(curl PRIVATE CURL_CA_PATH="/etc/ssl/certs")
+    target_compile_definitions(curl PRIVATE USE_MBEDTLS)
+    target_compile_definitions(curl PRIVATE USE_ARES)
     target_compile_definitions(curl PRIVATE HAVE_RECV)
     target_compile_definitions(curl PRIVATE HAVE_SEND)
     target_compile_definitions(curl PRIVATE HAVE_SOCKET)
@@ -544,37 +525,13 @@ if(NOT CURL_FOUND)
     target_compile_definitions(curl PRIVATE HAVE_FCNTL_O_NONBLOCK)
     target_compile_definitions(curl PRIVATE HAVE_STRUCT_TIMEVAL)
     target_compile_definitions(curl PRIVATE HAVE_GETSOCKNAME)
-  elseif(WIN32)
-    target_compile_definitions(curl PRIVATE CURL_OS="Windows")
+    target_link_libraries(curl PRIVATE MbedTLS::mbedtls)
+    target_link_libraries(curl PRIVATE c-ares::cares)
+    target_link_libraries(curl PRIVATE "-framework Foundation")
+    target_link_libraries(curl PRIVATE "-framework SystemConfiguration")
   endif()
 
   target_include_directories(curl PRIVATE "${CURL_DIR}/lib")
-
-  target_link_libraries(curl PRIVATE ZLIB::ZLIB)
-  # Link mbedTLS on Unix platforms and MSYS2 (Windows/MSVC uses Schannel)
-  if(NOT WIN32 OR CMAKE_SYSTEM_NAME STREQUAL "MSYS")
-    target_link_libraries(curl PRIVATE MbedTLS::mbedtls)
-  endif()
-  target_link_libraries(curl PRIVATE Nghttp2::nghttp2)
-  # Only link c-ares on Unix platforms (excluding MSYS2) (see TODO comment above)
-  if(NOT WIN32 AND NOT CMAKE_SYSTEM_NAME STREQUAL "MSYS")
-    target_link_libraries(curl PRIVATE CAres::cares)
-  endif()
-  target_link_libraries(curl PRIVATE PSL::psl)
-  if(APPLE)
-    target_link_libraries(curl PRIVATE "-framework Foundation")
-    target_link_libraries(curl PRIVATE "-framework SystemConfiguration")
-  elseif(WIN32 AND NOT CMAKE_SYSTEM_NAME STREQUAL "MSYS")
-    # Only link Windows SSL/networking libraries on MSVC (MSYS2 uses mbedTLS)
-    target_link_libraries(curl PRIVATE ws2_32)
-    target_link_libraries(curl PRIVATE Crypt32)
-    target_link_libraries(curl PRIVATE Secur32)  # For SSPI/Schannel
-  elseif(CMAKE_SYSTEM_NAME STREQUAL "MSYS")
-    # MSYS2 is POSIX-like, doesn't use Windows native libraries
-    # Link pthread for threaded resolver
-    target_link_libraries(curl PRIVATE pthread)
-  endif()
-
   target_include_directories(curl PUBLIC
     "$<BUILD_INTERFACE:${CURL_DIR}/include>"
     "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
@@ -609,10 +566,7 @@ if(NOT CURL_FOUND)
       DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/curl"
       COMPONENT sourcemeta_hydra_dev)
 
-    # TODO: Why does `find_dependency(ZLIB)` fail to locate ZLIB
-    # if even `CMAKE_PREFIX_PATH` is correct?
     file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/curl-config.cmake
-      "include(\"\${CMAKE_CURRENT_LIST_DIR}/../zlib/zlib-config.cmake\")\n"
       "include(\"\${CMAKE_CURRENT_LIST_DIR}/curl.cmake\")\n"
       "check_required_components(\"curl\")\n")
     install(FILES

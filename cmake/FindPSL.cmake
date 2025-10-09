@@ -1,7 +1,6 @@
 if(NOT PSL_FOUND)
   set(LIBPSL_DIR "${PROJECT_SOURCE_DIR}/vendor/libpsl")
 
-  # Read version from version.txt file
   file(STRINGS "${LIBPSL_DIR}/version.txt" LIBPSL_VERSION_LINE LIMIT_COUNT 1)
   if(LIBPSL_VERSION_LINE)
     string(REGEX MATCH "([0-9]+)\\.([0-9]+)\\.([0-9]+)" LIBPSL_VERSION_MATCH "${LIBPSL_VERSION_LINE}")
@@ -26,12 +25,7 @@ if(NOT PSL_FOUND)
   add_library(psl ${LIBPSL_SOURCES})
 
   if(HYDRA_COMPILER_MSVC)
-    target_compile_options(psl PRIVATE
-      /W3
-      /wd4996
-      /wd4267
-      /wd4244
-      /MP)
+    target_compile_options(psl PRIVATE /W3 /wd4996 /wd4267 /wd4244 /MP)
     target_compile_definitions(psl PRIVATE _CRT_SECURE_NO_WARNINGS)
   else()
     target_compile_options(psl PRIVATE
@@ -55,7 +49,6 @@ if(NOT PSL_FOUND)
     endif()
   endif()
 
-  # Generate libpsl.h header with version information
   configure_file("${LIBPSL_DIR}/include/libpsl.h.in"
     "${CMAKE_CURRENT_BINARY_DIR}/libpsl_generated/libpsl.h" @ONLY)
 
@@ -65,7 +58,6 @@ if(NOT PSL_FOUND)
     target_compile_definitions(psl PUBLIC PSL_STATIC)
   endif()
 
-  # Platform-specific defines
   if(UNIX)
     target_compile_definitions(psl PRIVATE HAVE_VISIBILITY)
     target_compile_definitions(psl PRIVATE _GNU_SOURCE)
@@ -76,7 +68,6 @@ if(NOT PSL_FOUND)
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/libpsl_generated>"
     "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
 
-  # Link Windows socket library for shared builds
   if(WIN32)
     target_link_libraries(psl PRIVATE ws2_32)
   endif()
@@ -115,7 +106,6 @@ if(NOT PSL_FOUND)
       DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/psl"
       COMPONENT sourcemeta_hydra_dev)
 
-    # Install headers
     install(FILES "${CMAKE_CURRENT_BINARY_DIR}/libpsl_generated/libpsl.h"
       DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
       COMPONENT sourcemeta_hydra_dev)

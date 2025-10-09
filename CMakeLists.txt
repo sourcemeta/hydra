@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.16)
+# We use live-at-head instead of versioning
 project(hydra VERSION 0.0.0 LANGUAGES C CXX)
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
 option(SOURCEMETA_HYDRA_INSTALL "Install the Sourcemeta Hydra library" ON)
 option(SOURCEMETA_HYDRA_TESTS "Build the Sourcemeta Hydra tests" OFF)
 
-# Compiler detection
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
   set(HYDRA_COMPILER_LLVM ON)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -39,16 +39,17 @@ if(CMAKE_SYSTEM_NAME STREQUAL "MSYS")
 endif()
 
 find_package(ZLIB REQUIRED)
-# mbedTLS is only used on Unix platforms and MSYS2 (Windows/MSVC uses Schannel for SSL)
+
 if(NOT WIN32 OR CMAKE_SYSTEM_NAME STREQUAL "MSYS")
   find_package(MbedTLS REQUIRED)
 endif()
+
 find_package(Nghttp2 REQUIRED)
-# c-ares is only used on non-Windows platforms due to Windows deadlock issues
-# MSYS2 also has issues with c-ares, so exclude it there too
+
 if(NOT WIN32 AND NOT CMAKE_SYSTEM_NAME STREQUAL "MSYS")
   find_package(CAres REQUIRED)
 endif()
+
 find_package(PSL REQUIRED)
 find_package(CURL REQUIRED)
 find_package(CPR REQUIRED)

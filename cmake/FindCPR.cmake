@@ -86,13 +86,7 @@ if(NOT CPR_FOUND)
     "${CPR_DIR}/cpr/util.cpp")
 
   if(HYDRA_COMPILER_MSVC)
-    target_compile_options(cpr PRIVATE
-      /W3
-      /MP
-      /EHsc
-      /wd4996
-      /wd4244
-      /GS-)
+    target_compile_options(cpr PRIVATE /W3 /MP /EHsc /wd4996 /wd4244 /GS-)
     target_compile_definitions(cpr PRIVATE _CRT_SECURE_NO_WARNINGS)
   else()
     target_compile_options(cpr PRIVATE
@@ -125,6 +119,7 @@ if(NOT CPR_FOUND)
     endif()
   endif()
 
+  # We don't need to know the actual version
   set(cpr_VERSION "0.0.0")
   set(cpr_VERSION_MAJOR 0)
   set(cpr_VERSION_MINOR 0)
@@ -174,7 +169,6 @@ if(NOT CPR_FOUND)
       DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/cpr"
       COMPONENT sourcemeta_hydra_dev)
 
-    # Install headers
     install(DIRECTORY "${CPR_DIR}/include/cpr"
       DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
       COMPONENT sourcemeta_hydra_dev)
