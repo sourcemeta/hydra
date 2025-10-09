@@ -63,6 +63,9 @@ jobs:
           - os: windows-latest
             type: static
             shell: msys2 {0}
+          - os: windows-latest
+            type: wsl-2
+            shell: wsl-bash {0}
 
     defaults:
       run:
@@ -79,6 +82,14 @@ jobs:
         with:
           install: cmake make gcc
 
+      # See https://github.com/Vampire/setup-wsl
+      - uses: Vampire/setup-wsl@v5
+        if: runner.os == 'windows' && matrix.platform.type == 'wsl-2'
+        with:
+          distribution: Ubuntu-22.04
+          additional-packages: cmake build-essential ca-certificates
+          wsl-version: 2
+
       - uses: actions/checkout@v4
       - name: Install dependencies (macOS)
         if: runner.os == 'macos'
@@ -89,7 +100,7 @@ jobs:
 
       - run: cmake --version
       - name: Configure (static)
-        if: matrix.platform.type == 'static'
+        if: matrix.platform.type == 'static' || matrix.platform.type == 'wsl-2'
         run: >
           cmake -S . -B ./build
           -DCMAKE_BUILD_TYPE:STRING=Release
