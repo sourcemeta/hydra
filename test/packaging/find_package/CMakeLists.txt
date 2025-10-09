@@ -1,13 +1,12 @@
 cmake_minimum_required(VERSION 3.18)
 project(core_hello VERSION 0.0.1 LANGUAGES CXX)
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
 find_package(Hydra REQUIRED)
 add_executable(hello hello.cc)
+set_target_properties(hello PROPERTIES
+  CXX_STANDARD 20
+  CXX_STANDARD_REQUIRED ON
+  CXX_EXTENSIONS OFF)
 
-# We exercise all dependencies to make sure they
-# are all installed and exposed as expected
 target_link_libraries(hello PRIVATE ZLIB::ZLIB)
 if(NOT WIN32 OR CMAKE_SYSTEM_NAME STREQUAL "MSYS")
   target_link_libraries(hello PRIVATE MbedTLS::mbedtls)
