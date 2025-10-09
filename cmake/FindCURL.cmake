@@ -456,6 +456,7 @@ if(NOT CURL_FOUND)
     target_compile_definitions(curl PRIVATE CURL_CA_PATH="/usr/ssl/certs")
     target_compile_definitions(curl PRIVATE USE_MBEDTLS)
     target_compile_definitions(curl PRIVATE USE_THREADS_POSIX)
+    target_compile_definitions(curl PRIVATE _POSIX_C_SOURCE=200809L)
     target_compile_definitions(curl PRIVATE HAVE_SYS_TIME_H)
     target_compile_definitions(curl PRIVATE HAVE_LONGLONG)
     target_compile_definitions(curl PRIVATE HAVE_RECV)
@@ -540,6 +541,10 @@ if(NOT CURL_FOUND)
 
   set_target_properties(curl
     PROPERTIES
+      C_STANDARD 11
+      C_STANDARD_REQUIRED ON
+      C_EXTENSIONS OFF
+      POSITION_INDEPENDENT_CODE ON
       OUTPUT_NAME curl
       PUBLIC_HEADER "${CURL_PUBLIC_HEADER}"
       PRIVATE_HEADER "${CURL_PRIVATE_HEADERS}"
