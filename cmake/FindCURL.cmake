@@ -451,20 +451,15 @@ if(NOT CURL_FOUND)
   # To support HTTP/2
   target_compile_definitions(curl PRIVATE USE_NGHTTP2)
   # To support async DNS resolution
-  # TODO: c-ares causes deadlocks on Windows/MSVC and has issues on MSYS2. This appears
-  # to be a known issue with c-ares async DNS resolution on Windows when built statically.
-  # For now, we only enable c-ares on Unix platforms (excluding MSYS2) and use the default
-  # threaded resolver on Windows and MSYS2.
+  # Note: c-ares causes deadlocks on Windows/MSVC when built statically.
+  # MSYS2 uses c-ares with POSIX headers (like Cygwin).
   # See: https://github.com/c-ares/c-ares/issues for related Windows issues
   # Note: CURLRES_THREADED and CURLRES_ARES are automatically defined by curl_setup.h
   # based on USE_THREADS_* or USE_ARES defines
-  if(NOT WIN32 AND NOT CMAKE_SYSTEM_NAME STREQUAL "MSYS")
+  if(NOT WIN32 OR CMAKE_SYSTEM_NAME STREQUAL "MSYS")
     target_compile_definitions(curl PRIVATE USE_ARES)
-  elseif(CMAKE_SYSTEM_NAME STREQUAL "MSYS")
-    # MSYS environment is POSIX-like, use POSIX threads for the threaded resolver
-    target_compile_definitions(curl PRIVATE USE_THREADS_POSIX)
   else()
-    # Windows/MSVC uses Windows threads
+    # Windows/MSVC uses Windows threads for the threaded resolver
     target_compile_definitions(curl PRIVATE USE_THREADS_WIN32)
   endif()
   # To support PSL (Public Suffix List)
@@ -499,7 +494,7 @@ if(NOT CURL_FOUND)
     target_compile_definitions(curl PRIVATE _POSIX_C_SOURCE=200809L)
   elseif(CMAKE_SYSTEM_NAME STREQUAL "MSYS")
     target_compile_definitions(curl PRIVATE CURL_OS="MSYS")
-    # Note: MSYS2 uses mbedTLS for SSL/TLS, not Schannel
+    # MSYS2 uses mbedTLS for SSL/TLS and c-ares for async DNS (with POSIX headers like Cygwin)
     # MSYS2 provides CA certificates via the ca-certificates package at /usr/ssl/certs/ca-bundle.crt
     # Users need to install ca-certificates package: pacman -S ca-certificates
     target_compile_definitions(curl PRIVATE CURL_CA_BUNDLE="/usr/ssl/certs/ca-bundle.crt")
@@ -556,8 +551,8 @@ if(NOT CURL_FOUND)
     target_link_libraries(curl PRIVATE MbedTLS::mbedtls)
   endif()
   target_link_libraries(curl PRIVATE Nghttp2::nghttp2)
-  # Only link c-ares on Unix platforms (excluding MSYS2) (see TODO comment above)
-  if(NOT WIN32 AND NOT CMAKE_SYSTEM_NAME STREQUAL "MSYS")
+  # Link c-ares on Unix platforms and MSYS2 (Windows/MSVC uses threaded resolver)
+  if(NOT WIN32 OR CMAKE_SYSTEM_NAME STREQUAL "MSYS")
     target_link_libraries(curl PRIVATE CAres::cares)
   endif()
   target_link_libraries(curl PRIVATE PSL::psl)
@@ -569,10 +564,6 @@ if(NOT CURL_FOUND)
     target_link_libraries(curl PRIVATE ws2_32)
     target_link_libraries(curl PRIVATE Crypt32)
     target_link_libraries(curl PRIVATE Secur32)  # For SSPI/Schannel
-  elseif(CMAKE_SYSTEM_NAME STREQUAL "MSYS")
-    # MSYS2 is POSIX-like, doesn't use Windows native libraries
-    # Link pthread for threaded resolver
-    target_link_libraries(curl PRIVATE pthread)
   endif()
 
   target_include_directories(curl PUBLIC

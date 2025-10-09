@@ -45,8 +45,8 @@ if(NOT WIN32 OR CMAKE_SYSTEM_NAME STREQUAL "MSYS")
 endif()
 find_package(Nghttp2 REQUIRED)
 # c-ares is only used on non-Windows platforms due to Windows deadlock issues
-# MSYS2 also has issues with c-ares, so exclude it there too
-if(NOT WIN32 AND NOT CMAKE_SYSTEM_NAME STREQUAL "MSYS")
+# MSYS2 now uses c-ares for async DNS resolution (uses POSIX headers like Cygwin)
+if(NOT WIN32 OR CMAKE_SYSTEM_NAME STREQUAL "MSYS")
   find_package(CAres REQUIRED)
 endif()
 find_package(PSL REQUIRED)
