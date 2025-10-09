@@ -1,7 +1,6 @@
 if(NOT Nghttp2_FOUND)
   set(NGHTTP2_DIR "${PROJECT_SOURCE_DIR}/vendor/nghttp2")
 
-  # Read version from DEPENDENCIES file
   file(STRINGS "${PROJECT_SOURCE_DIR}/DEPENDENCIES" NGHTTP2_VERSION_LINE
     REGEX "^nghttp2 ")
   if(NGHTTP2_VERSION_LINE)
@@ -14,7 +13,7 @@ if(NOT Nghttp2_FOUND)
       "(${NGHTTP2_VERSION_MAJOR} << 16) | (${NGHTTP2_VERSION_MINOR} << 8) | ${NGHTTP2_VERSION_PATCH}"
       OUTPUT_FORMAT HEXADECIMAL)
   else()
-    message(FATAL_ERROR "Could not find nghttp2 version in DEPENDENCIES file")
+    message(FATAL_ERROR "Could not find nghttp2 version in DEPENDENCIES")
   endif()
 
   set(NGHTTP2_PUBLIC_HEADER "${NGHTTP2_DIR}/lib/includes/nghttp2/nghttp2.h")
@@ -51,12 +50,7 @@ if(NOT Nghttp2_FOUND)
 
   if(HYDRA_COMPILER_MSVC)
     target_compile_options(nghttp2 PRIVATE
-      /W3
-      /wd4996
-      /wd4334
-      /MP
-      /Zc:inline-
-      /GS-)
+      /W3 /wd4996 /wd4334 /MP /Zc:inline- /GS-)
     target_compile_definitions(nghttp2 PRIVATE _CRT_SECURE_NO_WARNINGS)
     # Define ssize_t for MSVC using the same approach as curl's config-win32.h
     # This ensures compatibility between nghttp2 and curl
@@ -97,7 +91,6 @@ if(NOT Nghttp2_FOUND)
     endif()
   endif()
 
-  # Generate version header
   set(PACKAGE_VERSION "${NGHTTP2_VERSION_STRING}")
   set(PACKAGE_VERSION_NUM "${NGHTTP2_VERSION_NUM}")
   configure_file("${NGHTTP2_DIR}/lib/includes/nghttp2/nghttp2ver.h.in"
@@ -149,7 +142,6 @@ if(NOT Nghttp2_FOUND)
       DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/nghttp2"
       COMPONENT sourcemeta_hydra_dev)
 
-    # Install headers
     install(FILES "${NGHTTP2_PUBLIC_HEADER}"
       DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/nghttp2"
       COMPONENT sourcemeta_hydra_dev)

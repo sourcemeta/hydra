@@ -1,7 +1,6 @@
 if(NOT MbedTLS_FOUND)
   set(MBEDTLS_DIR "${PROJECT_SOURCE_DIR}/vendor/mbedtls")
 
-  # All source files from mbedcrypto, mbedx509, and mbedtls libraries
   set(MBEDTLS_SOURCES
     # Crypto library sources
     "${MBEDTLS_DIR}/library/aes.c"
@@ -115,7 +114,6 @@ if(NOT MbedTLS_FOUND)
     "${MBEDTLS_DIR}/library/ssl_tls13_client.c"
     "${MBEDTLS_DIR}/library/ssl_tls13_generic.c")
 
-  # Build single mbedtls library
   if(WIN32)
     add_library(mbedtls STATIC ${MBEDTLS_SOURCES})
   else()
@@ -124,12 +122,7 @@ if(NOT MbedTLS_FOUND)
 
   if(HYDRA_COMPILER_MSVC)
     target_compile_options(mbedtls PRIVATE
-      /W3
-      /MP
-      /wd4244  # Conversion warnings
-      /wd4267  # Size_t conversion warnings
-      /wd4996
-      /wd4146) # Unary minus on unsigned type
+      /W3 /MP /wd4244 /wd4267 /wd4996 /wd4146)
     target_compile_definitions(mbedtls PRIVATE _CRT_SECURE_NO_WARNINGS)
   else()
     target_compile_options(mbedtls PRIVATE
@@ -206,7 +199,6 @@ if(NOT MbedTLS_FOUND)
       DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/mbedtls"
       COMPONENT sourcemeta_hydra_dev)
 
-    # Install headers
     install(DIRECTORY "${MBEDTLS_DIR}/include/mbedtls"
       DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
       COMPONENT sourcemeta_hydra_dev)

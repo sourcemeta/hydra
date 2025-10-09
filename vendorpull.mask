@@ -1,0 +1,14 @@
+test
+vendor/c-ares.mask
+vendor/cpr.mask
+vendor/curl.mask
+vendor/libpsl.mask
+vendor/mbedtls.mask
+vendor/nghttp2.mask
+vendor/zlib.mask
+.editorconfig
+.gitattributes
+.gitignore
+Brewfile
+Makefile
+README.markdown

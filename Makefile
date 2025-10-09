@@ -1,7 +1,6 @@
 # Programs
 CMAKE = cmake
 CTEST = ctest
-DOCKER = docker
 
 # Options
 PRESET = Debug
@@ -27,12 +26,8 @@ compile: .always
 test: .always
 	$(CTEST) --test-dir ./build --build-config $(PRESET) --output-on-failure --parallel
 
-docker: .always
-	$(DOCKER) build . --file Dockerfile --progress plain
-
 clean: .always
 	$(CMAKE) -E rm -R -f build
-	$(DOCKER) system prune --force --all --volumes || true
 
 # For NMake, which doesn't support .PHONY
 .always:

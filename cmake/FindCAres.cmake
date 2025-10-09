@@ -1,7 +1,6 @@
 if(NOT CAres_FOUND)
   set(CARES_DIR "${PROJECT_SOURCE_DIR}/vendor/c-ares")
 
-  # Read version from DEPENDENCIES file
   file(STRINGS "${PROJECT_SOURCE_DIR}/DEPENDENCIES" CARES_VERSION_LINE
     REGEX "^c-ares ")
   if(CARES_VERSION_LINE)
@@ -11,7 +10,7 @@ if(NOT CAres_FOUND)
     set(CARES_VERSION_PATCH "${CMAKE_MATCH_3}")
     set(CARES_VERSION_STRING "${CARES_VERSION_MAJOR}.${CARES_VERSION_MINOR}.${CARES_VERSION_PATCH}")
   else()
-    message(FATAL_ERROR "Could not find c-ares version in DEPENDENCIES file")
+    message(FATAL_ERROR "Could not find c-ares version in DEPENDENCIES")
   endif()
 
   set(CARES_PUBLIC_HEADERS
@@ -117,19 +116,53 @@ if(NOT CAres_FOUND)
   add_library(cares ${CARES_SOURCES})
 
   if(HYDRA_COMPILER_MSVC)
-    target_compile_options(cares PRIVATE
-      /W3
-      /wd4996
-      /wd4013
-      /MP)
-    target_compile_definitions(cares PRIVATE
-      _CRT_SECURE_NO_WARNINGS
-      CARES_BUILDING_LIBRARY
-      HAVE_WS2TCPIP_H
-      HAVE_IPHLPAPI_H
-      HAVE_SYS_STAT_H
-      HAVE_IOCTLSOCKET
-      HAVE_IOCTLSOCKET_FIONBIO)
+    target_compile_options(cares PRIVATE /W3 /wd4996 /wd4013 /MP)
+    set(CARES_TYPEOF_ARES_SOCKLEN_T "int")
+    set(CARES_TYPEOF_ARES_SSIZE_T "SSIZE_T")
+    set(RECV_TYPE_ARG1 "SOCKET")
+    set(RECV_TYPE_ARG2 "char *")
+    set(RECV_TYPE_ARG3 "int")
+    set(RECV_TYPE_ARG4 "int")
+    set(RECVFROM_TYPE_ARG1 "SOCKET")
+    set(RECVFROM_TYPE_ARG2 "char *")
+    set(RECVFROM_TYPE_ARG3 "int")
+    set(RECVFROM_TYPE_ARG4 "int")
+    set(RECVFROM_TYPE_ARG5 "struct sockaddr *")
+    set(RECVFROM_TYPE_ARG6 "int *")
+    set(SEND_TYPE_ARG1 "SOCKET")
+    set(SEND_TYPE_ARG2 "const char *")
+    set(SEND_TYPE_ARG3 "int")
+    set(SEND_TYPE_ARG4 "int")
+    set(GETHOSTNAME_TYPE_ARG2 "int")
+    set(GETNAMEINFO_TYPE_ARG1 "struct sockaddr *")
+    set(GETNAMEINFO_TYPE_ARG2 "int")
+    set(GETNAMEINFO_TYPE_ARG46 "DWORD")
+    set(GETNAMEINFO_TYPE_ARG7 "int")
+    target_compile_definitions(cares PRIVATE _CRT_SECURE_NO_WARNINGS)
+    target_compile_definitions(cares PRIVATE HAVE_WINDOWS_H)
+    target_compile_definitions(cares PRIVATE HAVE_WINSOCK2_H)
+    target_compile_definitions(cares PRIVATE HAVE_WS2TCPIP_H)
+    target_compile_definitions(cares PRIVATE HAVE_IPHLPAPI_H)
+    target_compile_definitions(cares PRIVATE HAVE_NETIOAPI_H)
+    target_compile_definitions(cares PRIVATE HAVE_SYS_STAT_H)
+    target_compile_definitions(cares PRIVATE HAVE_STRUCT_TIMEVAL)
+    target_compile_definitions(cares PRIVATE HAVE_STRUCT_SOCKADDR_IN6)
+    target_compile_definitions(cares PRIVATE HAVE_STRUCT_ADDRINFO)
+    target_compile_definitions(cares PRIVATE HAVE_AF_INET6)
+    target_compile_definitions(cares PRIVATE HAVE_RECV)
+    target_compile_definitions(cares PRIVATE HAVE_RECVFROM)
+    target_compile_definitions(cares PRIVATE HAVE_SEND)
+    target_compile_definitions(cares PRIVATE HAVE_SENDTO)
+    target_compile_definitions(cares PRIVATE HAVE_IOCTLSOCKET)
+    target_compile_definitions(cares PRIVATE HAVE_IOCTLSOCKET_FIONBIO)
+    target_compile_definitions(cares PRIVATE HAVE_ERRNO_H)
+    target_compile_definitions(cares PRIVATE HAVE_STDLIB_H)
+    target_compile_definitions(cares PRIVATE HAVE_STRING_H)
+    target_compile_definitions(cares PRIVATE HAVE_LIMITS_H)
+    target_compile_definitions(cares PRIVATE HAVE_STDINT_H)
+    target_compile_definitions(cares PRIVATE _WIN32_WINNT=0x0600)
+    target_link_libraries(cares PRIVATE ws2_32)
+    target_link_libraries(cares PRIVATE iphlpapi)
   else()
     target_compile_options(cares PRIVATE
       -Wall
@@ -153,82 +186,33 @@ if(NOT CAres_FOUND)
         -fno-math-errno
         -fwrapv)
     endif()
-  endif()
 
-  # Generate configuration headers
-  if(WIN32 AND HYDRA_COMPILER_MSVC)
-    set(CARES_TYPEOF_ARES_SOCKLEN_T "int")
-    set(CARES_TYPEOF_ARES_SSIZE_T "SSIZE_T")
-  else()
     set(CARES_TYPEOF_ARES_SOCKLEN_T "socklen_t")
     set(CARES_TYPEOF_ARES_SSIZE_T "ssize_t")
-  endif()
-
-  # Socket function type definitions for Unix and Unix-like (MSYS2)
-  if(UNIX OR CMAKE_SYSTEM_NAME STREQUAL "MSYS")
     set(RECV_TYPE_ARG1 "int")
     set(RECV_TYPE_ARG2 "void *")
     set(RECV_TYPE_ARG3 "size_t")
     set(RECV_TYPE_ARG4 "int")
-
     set(RECVFROM_TYPE_ARG1 "int")
     set(RECVFROM_TYPE_ARG2 "void *")
     set(RECVFROM_TYPE_ARG3 "size_t")
     set(RECVFROM_TYPE_ARG4 "int")
     set(RECVFROM_TYPE_ARG5 "struct sockaddr *")
     set(RECVFROM_TYPE_ARG6 "socklen_t *")
-
     set(SEND_TYPE_ARG1 "int")
     set(SEND_TYPE_ARG2 "const void *")
     set(SEND_TYPE_ARG3 "size_t")
     set(SEND_TYPE_ARG4 "int")
-
     set(GETHOSTNAME_TYPE_ARG2 "size_t")
     set(GETNAMEINFO_TYPE_ARG1 "struct sockaddr *")
     set(GETNAMEINFO_TYPE_ARG2 "socklen_t")
     set(GETNAMEINFO_TYPE_ARG46 "size_t")
     set(GETNAMEINFO_TYPE_ARG7 "int")
-  elseif(WIN32 AND HYDRA_COMPILER_MSVC)
-    set(RECV_TYPE_ARG1 "SOCKET")
-    set(RECV_TYPE_ARG2 "char *")
-    set(RECV_TYPE_ARG3 "int")
-    set(RECV_TYPE_ARG4 "int")
 
-    set(RECVFROM_TYPE_ARG1 "SOCKET")
-    set(RECVFROM_TYPE_ARG2 "char *")
-    set(RECVFROM_TYPE_ARG3 "int")
-    set(RECVFROM_TYPE_ARG4 "int")
-    set(RECVFROM_TYPE_ARG5 "struct sockaddr *")
-    set(RECVFROM_TYPE_ARG6 "int *")
-
-    set(SEND_TYPE_ARG1 "SOCKET")
-    set(SEND_TYPE_ARG2 "const char *")
-    set(SEND_TYPE_ARG3 "int")
-    set(SEND_TYPE_ARG4 "int")
-
-    set(GETHOSTNAME_TYPE_ARG2 "int")
-    set(GETNAMEINFO_TYPE_ARG1 "struct sockaddr *")
-    set(GETNAMEINFO_TYPE_ARG2 "int")
-    set(GETNAMEINFO_TYPE_ARG46 "DWORD")
-    set(GETNAMEINFO_TYPE_ARG7 "int")
-  endif()
-
-  configure_file("${CARES_DIR}/include/ares_build.h.cmake"
-    "${CMAKE_CURRENT_BINARY_DIR}/cares_generated/ares_build.h" @ONLY)
-  configure_file("${CARES_DIR}/src/lib/ares_config.h.cmake"
-    "${CMAKE_CURRENT_BINARY_DIR}/cares_generated/ares_config.h" @ONLY)
-
-  target_compile_definitions(cares PRIVATE HAVE_CONFIG_H)
-  target_compile_definitions(cares PRIVATE CARES_BUILDING_LIBRARY)
-  if(NOT BUILD_SHARED_LIBS)
-    target_compile_definitions(cares PUBLIC CARES_STATICLIB)
-  endif()
-
-  # Platform-specific defines
-  if(UNIX OR CMAKE_SYSTEM_NAME STREQUAL "MSYS")
     if(NOT APPLE AND NOT CMAKE_SYSTEM_NAME STREQUAL "MSYS")
       target_compile_definitions(cares PRIVATE _POSIX_C_SOURCE=199309L)
     endif()
+
     target_compile_definitions(cares PRIVATE HAVE_SYS_TIME_H)
     target_compile_definitions(cares PRIVATE HAVE_TIME_H)
     target_compile_definitions(cares PRIVATE HAVE_SYS_SELECT_H)
@@ -260,27 +244,22 @@ if(NOT CAres_FOUND)
     target_compile_definitions(cares PRIVATE HAVE_GETTIMEOFDAY)
     target_compile_definitions(cares PRIVATE HAVE_CLOCK_GETTIME_MONOTONIC)
     target_compile_definitions(cares PRIVATE HAVE_STDINT_H)
-  elseif(WIN32 AND HYDRA_COMPILER_MSVC)
-    target_compile_definitions(cares PRIVATE HAVE_WINDOWS_H)
-    target_compile_definitions(cares PRIVATE HAVE_WINSOCK2_H)
-    target_compile_definitions(cares PRIVATE HAVE_WS2TCPIP_H)
-    target_compile_definitions(cares PRIVATE HAVE_IPHLPAPI_H)
-    target_compile_definitions(cares PRIVATE HAVE_NETIOAPI_H)
-    target_compile_definitions(cares PRIVATE HAVE_STRUCT_TIMEVAL)
-    target_compile_definitions(cares PRIVATE HAVE_STRUCT_SOCKADDR_IN6)
-    target_compile_definitions(cares PRIVATE HAVE_STRUCT_ADDRINFO)
-    target_compile_definitions(cares PRIVATE HAVE_AF_INET6)
-    target_compile_definitions(cares PRIVATE HAVE_RECV)
-    target_compile_definitions(cares PRIVATE HAVE_RECVFROM)
-    target_compile_definitions(cares PRIVATE HAVE_SEND)
-    target_compile_definitions(cares PRIVATE HAVE_SENDTO)
-    target_compile_definitions(cares PRIVATE HAVE_ERRNO_H)
-    target_compile_definitions(cares PRIVATE HAVE_STDLIB_H)
-    target_compile_definitions(cares PRIVATE HAVE_STRING_H)
-    target_compile_definitions(cares PRIVATE HAVE_LIMITS_H)
-    target_compile_definitions(cares PRIVATE HAVE_STDINT_H)
-    # Windows version for IP Helper API
-    target_compile_definitions(cares PRIVATE _WIN32_WINNT=0x0600)
+
+    if(APPLE)
+      target_link_libraries(cares PRIVATE "-framework CoreFoundation")
+      target_link_libraries(cares PRIVATE "-framework SystemConfiguration")
+    endif()
+  endif()
+
+  configure_file("${CARES_DIR}/include/ares_build.h.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/cares_generated/ares_build.h" @ONLY)
+  configure_file("${CARES_DIR}/src/lib/ares_config.h.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/cares_generated/ares_config.h" @ONLY)
+
+  target_compile_definitions(cares PRIVATE HAVE_CONFIG_H)
+  target_compile_definitions(cares PRIVATE CARES_BUILDING_LIBRARY)
+  if(NOT BUILD_SHARED_LIBS)
+    target_compile_definitions(cares PUBLIC CARES_STATICLIB)
   endif()
 
   target_include_directories(cares PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/cares_generated")
@@ -291,14 +270,7 @@ if(NOT CAres_FOUND)
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/cares_generated>"
     "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
 
-  if(APPLE)
-    target_link_libraries(cares PRIVATE "-framework CoreFoundation")
-    target_link_libraries(cares PRIVATE "-framework SystemConfiguration")
-  elseif(WIN32)
-    target_link_libraries(cares PRIVATE ws2_32 iphlpapi)
-  endif()
-
-  add_library(CAres::cares ALIAS cares)
+  add_library(c-ares::cares ALIAS cares)
 
   set_target_properties(cares
     PROPERTIES
@@ -332,7 +304,6 @@ if(NOT CAres_FOUND)
       DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/cares"
       COMPONENT sourcemeta_hydra_dev)
 
-    # Install headers
     install(FILES ${CARES_PUBLIC_HEADERS}
       DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
       COMPONENT sourcemeta_hydra_dev)
