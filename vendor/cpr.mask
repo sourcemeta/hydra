@@ -10,6 +10,7 @@ cmake/clear_variable.cmake
 cmake/code_coverage.cmake
 cmake/cppcheck.cmake
 cmake/cprConfig.cmake.in
+cmake/cprConfig-ssl.cmake.in
 cmake/FindMbedTLS.cmake
 cmake/libpsl.cmake
 cmake/mongoose.CMakeLists.txt
