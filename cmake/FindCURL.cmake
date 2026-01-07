@@ -37,7 +37,6 @@ if(NOT CURL_FOUND)
     "${CURL_DIR}/lib/pingpong.c"
     "${CURL_DIR}/lib/httpsrr.c"
     "${CURL_DIR}/lib/socks_gssapi.c"
-    "${CURL_DIR}/lib/memdebug.h"
     "${CURL_DIR}/lib/psl.c"
     "${CURL_DIR}/lib/progress.h"
     "${CURL_DIR}/lib/url.c"
@@ -93,9 +92,9 @@ if(NOT CURL_FOUND)
     "${CURL_DIR}/lib/splay.h"
     "${CURL_DIR}/lib/escape.c"
     "${CURL_DIR}/lib/easy.c"
-    "${CURL_DIR}/lib/rename.c"
+    "${CURL_DIR}/lib/ratelimit.c"
     "${CURL_DIR}/lib/pop3.h"
-    "${CURL_DIR}/lib/share.c"
+    "${CURL_DIR}/lib/curl_share.c"
     "${CURL_DIR}/lib/slist.c"
     "${CURL_DIR}/lib/tftp.c"
     "${CURL_DIR}/lib/curl_ntlm_core.h"
@@ -134,7 +133,7 @@ if(NOT CURL_FOUND)
     "${CURL_DIR}/lib/hostip4.c"
     "${CURL_DIR}/lib/cw-out.h"
     "${CURL_DIR}/lib/http1.c"
-    "${CURL_DIR}/lib/speedcheck.h"
+    "${CURL_DIR}/lib/ratelimit.h"
     "${CURL_DIR}/lib/urlapi.c"
     "${CURL_DIR}/lib/ftplistparser.h"
     "${CURL_DIR}/lib/openldap.c"
@@ -163,7 +162,6 @@ if(NOT CURL_FOUND)
     "${CURL_DIR}/lib/multi.c"
     "${CURL_DIR}/lib/asyn-base.c"
     "${CURL_DIR}/lib/sendf.h"
-    "${CURL_DIR}/lib/curl_memory.h"
     "${CURL_DIR}/lib/cf-https-connect.h"
     "${CURL_DIR}/lib/formdata.h"
     "${CURL_DIR}/lib/urldata.h"
@@ -211,8 +209,7 @@ if(NOT CURL_FOUND)
     "${CURL_DIR}/lib/curl_ntlm_core.c"
     "${CURL_DIR}/lib/tftp.h"
     "${CURL_DIR}/lib/slist.h"
-    "${CURL_DIR}/lib/share.h"
-    "${CURL_DIR}/lib/rename.h"
+    "${CURL_DIR}/lib/curl_share.h"
     "${CURL_DIR}/lib/pop3.c"
     "${CURL_DIR}/lib/arpa_telnet.h"
     "${CURL_DIR}/lib/noproxy.c"
@@ -250,6 +247,10 @@ if(NOT CURL_FOUND)
     "${CURL_DIR}/lib/curlx/strparse.c"
     "${CURL_DIR}/lib/curlx/multibyte.h"
     "${CURL_DIR}/lib/curlx/nonblock.h"
+    "${CURL_DIR}/lib/curlx/strcopy.c"
+    "${CURL_DIR}/lib/curlx/strcopy.h"
+    "${CURL_DIR}/lib/curlx/snprintf.h"
+    "${CURL_DIR}/lib/curlx/binmode.h"
     "${CURL_DIR}/lib/setup-vms.h"
     "${CURL_DIR}/lib/hostip.h"
     "${CURL_DIR}/lib/content_encoding.h"
@@ -322,7 +323,6 @@ if(NOT CURL_FOUND)
     "${CURL_DIR}/lib/vtls/cipher_suite.h"
     "${CURL_DIR}/lib/vtls/schannel_verify.c"
     "${CURL_DIR}/lib/vtls/x509asn1.h"
-    "${CURL_DIR}/lib/vtls/mbedtls_threadlock.h"
     "${CURL_DIR}/lib/vtls/vtls.c"
     "${CURL_DIR}/lib/vtls/hostcheck.h"
     "${CURL_DIR}/lib/vtls/gtls.h"
@@ -336,16 +336,15 @@ if(NOT CURL_FOUND)
     "${CURL_DIR}/lib/vtls/openssl.c"
     "${CURL_DIR}/lib/vtls/vtls_spack.c"
     "${CURL_DIR}/lib/vtls/schannel.h"
-    "${CURL_DIR}/lib/vtls/mbedtls_threadlock.c"
     "${CURL_DIR}/lib/vtls/x509asn1.c"
     "${CURL_DIR}/lib/parsedate.h"
     "${CURL_DIR}/lib/curl_trc.h"
     "${CURL_DIR}/lib/socks.h"
     "${CURL_DIR}/lib/vssh/libssh.c"
     "${CURL_DIR}/lib/vssh/libssh2.c"
-    "${CURL_DIR}/lib/vssh/curl_path.h"
+    "${CURL_DIR}/lib/vssh/vssh.h"
     "${CURL_DIR}/lib/vssh/ssh.h"
-    "${CURL_DIR}/lib/vssh/curl_path.c"
+    "${CURL_DIR}/lib/vssh/vssh.c"
     "${CURL_DIR}/lib/asyn-ares.c"
     "${CURL_DIR}/lib/imap.c"
     "${CURL_DIR}/lib/headers.c"
@@ -366,7 +365,6 @@ if(NOT CURL_FOUND)
     "${CURL_DIR}/lib/sigpipe.h"
     "${CURL_DIR}/lib/fake_addrinfo.c"
     "${CURL_DIR}/lib/getinfo.c"
-    "${CURL_DIR}/lib/speedcheck.c"
     "${CURL_DIR}/lib/http1.h"
     "${CURL_DIR}/lib/cw-out.c"
     "${CURL_DIR}/lib/curl_rtmp.h"
@@ -458,6 +456,7 @@ if(NOT CURL_FOUND)
     target_compile_definitions(curl PRIVATE USE_MBEDTLS)
     target_compile_definitions(curl PRIVATE USE_THREADS_POSIX)
     target_compile_definitions(curl PRIVATE _POSIX_C_SOURCE=200809L)
+    target_compile_definitions(curl PRIVATE HAVE_STDINT_H)
     target_compile_definitions(curl PRIVATE HAVE_SYS_TIME_H)
     target_compile_definitions(curl PRIVATE HAVE_LONGLONG)
     target_compile_definitions(curl PRIVATE HAVE_RECV)
@@ -489,6 +488,7 @@ if(NOT CURL_FOUND)
     target_compile_definitions(curl PRIVATE CURL_CA_PATH="/etc/ssl/certs")
     target_compile_definitions(curl PRIVATE USE_MBEDTLS)
     target_compile_definitions(curl PRIVATE USE_ARES)
+    target_compile_definitions(curl PRIVATE HAVE_STDINT_H)
     target_compile_definitions(curl PRIVATE HAVE_SYS_TIME_H)
     target_compile_definitions(curl PRIVATE HAVE_LONGLONG)
     target_compile_definitions(curl PRIVATE HAVE_RECV)
