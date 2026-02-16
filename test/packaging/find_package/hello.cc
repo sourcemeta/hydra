@@ -1,6 +1,8 @@
 #include <zlib.h>
 
-#if !defined(_WIN32) || defined(__MSYS__)
+#if defined(SOURCEMETA_HYDRA_USE_SYSTEM_OPENSSL)
+#include <openssl/ssl.h>
+#elif !defined(_WIN32) || defined(__MSYS__)
 #include <mbedtls/ssl.h>
 #endif
 

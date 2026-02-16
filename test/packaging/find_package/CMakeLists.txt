@@ -8,7 +8,10 @@ set_target_properties(hello PROPERTIES
   CXX_EXTENSIONS OFF)
 
 target_link_libraries(hello PRIVATE ZLIB::ZLIB)
-if(NOT WIN32 OR CMAKE_SYSTEM_NAME STREQUAL "MSYS")
+if(SOURCEMETA_HYDRA_USE_SYSTEM_OPENSSL)
+  target_compile_definitions(hello PRIVATE SOURCEMETA_HYDRA_USE_SYSTEM_OPENSSL)
+  target_link_libraries(hello PRIVATE OpenSSL::SSL OpenSSL::Crypto)
+elseif(NOT WIN32 OR CMAKE_SYSTEM_NAME STREQUAL "MSYS")
   target_link_libraries(hello PRIVATE MbedTLS::mbedtls)
 endif()
 target_link_libraries(hello PRIVATE Nghttp2::nghttp2)
