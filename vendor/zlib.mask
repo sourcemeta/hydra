@@ -26,3 +26,8 @@ zlib.3.pdf
 zlib.map
 zlib.pc.cmakein
 zlib.pc.in
+.cmake-format.yaml
+BUILD.bazel
+MODULE.bazel
+README-cmake.md
+zlibConfig.cmake.in
