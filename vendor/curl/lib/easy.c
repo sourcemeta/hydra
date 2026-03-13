@@ -140,6 +140,11 @@ static CURLcode global_init(long flags, bool memoryfuncs)
     goto fail;
   }
 
+  if(Curl_win32_init(flags)) {
+    DEBUGF(curl_mfprintf(stderr, "Error: win32_init failed\n"));
+    goto fail;
+  }
+
   if(!Curl_ssl_init()) {
     DEBUGF(curl_mfprintf(stderr, "Error: Curl_ssl_init failed\n"));
     goto fail;
@@ -147,11 +152,6 @@ static CURLcode global_init(long flags, bool memoryfuncs)
 
   if(!Curl_vquic_init()) {
     DEBUGF(curl_mfprintf(stderr, "Error: Curl_vquic_init failed\n"));
-    goto fail;
-  }
-
-  if(Curl_win32_init(flags)) {
-    DEBUGF(curl_mfprintf(stderr, "Error: win32_init failed\n"));
     goto fail;
   }
 
